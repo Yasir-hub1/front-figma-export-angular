@@ -1,0 +1,315 @@
+/* src/components/editor/Element.css */
+.editor-element {
+    position: absolute;
+    box-sizing: border-box;
+    user-select: none;
+    cursor: move;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .editor-element.selected {
+    outline: 2px solid #4285f4;
+    z-index: 10;
+  }
+  
+  .element-container-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .element-content {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .element-button {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #4285f4;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .element-image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .element-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .element-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+  }
+  
+  .element-input {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+  }
+  
+  .element-checkbox-label,
+  .element-radio-label {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+  
+  .element-checkbox,
+  .element-radio {
+    margin-right: 8px;
+  }
+  
+  .element-select {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+  }
+  
+  .element-icon {
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .element-controls {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+  
+  .element-resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border: 2px solid #4285f4;
+    pointer-events: all; /* Importante: permite que reciba eventos del mouse */
+    z-index: 11; /* Por encima del elemento seleccionado */
+  }
+  
+  .element-resize-handle.top-left {
+    top: -6px;
+    left: -6px;
+    cursor: nwse-resize;
+  }
+  
+  .element-resize-handle.top-right {
+    top: -6px;
+    right: -6px;
+    cursor: nesw-resize;
+  }
+  
+  .element-resize-handle.bottom-left {
+    bottom: -6px;
+    left: -6px;
+    cursor: nesw-resize;
+  }
+  
+  .element-resize-handle.bottom-right {
+    bottom: -6px;
+    right: -6px;
+    cursor: nwse-resize;
+  }
+  
+  .element-name {
+    position: absolute;
+    top: -24px;
+    left: 0;
+    background-color: #4285f4;
+    color: white;
+    padding: 2px 6px;
+    font-size: 12px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+
+  /* src/components/editor/Element.css */
+  .editor-element {
+    position: absolute;
+    box-sizing: border-box;
+    user-select: none;
+    cursor: move; /* Indicador visual de que se puede arrastrar */
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  
+  .editor-element.selected {
+    outline: 2px solid #4285f4;
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(66, 133, 244, 0.3); /* Sombra más visible */
+  }
+/* El resto del CSS como estaba antes */
+
+.element-resize-handle {
+  position: absolute;
+  width: 10px; /* Un poco más grande para facilitar su uso */
+  height: 10px;
+  background-color: white;
+  border: 2px solid #4285f4;
+  pointer-events: all; /* Importante para que reciba eventos */
+  z-index: 2; /* Por encima del elemento */
+}
+
+.element-resize-handle.top-left {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.element-resize-handle.top-right {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.element-resize-handle.bottom-left {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
+.element-resize-handle.bottom-right {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+
+.element-interaction-tooltip {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background-color: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  animation: fadeIn 0.3s;
+}
+
+.interaction-user {
+  display: flex;
+  align-items: center;
+}
+
+.interaction-avatar {
+  width: 20px;
+  height: 20px;
+  background-color: #4285f4;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  font-size: 10px;
+  margin-right: 6px;
+}
+
+.interaction-username {
+  font-size: 12px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos para el elemento siendo editado */
+.editor-element.being-edited {
+  box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.7); /* Borde naranja para destacar */
+}
+
+/* Badge de usuario que está editando */
+.user-interaction-badge {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  pointer-events: none; /* Para no interferir con los clics */
+}
+
+.user-initial {
+  width: 24px;
+  height: 24px;
+  background-color: #FF9500;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.interaction-tooltip {
+  background-color: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  margin-left: 5px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Añadir animación para llamar la atención */
+@keyframes highlight {
+  0% { box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.5); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 165, 0, 0.7); }
+  100% { box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.5); }
+}
+
+.being-edited {
+  animation: highlight 2s infinite;
+}

@@ -1,0 +1,136 @@
+/* src/components/dashboard/Dashboard.css */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .dashboard-content {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .create-button {
+    padding: 10px 20px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .create-button:hover {
+    background-color: #3367d6;
+  }
+  
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  
+  .dashboard-error {
+    background-color: #ffebee;
+    color: #d32f2f;
+    padding: 16px;
+    border-radius: 4px;
+    margin-bottom: 24px;
+  }
+  
+  .no-projects {
+    text-align: center;
+    padding: 40px 0;
+    color: #666;
+  }
+  
+  .no-projects button {
+    margin-top: 16px;
+    padding: 10px 20px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    color: #666;
+  }
+  
+  .create-form-container {
+    margin-bottom: 24px;
+  }
+
+  .join-project-section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .join-project-section h2 {
+    font-size: 18px;
+    margin: 0 0 16px;
+    color: #333;
+  }
+  
+  .join-form {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .join-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .join-button {
+    padding: 0 20px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .join-button:hover {
+    background-color: #3367d6;
+  }
+  
+  .join-button:disabled {
+    background-color: #a4c2f4;
+    cursor: not-allowed;
+  }
+  
+  .join-error {
+    color: #d32f2f;
+    font-size: 14px;
+    margin-top: 8px;
+  }

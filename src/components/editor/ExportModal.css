@@ -1,0 +1,131 @@
+/* src/components/editor/ExportModal.css */
+.export-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .export-modal {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .export-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .export-modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+  }
+  
+  .close-button:hover {
+    color: #333;
+  }
+  
+  .export-tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .tab-button {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 16px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.2s;
+  }
+  
+  .tab-button:hover {
+    color: #333;
+    background-color: #f9f9f9;
+  }
+  
+  .tab-button.active {
+    color: #4285f4;
+    border-bottom-color: #4285f4;
+    font-weight: 500;
+  }
+  
+  .export-content {
+    padding: 0;
+    flex: 1;
+    overflow: auto;
+    background-color: #f5f5f5;
+  }
+  
+  .code-preview {
+    margin: 0;
+    padding: 16px;
+    overflow: auto;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    background-color: #f5f5f5;
+    max-height: 400px;
+    white-space: pre-wrap;
+  }
+  
+  .export-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px;
+    border-top: 1px solid #eee;
+    gap: 12px;
+  }
+  
+  .action-button {
+    padding: 10px 20px;
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  
+  .action-button:hover {
+    background-color: #e5e5e5;
+  }
+  
+  .action-button.primary {
+    background-color: #4285f4;
+    color: white;
+    border-color: #4285f4;
+  }
+  
+  .action-button.primary:hover {
+    background-color: #3367d6;
+  }
