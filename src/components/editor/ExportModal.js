@@ -9,7 +9,7 @@ const ExportModal = () => {
   
   if (!exportModalOpen || !exportContent) return null;
   
-  const { html, css, ts } = exportContent;
+  const { html, css, ts, module } = exportContent;
 
   // Función para copiar el código
   const copyToClipboard = (text) => {
@@ -75,13 +75,21 @@ const ExportModal = () => {
           >
             TypeScript
           </button>
+
+          <button 
+            className={`tab-button ${activeTab === 'module' ? 'active' : ''}`}
+            onClick={() => setActiveTab('module')}
+          >
+            Módulo
+          </button>
         </div>
         
         <div className="export-content">
-          <pre className="code-preview">
+        <pre className="code-preview">
             {activeTab === 'html' && html}
             {activeTab === 'css' && css}
             {activeTab === 'ts' && ts}
+            {activeTab === 'module' && module}
           </pre>
         </div>
         
