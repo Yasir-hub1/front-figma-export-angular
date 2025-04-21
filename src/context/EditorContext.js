@@ -37,7 +37,7 @@ const [elementInteractions, setElementInteractions] = useState({});
 useEffect(() => {
   if (!id || !currentUser) return;
 
-  const newSocket = io('http://localhost:5000', {
+  const newSocket = io('http://45.55.145.232:80', {
     withCredentials: true,
     transports: ['websocket'],
   });
