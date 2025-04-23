@@ -1,80 +1,236 @@
 /* src/components/editor/Toolbar.css */
+
+/* Reutilizamos las variables de color de nuestra paleta femenina */
+:root {
+  --primary-color: #D36CB0;      /* Rosa intenso */
+  --primary-hover: #C055A0;      /* Rosa intenso oscuro */
+  --secondary-color: #F9A8D4;    /* Rosa claro */
+  --text-color: #6B4768;         /* Morado oscuro para texto */
+  --text-light: #9A7A97;         /* Morado claro para texto secundario */
+  --background-light: #FDF2F8;   /* Fondo rosa muy claro */
+  --background-dark: #FCE7F3;    /* Fondo rosa pálido */
+  --border-color: #F3D4E6;       /* Borde rosa pálido */
+  --success-color: #62BCA3;      /* Verde menta */
+  --error-color: #E46997;        /* Rosa coral para errores */
+  --shadow-sm: 0 2px 8px rgba(211, 108, 176, 0.08);
+  --shadow-md: 0 4px 12px rgba(211, 108, 176, 0.12);
+  --border-radius: 10px;         /* Bordes más redondeados */
+  --transition: all 0.3s ease;
+}
+
 .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 50px;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
-    padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  height: 60px;
+  position: relative;
+  z-index: 100;
+}
+
+/* Secciones de la barra de herramientas */
+.toolbar-section {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-section-left {
+  width: 25%;
+  justify-content: flex-start;
+}
+
+.toolbar-section-center {
+  width: 50%;
+  justify-content: center;
+  gap: 20px;
+}
+
+.toolbar-section-right {
+  width: 25%;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Grupos de botones */
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  background-color: var(--background-light);
+  border-radius: var(--border-radius);
+  padding: 3px;
+  border: 1px solid var(--border-color);
+}
+
+/* Botones estándar */
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: transparent;
+  color: var(--text-light);
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  position: relative;
+}
+
+.toolbar-button:hover {
+  color: var(--primary-color);
+  background-color: var(--background-dark);
+}
+
+.toolbar-button.active {
+  color: white;
+  background-color: var(--primary-color);
+}
+
+.toolbar-button.active:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Botón de volver */
+.back-button {
+  margin-right: 12px;
+  color: var(--text-color);
+}
+
+/* Nombre del proyecto */
+.project-name {
+  font-weight: 500;
+  color: var(--text-color);
+  font-size: 1rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Controles de zoom */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+}
+
+.zoom-selector {
+  padding: 0 8px;
+}
+
+.zoom-selector select {
+  padding: 6px 10px;
+  border: none;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 70px;
+}
+
+.zoom-selector select:focus {
+  outline: none;
+}
+
+/* Botones de acción (compartir y exportar) */
+.toolbar-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 8px;
+  height: 38px;
+}
+
+.share-button {
+  background-color: var(--background-light);
+  color: var(--primary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+.share-button:hover {
+  background-color: var(--background-dark);
+}
+
+.export-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.export-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.export-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .button-text {
+    display: none;
   }
   
-  .toolbar-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .toolbar-action-button {
+    width: 38px;
+    padding: 0;
+  }
+  
+  .toolbar-section-center {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 8px;
+  }
+  
+  .toolbar-section-left,
+  .toolbar-section-right {
+    width: 30%;
+  }
+  
+  .toolbar-section-center {
+    width: 40%;
   }
   
   .project-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-    margin-left: 6px;
-  }
-  
-  .toolbar-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background-color: transparent;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .toolbar-button:hover {
-    background-color: #f5f5f5;
-  }
-  
-  .toolbar-button.active {
-    background-color: #e3f2fd;
-    border-color: #bbdefb;
-    color: #4285f4;
-  }
-  
-  .zoom-selector {
-    display: flex;
-    align-items: center;
+    max-width: 120px;
   }
   
   .zoom-selector select {
-    padding: 6px 8px;
-    font-size: 14px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: white;
-    cursor: pointer;
+    width: 60px;
   }
   
-  .export-button {
-    padding: 6px 12px;
-    background-color: #4285f4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  .toolbar-button {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar-section-center {
+    display: none;
   }
   
-  .export-button:hover {
-    background-color: #3367d6;
+  .toolbar-section-left,
+  .toolbar-section-right {
+    width: 50%;
   }
-  
-  .export-button:disabled {
-    background-color: #b3b3b3;
-    cursor: not-allowed;
-  }
+}

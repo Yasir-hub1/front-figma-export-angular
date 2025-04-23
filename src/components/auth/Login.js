@@ -35,46 +35,86 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2>Iniciar Sesión</h2>
-        
-        {error && <div className="auth-error">{error}</div>}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+    <div className="auth-page">
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <div className="auth-logo">
+              <div className="logo-icon">✨</div>
+            </div>
+            <h1 className="auth-title">Bienvenid@</h1>
+            <p className="auth-subtitle">Ingresa tus credenciales para acceder</p>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          {error && (
+            <div className="auth-error">
+              <i className="fa fa-exclamation-circle error-icon"></i>
+              <span>{error}</span>
+            </div>
+          )}
           
-          <button 
-            type="submit" 
-            className="auth-button" 
-            disabled={loading}
-          >
-            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-          </button>
-        </form>
-        
-        <div className="auth-footer">
-          <p>¿No tienes una cuenta? <Link to="/register">Regístrate</Link></p>
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="email">Correo electrónico</label>
+              <div className="input-wrapper">
+                <i className="fa fa-envelope input-icon"></i>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="nombre@ejemplo.com"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <div className="password-label-row">
+                <label htmlFor="password">Contraseña</label>
+                {/* <Link to="/forgot-password" className="forgot-password">
+                  ¿Olvidaste tu contraseña?
+                </Link> */}
+              </div>
+              <div className="input-wrapper">
+                <i className="fa fa-lock input-icon"></i>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Ingresa tu contraseña"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <button
+                type="submit"
+                className="auth-button"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="button-spinner"></span>
+                    <span>Iniciando sesión...</span>
+                  </>
+                ) : (
+                  'Iniciar Sesión'
+                )}
+              </button>
+            </div>
+          </form>
+          
+          <div className="auth-footer">
+            <p>
+              ¿No tienes una cuenta? 
+              <Link to="/register" className="register-link">
+                Regístrate aquí
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

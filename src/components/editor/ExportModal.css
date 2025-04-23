@@ -1,131 +1,300 @@
 /* src/components/editor/ExportModal.css */
+
+/* Reutilizamos las variables de color de nuestra paleta femenina */
+:root {
+  --primary-color: #D36CB0;      /* Rosa intenso */
+  --primary-hover: #C055A0;      /* Rosa intenso oscuro */
+  --secondary-color: #F9A8D4;    /* Rosa claro */
+  --text-color: #6B4768;         /* Morado oscuro para texto */
+  --text-light: #9A7A97;         /* Morado claro para texto secundario */
+  --background-light: #FDF2F8;   /* Fondo rosa muy claro */
+  --background-dark: #FCE7F3;    /* Fondo rosa pálido */
+  --border-color: #F3D4E6;       /* Borde rosa pálido */
+  --success-color: #62BCA3;      /* Verde menta */
+  --error-color: #E46997;        /* Rosa coral para errores */
+  --shadow-sm: 0 2px 8px rgba(211, 108, 176, 0.08);
+  --shadow-md: 0 4px 12px rgba(211, 108, 176, 0.12);
+  --border-radius: 10px;         /* Bordes más redondeados */
+  --transition: all 0.3s ease;
+  
+  /* Colores de código */
+  --code-bg: #2A2139;
+  --code-text: #F8F8F2;
+  --code-header: #372B4A;
+}
+
+/* Overlay del modal */
 .export-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Contenedor del modal */
+.export-modal {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  width: 800px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Encabezado del modal */
+.export-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.export-modal-header h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background-color: transparent;
+  border: none;
+  color: var(--text-light);
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.close-button:hover {
+  background-color: var(--background-light);
+  color: var(--primary-color);
+}
+
+/* Tabs de navegación */
+.export-tabs {
+  display: flex;
+  background-color: var(--background-light);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 16px;
+}
+
+.tab-button {
+  padding: 14px 20px;
+  background-color: transparent;
+  border: none;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button i {
+  font-size: 1rem;
+}
+
+.tab-button:hover {
+  color: var(--primary-color);
+}
+
+.tab-button.active {
+  color: var(--primary-color);
+  font-weight: 500;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Contenido del código */
+.export-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 400px;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: var(--code-header);
+  color: #ccc;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.code-filename {
+  font-weight: 500;
+}
+
+.code-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.code-action-button {
+  background-color: transparent;
+  border: none;
+  color: #ddd;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.code-action-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.code-preview {
+  flex: 1;
+  margin: 0;
+  padding: 16px;
+  background-color: var(--code-bg);
+  color: var(--code-text);
+  overflow: auto;
+  font-family: monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Notificación de copiado */
+.copy-notification {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  animation: fadeInOut 2s ease;
+  box-shadow: var(--shadow-sm);
+  z-index: 1010;
+}
+
+.copy-notification.success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.copy-notification.error {
+  background-color: var(--error-color);
+  color: white;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-20px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Acciones finales */
+.export-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: var(--background-light);
+  border-top: 1px solid var(--border-color);
+}
+
+.export-info {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.export-info p {
+  margin: 0;
+}
+
+.download-all-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-all-button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Diseño responsive */
+@media (max-width: 768px) {
   .export-modal {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    width: 90%;
-    max-width: 900px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  
-  .export-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .export-modal-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: #333;
-  }
-  
-  .close-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #888;
-  }
-  
-  .close-button:hover {
-    color: #333;
+    max-width: 95vw;
   }
   
   .export-tabs {
-    display: flex;
-    border-bottom: 1px solid #eee;
+    overflow-x: auto;
+    padding: 0 8px;
   }
   
   .tab-button {
-    padding: 12px 24px;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-size: 16px;
-    cursor: pointer;
-    color: #666;
-    transition: all 0.2s;
-  }
-  
-  .tab-button:hover {
-    color: #333;
-    background-color: #f9f9f9;
-  }
-  
-  .tab-button.active {
-    color: #4285f4;
-    border-bottom-color: #4285f4;
-    font-weight: 500;
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    white-space: nowrap;
   }
   
   .export-content {
-    padding: 0;
-    flex: 1;
-    overflow: auto;
-    background-color: #f5f5f5;
-  }
-  
-  .code-preview {
-    margin: 0;
-    padding: 16px;
-    overflow: auto;
-    font-family: monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #333;
-    background-color: #f5f5f5;
-    max-height: 400px;
-    white-space: pre-wrap;
+    height: 300px;
   }
   
   .export-actions {
-    display: flex;
-    justify-content: flex-end;
-    padding: 16px 24px;
-    border-top: 1px solid #eee;
-    gap: 12px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
   }
   
-  .action-button {
-    padding: 10px 20px;
-    background-color: #f5f5f5;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
+  .download-all-button {
+    width: 100%;
+    justify-content: center;
   }
-  
-  .action-button:hover {
-    background-color: #e5e5e5;
-  }
-  
-  .action-button.primary {
-    background-color: #4285f4;
-    color: white;
-    border-color: #4285f4;
-  }
-  
-  .action-button.primary:hover {
-    background-color: #3367d6;
-  }
+}

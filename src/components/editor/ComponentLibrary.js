@@ -1,11 +1,12 @@
 // src/components/editor/ComponentLibrary.js
-import React from 'react';
+import React, { useState } from 'react';
 import { useEditor } from '../../context/EditorContext';
 import './ComponentLibrary.css';
 
 const ComponentLibrary = () => {
   const { createElement, project } = useEditor();
-  
+  const [activeCategory, setActiveCategory] = useState('Básicos');
+
   // Definición de los componentes disponibles
   const componentCategories = [
     {
@@ -361,26 +362,43 @@ const ComponentLibrary = () => {
 
   return (
     <div className="component-library">
-      {componentCategories.map((category, index) => (
-        <div key={index} className="component-category">
-          <h4 className="category-title">{category.name}</h4>
-          
-          <div className="component-grid">
-            {category.components.map((component, compIndex) => (
-              <div 
-                key={compIndex} 
-                className="component-item"
-                onClick={() => handleCreateComponent(component)}
-              >
-                <div className="component-icon">
-                  <i className={component.icon}></i>
-                </div>
-                <div className="component-name">{component.name}</div>
-              </div>
-            ))}
+      <div className="component-tabs">
+        {componentCategories.map((category, index) => (
+          <div 
+            key={index} 
+            className={`component-tab ${activeCategory === category.name ? 'active' : ''}`}
+            onClick={() => setActiveCategory(category.name)}
+          >
+            {category.name}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      <div className="component-content">
+        {componentCategories.map((category, index) => (
+          <div 
+            key={index} 
+            className={`component-category ${activeCategory === category.name ? 'visible' : 'hidden'}`}
+          >
+            <h4 className="category-title">{category.name}</h4>
+            
+            <div className="component-grid">
+              {category.components.map((component, compIndex) => (
+                <div 
+                  key={compIndex} 
+                  className="component-item"
+                  onClick={() => handleCreateComponent(component)}
+                >
+                  <div className="component-icon">
+                    <i className={component.icon}></i>
+                  </div>
+                  <div className="component-name">{component.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

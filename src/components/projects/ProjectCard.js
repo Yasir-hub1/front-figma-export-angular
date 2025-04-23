@@ -38,26 +38,43 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
   return (
     <div className="project-card">
       <div className="project-card-header">
-        <div className="project-card-canvas" style={{ backgroundColor: project.canvas?.background || '#f0f0f0' }}>
+        <div 
+          className="project-card-canvas" 
+          style={{ backgroundColor: project.canvas?.background || '#f0f0f0' }}
+        >
           {/* Miniatura del proyecto */}
+          <div className="project-actions">
+            <button 
+              className="btn-card-edit"
+              onClick={handleEdit}
+              aria-label="Editar proyecto"
+            >
+              <span className="icon-edit">✏️</span>
+            </button>
+          </div>
         </div>
       </div>
       
       <div className="project-card-body">
-        <h3>{project.name}</h3>
-        <p className="project-description">{project.description || 'Sin descripción'}</p>
+        <h3 title={project.name}>{project.name}</h3>
+        <p className="project-description" title={project.description || 'Sin descripción'}>
+          {project.description || 'Sin descripción'}
+        </p>
         
         <div className="project-meta">
-          <div className="project-updated">
-            Actualizado {getProjectTimeSince(project.updatedAt)}
+          <div className="meta-item project-updated">
+            <span className="meta-icon">🕒</span>
+            <span className="meta-text">{getProjectTimeSince(project.updatedAt)}</span>
           </div>
           
           {project.owner && (
-            <div className="project-owner">
+            <div className="meta-item project-owner">
               <div className="owner-avatar">
                 {getInitials(project.owner.username || 'Usuario')}
               </div>
-              <span>{project.owner.username}</span>
+              <span className="owner-name" title={project.owner.username}>
+                {project.owner.username}
+              </span>
             </div>
           )}
         </div>
@@ -65,10 +82,10 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
       
       <div className="project-card-footer">
         <button 
-          className="edit-button"
+          className="btn-primary"
           onClick={handleEdit}
         >
-          ACTUALIZAR
+          Abrir proyecto
         </button>
         
         {isOwner && (
@@ -78,14 +95,14 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
                 <p>¿Eliminar este proyecto?</p>
                 <div className="delete-actions">
                   <button 
-                    className="confirm-delete"
+                    className="btn-delete"
                     onClick={handleDelete}
                     disabled={isDeleting}
                   >
                     {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
                   </button>
                   <button 
-                    className="cancel-delete"
+                    className="btn-cancel"
                     onClick={() => setShowDeleteConfirm(false)}
                     disabled={isDeleting}
                   >
@@ -95,10 +112,11 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
               </div>
             ) : (
               <button 
-                className="delete-button"
+                className="btn-delete-icon"
                 onClick={() => setShowDeleteConfirm(true)}
+                aria-label="Eliminar proyecto"
               >
-                Eliminar
+                <span className="icon-trash">🗑️</span>
               </button>
             )}
           </>

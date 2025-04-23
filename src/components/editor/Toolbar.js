@@ -62,100 +62,104 @@ const Toolbar = () => {
 
   return (
     <div className="toolbar">
-      <div className="toolbar-section">
+      <div className="toolbar-section toolbar-section-left">
         <button 
-          className="toolbar-button"
+          className="toolbar-button back-button"
           onClick={handleBackToDashboard}
           title="Volver al Dashboard"
         >
           <i className="fas fa-arrow-left"></i>
         </button>
         
-        <span className="project-name">{project?.name}</span>
+        <span className="project-name">
+          {project?.name ? project.name : 'Proyecto sin título'}
+        </span>
       </div>
       
-      <div className="toolbar-section">
-        <button 
-          className={`toolbar-button ${gridVisible ? 'active' : ''}`}
-          onClick={() => setGridVisible(!gridVisible)}
-          title="Mostrar/Ocultar Cuadrícula"
-        >
-          <i className="fas fa-th"></i>
-        </button>
-        
-        <button 
-          className={`toolbar-button ${snapToGrid ? 'active' : ''}`}
-          onClick={() => setSnapToGrid(!snapToGrid)}
-          title="Ajustar a Cuadrícula"
-        >
-          <i className="fas fa-magnet"></i>
-        </button>
-      </div>
-      
-      <div className="toolbar-section">
-        <button 
-          className="toolbar-button"
-          onClick={handleZoomOut}
-          title="Alejar"
-        >
-          <i className="fas fa-search-minus"></i>
-        </button>
-        
-        <div className="zoom-selector">
-          <select 
-            value={currentZoom}
-            onChange={(e) => handleZoomChange(Number(e.target.value))}
+      <div className="toolbar-section toolbar-section-center">
+        <div className="toolbar-group">
+          <button 
+            className={`toolbar-button ${gridVisible ? 'active' : ''}`}
+            onClick={() => setGridVisible(!gridVisible)}
+            title="Mostrar/Ocultar Cuadrícula"
           >
-            {zoomOptions.map(option => (
-              <option key={option} value={option}>{option}%</option>
-            ))}
-          </select>
+            <i className="fas fa-th"></i>
+          </button>
+          
+          <button 
+            className={`toolbar-button ${snapToGrid ? 'active' : ''}`}
+            onClick={() => setSnapToGrid(!snapToGrid)}
+            title="Ajustar a Cuadrícula"
+          >
+            <i className="fas fa-magnet"></i>
+          </button>
         </div>
         
-        <button 
-          className="toolbar-button"
-          onClick={handleZoomIn}
-          title="Acercar"
-        >
-          <i className="fas fa-search-plus"></i>
-        </button>
-        
-        <button 
-          className="toolbar-button"
-          onClick={handleResetView}
-          title="Restablecer Vista"
-        >
-          <i className="fas fa-home"></i>
-        </button>
+        <div className="toolbar-group zoom-controls">
+          <button 
+            className="toolbar-button"
+            onClick={handleZoomOut}
+            title="Alejar"
+          >
+            <i className="fas fa-search-minus"></i>
+          </button>
+          
+          <div className="zoom-selector">
+            <select 
+              value={currentZoom}
+              onChange={(e) => handleZoomChange(Number(e.target.value))}
+            >
+              {zoomOptions.map(option => (
+                <option key={option} value={option}>{option}%</option>
+              ))}
+            </select>
+          </div>
+          
+          <button 
+            className="toolbar-button"
+            onClick={handleZoomIn}
+            title="Acercar"
+          >
+            <i className="fas fa-search-plus"></i>
+          </button>
+          
+          <button 
+            className="toolbar-button"
+            onClick={handleResetView}
+            title="Restablecer Vista"
+          >
+            <i className="fas fa-home"></i>
+          </button>
+        </div>
       </div>
       
-      <div className="toolbar-section">
-      <button 
-        className="share-button"
-        onClick={() => setShowShareModal(true)}
-        title="Compartir proyecto"
-      >
-        <i className="fa fa-share-alt"></i> Compartir
-      </button>
+      <div className="toolbar-section toolbar-section-right">
         <button 
-          className="export-button"
+          className="toolbar-action-button share-button"
+          onClick={() => setShowShareModal(true)}
+          title="Compartir proyecto"
+        >
+          <i className="fa fa-share-alt"></i> <span className="button-text">Compartir</span>
+        </button>
+        <button 
+          className="toolbar-action-button export-button"
           onClick={handleExport}
           disabled={exportLoading}
           title="Exportar a Angular"
         >
-          {exportLoading ? 'Exportando...' : 'Exportar a Angular'}
+          <i className="fa fa-download"></i> <span className="button-text">
+            {exportLoading ? 'Exportando...' : 'Exportar'}
+          </span>
         </button>
       </div>
 
       {showShareModal && (
-      <ShareProjectModal 
-        project={project}
-        onClose={() => setShowShareModal(false)}
-      />
-    )}
+        <ShareProjectModal 
+          project={project}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
-
-    
   );
 };
 

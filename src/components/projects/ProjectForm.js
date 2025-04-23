@@ -47,80 +47,116 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
   };
 
   return (
-    <div className="project-form">
-      <h2>{project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</h2>
+    <div className="project-form-container">
+      <div className="project-form-header">
+        <h2>{project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</h2>
+      </div>
       
-      {error && <div className="form-error">{error}</div>}
+      {error && (
+        <div className="form-error">
+          <i className="fa fa-exclamation-circle"></i>
+          <span>{error}</span>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="name">Nombre del Proyecto</label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            placeholder="Mi proyecto"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="description">Descripción (opcional)</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe tu proyecto aquí"
-            rows={3}
-          />
-        </div>
-        
-        <div className="form-row">
+        <div className="form-section">
           <div className="form-group">
-            <label htmlFor="canvasWidth">Ancho del Canvas (px)</label>
-            <input
-              type="number"
-              id="canvasWidth"
-              value={canvasWidth}
-              onChange={(e) => setCanvasWidth(e.target.value)}
-              min="320"
-              max="3840"
-              required
-            />
+            <label htmlFor="name">Nombre del Proyecto</label>
+            <div className="input-wrapper">
+              <i className="fa fa-pencil input-icon"></i>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Mi proyecto"
+              />
+            </div>
           </div>
           
           <div className="form-group">
-            <label htmlFor="canvasHeight">Alto del Canvas (px)</label>
-            <input
-              type="number"
-              id="canvasHeight"
-              value={canvasHeight}
-              onChange={(e) => setCanvasHeight(e.target.value)}
-              min="240"
-              max="2160"
-              required
-            />
+            <label htmlFor="description">Descripción (opcional)</label>
+            <div className="input-wrapper">
+              <i className="fa fa-align-left input-icon textarea-icon"></i>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe tu proyecto aquí"
+                rows={3}
+              />
+            </div>
           </div>
         </div>
         
-        <div className="form-group">
-          <label htmlFor="canvasBackground">Color de Fondo</label>
-          <div className="color-input-container">
-            <input
-              type="color"
-              id="canvasBackground"
-              value={canvasBackground}
-              onChange={(e) => setCanvasBackground(e.target.value)}
-              className="color-input"
-            />
-            <input
-              type="text"
-              value={canvasBackground}
-              onChange={(e) => setCanvasBackground(e.target.value)}
-              className="color-text"
-              maxLength={7}
-            />
+        <div className="form-section">
+          <h3 className="section-title">Propiedades del Canvas</h3>
+          
+          <div className="form-row">
+            <div className="form-group half">
+              <label htmlFor="canvasWidth">Ancho del Canvas (px)</label>
+              <div className="input-wrapper">
+                <i className="fa fa-arrows-h input-icon"></i>
+                <input
+                  type="number"
+                  id="canvasWidth"
+                  value={canvasWidth}
+                  onChange={(e) => setCanvasWidth(e.target.value)}
+                  min="320"
+                  max="3840"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="form-group half">
+              <label htmlFor="canvasHeight">Alto del Canvas (px)</label>
+              <div className="input-wrapper">
+                <i className="fa fa-arrows-v input-icon"></i>
+                <input
+                  type="number"
+                  id="canvasHeight"
+                  value={canvasHeight}
+                  onChange={(e) => setCanvasHeight(e.target.value)}
+                  min="240"
+                  max="2160"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="canvasBackground">Color de Fondo</label>
+            <div className="color-input-container">
+              <div className="color-preview-wrapper">
+                <input
+                  type="color"
+                  id="canvasBackground"
+                  value={canvasBackground}
+                  onChange={(e) => setCanvasBackground(e.target.value)}
+                  className="color-input"
+                  aria-label="Seleccionar color"
+                />
+                <div 
+                  className="color-preview" 
+                  style={{ backgroundColor: canvasBackground }}
+                ></div>
+              </div>
+              <div className="input-wrapper color-text-wrapper">
+                <i className="fa fa-hashtag input-icon"></i>
+                <input
+                  type="text"
+                  value={canvasBackground}
+                  onChange={(e) => setCanvasBackground(e.target.value)}
+                  className="color-text"
+                  maxLength={7}
+                  placeholder="FFFFFF"
+                />
+              </div>
+            </div>
           </div>
         </div>
         
@@ -138,7 +174,12 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
             className="submit-button"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Guardando...' : project ? 'Actualizar' : 'Crear'}
+            {isSubmitting ? (
+              <>
+                <span className="button-spinner"></span>
+                <span>Guardando...</span>
+              </>
+            ) : project ? 'Actualizar' : 'Crear'}
           </button>
         </div>
       </form>

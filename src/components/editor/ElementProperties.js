@@ -125,7 +125,7 @@ const handleSave = async () => {
       [property]: value
     });
   };
-
+   console.log("STILES FRONAT ",styles)
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -363,14 +363,14 @@ const handleSave = async () => {
               <div className="color-input-container">
                 <input
                   type="color"
-                  value={styles.backgroundColor || '#ffffff'}
+                  value={styles.backgroundColor}
                   onChange={(e) => updateStyle('backgroundColor', e.target.value)}
                   onBlur={handleSave}
                   className="color-input"
                 />
                 <input
                   type="text"
-                  value={styles.backgroundColor || '#ffffff'}
+                  value={styles.backgroundColor}
                   onChange={(e) => updateStyle('backgroundColor', e.target.value)}
                   onBlur={handleSave}
                   className="color-text"

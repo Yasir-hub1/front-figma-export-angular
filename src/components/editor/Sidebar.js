@@ -12,7 +12,7 @@ const Sidebar = ({ onClose }) => {
     <div className="sidebar">
       <div className="sidebar-header">
         <h3>Editor de {project?.name}</h3>
-        <button className="close-sidebar" onClick={onClose}>×</button>
+        {/* <button className="close-sidebar" onClick={onClose}>×</button> */}
       </div>
       
       <div className="sidebar-tabs">

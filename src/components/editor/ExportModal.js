@@ -6,6 +6,7 @@ import './ExportModal.css';
 const ExportModal = () => {
   const { exportModalOpen, exportContent, setExportModalOpen } = useEditor();
   const [activeTab, setActiveTab] = useState('html');
+  const [copyStatus, setCopyStatus] = useState(null);
   
   if (!exportModalOpen || !exportContent) return null;
   
@@ -15,11 +16,14 @@ const ExportModal = () => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
       .then(() => {
-        // Muestra alguna notificación de éxito
-        alert('Código copiado al portapapeles');
+        // Mostrar notificación de éxito
+        setCopyStatus('copied');
+        setTimeout(() => setCopyStatus(null), 2000);
       })
       .catch(err => {
         console.error('Error al copiar: ', err);
+        setCopyStatus('error');
+        setTimeout(() => setCopyStatus(null), 2000);
       });
   };
 
@@ -43,6 +47,28 @@ const ExportModal = () => {
     downloadFile(ts, 'component.component.ts');
   };
 
+  // Obtener el contenido actual según la pestaña activa
+  const getCurrentContent = () => {
+    switch(activeTab) {
+      case 'html': return html;
+      case 'css': return css;
+      case 'ts': return ts;
+      case 'module': return module;
+      default: return html;
+    }
+  };
+
+  // Obtener el nombre de archivo actual según la pestaña activa
+  const getCurrentFilename = () => {
+    switch(activeTab) {
+      case 'html': return 'component.component.html';
+      case 'css': return 'component.component.css';
+      case 'ts': return 'component.component.ts';
+      case 'module': return 'component.module.ts';
+      default: return 'component.component.html';
+    }
+  };
+
   return (
     <div className="export-modal-overlay">
       <div className="export-modal">
@@ -51,6 +77,7 @@ const ExportModal = () => {
           <button 
             className="close-button" 
             onClick={() => setExportModalOpen(false)}
+            aria-label="Cerrar"
           >
             &times;
           </button>
@@ -61,66 +88,74 @@ const ExportModal = () => {
             className={`tab-button ${activeTab === 'html' ? 'active' : ''}`}
             onClick={() => setActiveTab('html')}
           >
-            HTML
+            <i className="fa fa-html5"></i> HTML
           </button>
           <button 
             className={`tab-button ${activeTab === 'css' ? 'active' : ''}`}
             onClick={() => setActiveTab('css')}
           >
-            CSS
+            <i className="fa fa-css3"></i> CSS
           </button>
           <button 
             className={`tab-button ${activeTab === 'ts' ? 'active' : ''}`}
             onClick={() => setActiveTab('ts')}
           >
-            TypeScript
+            <i className="fa fa-code"></i> TypeScript
           </button>
-
           <button 
             className={`tab-button ${activeTab === 'module' ? 'active' : ''}`}
             onClick={() => setActiveTab('module')}
           >
-            Módulo
+            <i className="fa fa-cubes"></i> Módulo
           </button>
         </div>
         
         <div className="export-content">
-        <pre className="code-preview">
-            {activeTab === 'html' && html}
-            {activeTab === 'css' && css}
-            {activeTab === 'ts' && ts}
-            {activeTab === 'module' && module}
+          <div className="code-header">
+            <span className="code-filename">{getCurrentFilename()}</span>
+            <div className="code-actions">
+              <button 
+                className="code-action-button"
+                onClick={() => copyToClipboard(getCurrentContent())}
+                title="Copiar código"
+              >
+                <i className="fa fa-copy"></i>
+              </button>
+              <button 
+                className="code-action-button"
+                onClick={() => downloadFile(getCurrentContent(), getCurrentFilename())}
+                title="Descargar archivo"
+              >
+                <i className="fa fa-download"></i>
+              </button>
+            </div>
+          </div>
+          <pre className="code-preview">
+            <code>{getCurrentContent()}</code>
           </pre>
         </div>
         
+        {copyStatus === 'copied' && (
+          <div className="copy-notification success">
+            <i className="fa fa-check-circle"></i> Código copiado al portapapeles
+          </div>
+        )}
+        
+        {copyStatus === 'error' && (
+          <div className="copy-notification error">
+            <i className="fa fa-times-circle"></i> Error al copiar el código
+          </div>
+        )}
+        
         <div className="export-actions">
+          <div className="export-info">
+            <p>Componente Angular listo para usar</p>
+          </div>
           <button 
-            className="action-button"
-            onClick={() => copyToClipboard(
-              activeTab === 'html' ? html : 
-              activeTab === 'css' ? css : ts
-            )}
-          >
-            Copiar Código
-          </button>
-          
-          <button 
-            className="action-button"
-            onClick={() => downloadFile(
-              activeTab === 'html' ? html : 
-              activeTab === 'css' ? css : ts,
-              activeTab === 'html' ? 'component.component.html' : 
-              activeTab === 'css' ? 'component.component.css' : 'component.component.ts'
-            )}
-          >
-            Descargar Archivo
-          </button>
-          
-          <button 
-            className="action-button primary"
+            className="download-all-button"
             onClick={downloadAllFiles}
           >
-            Descargar Todo
+            <i className="fa fa-download"></i> Descargar todos los archivos
           </button>
         </div>
       </div>

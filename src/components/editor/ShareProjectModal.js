@@ -11,7 +11,8 @@ const ShareProjectModal = ({ project, onClose }) => {
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [activeUsers, setActiveUsers] = useState([]);
-  
+  const [activeTab, setActiveTab] = useState('link');
+
   useEffect(() => {
     // Generar URL para compartir
     const baseUrl = window.location.origin;
@@ -46,7 +47,7 @@ const ShareProjectModal = ({ project, onClose }) => {
   };
   
   const searchUsers = async (term) => {
-    if (term.length < 3) {
+    if (term.length < 1) {
       setUsers([]);
       return;
     }
@@ -73,12 +74,10 @@ const ShareProjectModal = ({ project, onClose }) => {
   
   const addCollaborator = async (userId) => {
     try {
-      console.log('Intentando añadir colaborador con ID:', userId);
       setLoading(true);
       
       // Llamar al servicio para añadir el colaborador
-      const response = await projectService.addCollaborator(project._id, userId);
-      console.log('Respuesta del servidor:', response);
+      await projectService.addCollaborator(project._id, userId);
       
       // Actualizar lista de colaboradores
       fetchCollaborators();
@@ -127,133 +126,224 @@ const ShareProjectModal = ({ project, onClose }) => {
           <button 
             className="close-button" 
             onClick={onClose}
+            aria-label="Cerrar"
           >
             &times;
           </button>
         </div>
         
+        <div className="share-tabs">
+          <button 
+            className={`share-tab ${activeTab === 'link' ? 'active' : ''}`}
+            onClick={() => setActiveTab('link')}
+          >
+            <i className="fa fa-link"></i> Enlace
+          </button>
+          <button 
+            className={`share-tab ${activeTab === 'collaborators' ? 'active' : ''}`}
+            onClick={() => setActiveTab('collaborators')}
+          >
+            <i className="fa fa-users"></i> Colaboradores
+          </button>
+          <button 
+            className={`share-tab ${activeTab === 'active' ? 'active' : ''}`}
+            onClick={() => setActiveTab('active')}
+          >
+            <i className="fa fa-circle"></i> Usuarios activos
+          </button>
+        </div>
+        
         <div className="share-modal-content">
-          <div className="share-link-section">
-            <h3>Enlace para compartir</h3>
-            <div className="share-link-container">
-              <input 
-                type="text" 
-                value={shareUrl} 
-                readOnly 
-                className="share-link-input"
-              />
-              <button 
-                className="copy-button"
-                onClick={copyToClipboard}
-              >
-                {copied ? 'Copiado!' : 'Copiar'}
-              </button>
-            </div>
-            <p className="share-info">
-              Cualquier persona con este enlace podrá acceder al proyecto.
-            </p>
-          </div>
-          
-          <div className="collaborators-section">
-            <h3>Colaboradores</h3>
-            
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Buscar usuarios por nombre o email"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="search-input"
-              />
+          {/* Sección de enlace para compartir */}
+          {activeTab === 'link' && (
+            <div className="share-link-section">
+              <div className="section-info">
+                <p className="share-instruction">
+                  Comparte este enlace con cualquier persona para dar acceso al proyecto
+                </p>
+              </div>
               
-              <div className="search-results">
-              {loading ? (
-                <div className="loading-results">Buscando...</div>
-              ) : users.length > 0 ? (
-                users.map(user => (
-                  <div key={user._id} className="user-item">
-                    <div className="user-info">
-                      <div className="user-avatar">
-                        {user.username.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="user-details">
-                        <div className="user-name">{user.username}</div>
-                        <div className="user-email">{user.email}</div>
-                      </div>
-                    </div>
-                    <button 
-                      className="add-user-button"
-                      onClick={() => addCollaborator(user._id)}
-                      disabled={loading}
-                    >
-                      <i className="fa fa-plus"></i> Añadir
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="no-results">No se encontraron usuarios</div>
-              )}
+              <div className="share-link-container">
+                <input 
+                  type="text" 
+                  value={shareUrl} 
+                  readOnly 
+                  className="share-link-input"
+                />
+                <button 
+                  className="copy-button"
+                  onClick={copyToClipboard}
+                >
+                  {copied ? (
+                    <>
+                      <i className="fa fa-check"></i> Copiado
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa fa-copy"></i> Copiar
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            </div>
-            
-            <div className="collaborators-list">
-              <h4>Colaboradores actuales</h4>
-              {loading ? (
-                <div className="loading-collaborators">Cargando colaboradores...</div>
-              ) : collaborators.length > 0 ? (
-                collaborators.map(user => (
-                  <div key={user._id} className="collaborator-item">
-                    <div className="user-info">
-                      <div className="user-avatar">
-                        {user.username.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="user-details">
-                        <div className="user-name">
-                          {user.username}
-                          {project.owner === user._id && <span className="owner-badge">Propietario</span>}
-                          {activeUsers.some(activeUser => activeUser.userId === user._id) && (
-                            <span className="online-badge">En línea</span>
-                          )}
-                        </div>
-                        <div className="user-email">{user.email}</div>
-                      </div>
-                    </div>
-                    
-                    {project.owner !== user._id && (
-                      <button 
-                        className="remove-user-button"
-                        onClick={() => removeCollaborator(user._id)}
-                        disabled={loading}
-                        title="Eliminar colaborador"
-                      >
-                        <i className="fa fa-times"></i>
-                      </button>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="no-collaborators">No hay colaboradores</div>
-              )}
-            </div>
-          </div>
+          )}
           
-          <div className="active-users-section">
-            <h3>Usuarios activos ahora</h3>
-            <div className="active-users-list">
-              {activeUsers.length > 0 ? (
-                activeUsers.map(user => (
-                  <div key={user.socketId} className="active-user">
-                    <div className="user-avatar online">
-                      {user.username.charAt(0).toUpperCase()}
+          {/* Sección de colaboradores */}
+          {activeTab === 'collaborators' && (
+            <div className="collaborators-section">
+              <div className="section-header">
+                <h3>Añadir nuevos colaboradores</h3>
+              </div>
+              
+              <div className="search-container">
+                <div className="search-input-wrapper">
+                  <i className="fa fa-search search-icon"></i>
+                  <input
+                    type="text"
+                    placeholder="Buscar usuarios por nombre o email"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="search-input"
+                  />
+                  {searchTerm && (
+                    <button 
+                      className="clear-search" 
+                      onClick={() => {
+                        setSearchTerm('');
+                        setUsers([]);
+                      }}
+                    >
+                      &times;
+                    </button>
+                  )}
+                </div>
+                
+                <div className={`search-results ${users.length > 0 ? 'has-results' : ''}`}>
+                  {loading ? (
+                    <div className="loading-results">
+                      <div className="loading-spinner"></div>
+                      <span>Buscando usuarios...</span>
                     </div>
-                    <span className="active-user-name">{user.username}</span>
+                  ) : users.length > 0 ? (
+                    users.map(user => (
+                      <div key={user._id} className="user-item">
+                        <div className="user-info">
+                          <div className="user-avatar">
+                            {user.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="user-details">
+                            <div className="user-name">{user.username}</div>
+                            <div className="user-email">{user.email}</div>
+                          </div>
+                        </div>
+                        <button 
+                          className="add-user-button"
+                          onClick={() => addCollaborator(user._id)}
+                          disabled={loading}
+                        >
+                          <i className="fa fa-plus"></i> Añadir
+                        </button>
+                      </div>
+                    ))
+                  ) : searchTerm.length >= 3 ? (
+                    <div className="no-results">
+                      <i className="fa fa-user-times"></i>
+                      <span>No se encontraron usuarios</span>
+                    </div>
+                  ) : searchTerm.length > 0 ? (
+                    <div className="search-hint">
+                      Escribe al menos 3 caracteres para buscar
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+              
+              <div className="section-header collaborators-header">
+                <h3>Colaboradores actuales</h3>
+                <span className="collaborator-count">
+                  {collaborators.length} {collaborators.length === 1 ? 'usuario' : 'usuarios'}
+                </span>
+              </div>
+              
+              <div className="collaborators-list">
+                {loading && collaborators.length === 0 ? (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <span>Cargando colaboradores...</span>
                   </div>
-                ))
-              ) : (
-                <div className="no-active-users">No hay usuarios activos actualmente</div>
-              )}
+                ) : collaborators.length > 0 ? (
+                  collaborators.map(user => (
+                    <div key={user._id} className="collaborator-item">
+                      <div className="user-info">
+                        <div className={`user-avatar ${activeUsers.some(activeUser => activeUser.userId === user._id) ? 'online' : ''}`}>
+                          {user.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="user-details">
+                          <div className="user-name">
+                            {user.username}
+                            {project.owner._id === user._id && (
+                              <span className="owner-badge">Propietario</span>
+                            )}
+                          </div>
+                          <div className="user-email">{user.email}</div>
+                        </div>
+                      </div>
+                      
+                      {project.owner._id !== user._id && (
+                        <button 
+                          className="remove-user-button"
+                          onClick={() => removeCollaborator(user._id)}
+                          disabled={loading}
+                          title="Eliminar colaborador"
+                        >
+                          <i className="fa fa-times"></i>
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-icon">👥</div>
+                    <p>No hay colaboradores añadidos todavía</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
+          
+          {/* Sección de usuarios activos */}
+          {activeTab === 'active' && (
+            <div className="active-users-section">
+              <div className="section-info">
+                <p className="active-users-info">
+                  Usuarios que están trabajando en este proyecto ahora mismo
+                </p>
+              </div>
+              
+              <div className="active-users-list">
+                {activeUsers.length > 0 ? (
+                  activeUsers.map(user => (
+                    <div key={user.socketId} className="active-user-item">
+                      <div className="user-avatar online">
+                        {user.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="active-user-info">
+                        <span className="active-user-name">{user.username}</span>
+                        <span className="active-status">
+                          <span className="status-dot"></span> Conectado ahora
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-icon">👤</div>
+                    <p>No hay usuarios activos en este momento</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
