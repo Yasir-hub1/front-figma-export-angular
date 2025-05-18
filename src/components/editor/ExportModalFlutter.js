@@ -1,9 +1,9 @@
-// src/components/editor/ExportModal.js
+// src/components/editor/ExportModalFlutter.js
 import React, { useState } from 'react';
 import { useEditor } from '../../context/EditorContext';
 import './ExportModal.css';
 
-const ExportModal = () => {
+const ExportModalFlutter = () => {
   const { exportModalOpen, exportContent, setExportModalOpen } = useEditor();
   const [activeTab, setActiveTab] = useState('dart');
   
@@ -118,4 +118,4 @@ const ExportModal = () => {
   );
 };
 
-export default ExportModal;
+export default ExportModalFlutter;

@@ -52,15 +52,15 @@ const elementService = {
     }
   },
 
-  // Exportar a Angular
-  exportToAngular: async (projectId) => {
+  exportToFlutter: async (projectId) => {
     try {
-      const response = await axios.get(`/components/export/${projectId}`);
+      const response = await axios.post(`/components/export/flutter/${projectId}`);
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Error al exportar a Angular' };
+      throw new Error(error.response?.data?.message || 'Error al exportar a Flutter');
     }
   }
+
 };
 
 export default elementService;

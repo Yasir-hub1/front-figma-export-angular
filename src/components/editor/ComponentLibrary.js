@@ -6,86 +6,246 @@ import './ComponentLibrary.css';
 const ComponentLibrary = () => {
   const { createElement, project } = useEditor();
   
-  // Definición de los componentes disponibles
+  // Definición de componentes Flutter
   const componentCategories = [
     {
-      name: 'Básicos',
+      name: 'Básicos Flutter',
       components: [
         {
           type: 'container',
-          name: 'Contenedor',
+          name: 'Container',
           icon: 'fa fa-square-o',
-          defaultSize: { width: 200, height: 200 },
-          defaultStyles: { backgroundColor: '#f5f5f5', borderRadius: 4 }
+          defaultSize: { width: 150, height: 150 },
+          defaultStyles: { backgroundColor: '#f5f5f5', borderRadius: 4 },
+          flutterWidget: 'Container'
         },
         {
           type: 'text',
-          name: 'Texto',
+          name: 'Text',
           icon: 'fa fa-font',
-          content: 'Texto de ejemplo',
+          content: 'Text de ejemplo',
           defaultSize: { width: 150, height: 40 },
-          defaultStyles: { color: '#333333', fontSize: 16, textAlign: 'center' }
+          defaultStyles: { color: '#333333', fontSize: 16, textAlign: 'center' },
+          flutterWidget: 'Text'
         },
         {
-          type: 'button',
-          name: 'Botón',
+          type: 'elevatedButton',
+          name: 'ElevatedButton',
           icon: 'fa fa-square',
-          content: 'Botón',
+          content: 'Button',
           defaultSize: { width: 120, height: 40 },
           defaultStyles: { 
-            backgroundColor: '#4285f4', 
+            backgroundColor: '#2196F3', 
             color: '#ffffff', 
             borderRadius: 4,
             fontWeight: 'bold',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center'
-          }
+          },
+          flutterWidget: 'ElevatedButton'
+        },
+        {
+          type: 'outlinedButton',
+          name: 'OutlinedButton',
+          icon: 'fa fa-square-o',
+          content: 'Button',
+          defaultSize: { width: 120, height: 40 },
+          defaultStyles: { 
+            backgroundColor: 'transparent', 
+            borderColor: '#2196F3',
+            color: '#2196F3', 
+            borderWidth: 1,
+            borderRadius: 4,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          },
+          flutterWidget: 'OutlinedButton'
+        },
+        {
+          type: 'textButton',
+          name: 'TextButton',
+          icon: 'fa fa-font',
+          content: 'Button',
+          defaultSize: { width: 100, height: 40 },
+          defaultStyles: { 
+            backgroundColor: 'transparent', 
+            color: '#2196F3',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          },
+          flutterWidget: 'TextButton'
         }
       ]
     },
     {
-      name: 'Formularios',
+      name: 'Layout Flutter',
       components: [
         {
-          type: 'input',
-          name: 'Campo de texto',
+          type: 'row',
+          name: 'Row',
+          icon: 'fa fa-ellipsis-h',
+          defaultSize: { width: 300, height: 60 },
+          defaultStyles: { 
+            display: 'flex', 
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(200, 200, 200, 0.2)'
+          },
+          flutterWidget: 'Row'
+        },
+        {
+          type: 'column',
+          name: 'Column',
+          icon: 'fa fa-ellipsis-v',
+          defaultSize: { width: 150, height: 200 },
+          defaultStyles: { 
+            display: 'flex', 
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(200, 200, 200, 0.2)'
+          },
+          flutterWidget: 'Column'
+        },
+        {
+          type: 'stack',
+          name: 'Stack',
+          icon: 'fa fa-clone',
+          defaultSize: { width: 150, height: 150 },
+          defaultStyles: { 
+            position: 'relative',
+            backgroundColor: 'rgba(200, 200, 200, 0.2)'
+          },
+          flutterWidget: 'Stack'
+        },
+        {
+          type: 'expanded',
+          name: 'Expanded',
+          icon: 'fa fa-arrows-alt-h',
+          defaultSize: { width: 200, height: 80 },
+          defaultStyles: { 
+            flex: 1,
+            backgroundColor: 'rgba(33, 150, 243, 0.2)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          },
+          flutterWidget: 'Expanded'
+        }
+      ]
+    },
+    {
+      name: 'Material Components',
+      components: [
+        {
+          type: 'appBar',
+          name: 'AppBar',
+          icon: 'fa fa-window-maximize',
+          content: 'AppBar',
+          defaultSize: { width: project?.canvas?.width || 360, height: 56 },
+          defaultStyles: { 
+            backgroundColor: '#2196F3', 
+            color: '#ffffff',
+            padding: '0 16px',
+            display: 'flex',
+            alignItems: 'center',
+            fontWeight: 'bold'
+          },
+          flutterWidget: 'AppBar'
+        },
+        {
+          type: 'floatingActionButton',
+          name: 'FloatingActionButton',
+          icon: 'fa fa-plus-circle',
+          defaultSize: { width: 56, height: 56 },
+          defaultStyles: { 
+            backgroundColor: '#2196F3', 
+            color: '#ffffff',
+            borderRadius: '50%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            boxShadow: '0 3px 5px rgba(0,0,0,0.3)'
+          },
+          flutterWidget: 'FloatingActionButton'
+        },
+        {
+          type: 'card',
+          name: 'Card',
+          icon: 'fa fa-credit-card',
+          defaultSize: { width: 200, height: 200 },
+          defaultStyles: { 
+            backgroundColor: '#ffffff', 
+            borderRadius: 8, 
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            padding: '12px'
+          },
+          flutterWidget: 'Card'
+        },
+        {
+          type: 'divider',
+          name: 'Divider',
+          icon: 'fa fa-minus',
+          defaultSize: { width: 200, height: 2 }, // Asegurarse de que la altura sea pequeña pero visible
+          defaultStyles: { 
+            backgroundColor: '#E0E0E0',
+            opacity: 0.7
+          },
+          flutterWidget: 'Divider'
+        }
+      ]
+    },
+    {
+      name: 'Inputs & Forms',
+      components: [
+        {
+          type: 'textField',
+          name: 'TextField',
           icon: 'fa fa-pencil-square-o',
-          content: 'Placeholder',
-          defaultSize: { width: 200, height: 40 },
-          defaultStyles: { borderWidth: 1, borderColor: '#ddd', borderRadius: 4, padding: '8px' }
+          content: 'Hint text',
+          defaultSize: { width: 200, height: 56 },
+          defaultStyles: { 
+            borderWidth: 1, 
+            borderColor: '#BDBDBD', 
+            borderRadius: 4,
+            padding: '8px 12px'
+          },
+          flutterWidget: 'TextField'
         },
         {
           type: 'checkbox',
-          name: 'Casilla',
+          name: 'Checkbox',
           icon: 'fa fa-check-square-o',
-          content: 'Opción',
-          defaultSize: { width: 120, height: 24 },
-          defaultStyles: {}
+          defaultSize: { width: 24, height: 24 },
+          defaultStyles: {
+            borderWidth: 1,
+            borderColor: '#2196F3',
+            borderRadius: 2
+          },
+          flutterWidget: 'Checkbox'
         },
         {
-          type: 'radio',
-          name: 'Radio',
-          icon: 'fa fa-dot-circle-o',
-          content: 'Opción',
-          defaultSize: { width: 120, height: 24 },
-          defaultStyles: {}
+          type: 'switch',
+          name: 'Switch',
+          icon: 'fa fa-toggle-on',
+          defaultSize: { width: 50, height: 30 },
+          defaultStyles: {
+            backgroundColor: '#BDBDBD',
+            borderRadius: 15
+          },
+          flutterWidget: 'Switch'
         },
         {
-          type: 'select',
-          name: 'Selector',
-          icon: 'fa fa-caret-square-o-down',
-          content: 'Seleccionar',
-          defaultSize: { width: 200, height: 40 },
-          defaultStyles: { borderWidth: 1, borderColor: '#ddd', borderRadius: 4 }
-        },
-        {
-          type: 'textarea',
-          name: 'Área de texto',
-          icon: 'fa fa-paragraph',
-          content: 'Texto multilínea',
-          defaultSize: { width: 200, height: 100 },
-          defaultStyles: { borderWidth: 1, borderColor: '#ddd', borderRadius: 4, padding: '8px' }
+          type: 'slider',
+          name: 'Slider',
+          icon: 'fa fa-sliders',
+          defaultSize: { width: 200, height: 24 },
+          defaultStyles: {},
+          flutterWidget: 'Slider'
         }
       ]
     },
@@ -93,240 +253,51 @@ const ComponentLibrary = () => {
       name: 'Navegación',
       components: [
         {
-          type: 'navbar',
-          name: 'Barra de navegación',
+          type: 'bottomNavigationBar',
+          name: 'BottomNavigationBar',
+          icon: 'fa fa-ellipsis-h',
+          defaultSize: { width: project?.canvas?.width || 360, height: 56 },
+          defaultStyles: { 
+            backgroundColor: '#FFFFFF', 
+            borderTopWidth: 1,
+            borderColor: '#E0E0E0',
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center'
+          },
+          flutterWidget: 'BottomNavigationBar'
+        },
+        {
+          type: 'tabBar',
+          name: 'TabBar',
+          icon: 'fa fa-folder',
+          defaultSize: { width: project?.canvas?.width || 360, height: 48 },
+          defaultStyles: { 
+            backgroundColor: '#2196F3', 
+            color: '#FFFFFF',
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center'
+          },
+          flutterWidget: 'TabBar'
+        },
+        {
+          type: 'drawer',
+          name: 'Drawer',
           icon: 'fa fa-bars',
-          defaultSize: { width: 600, height: 60 },
+          defaultSize: { width: 250, height: project?.canvas?.height || 640 },
           defaultStyles: { 
-            backgroundColor: '#333333', 
-            color: '#ffffff', 
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 16px'
-          }
-        },
-        {
-          type: 'link',
-          name: 'Enlace',
-          icon: 'fa fa-link',
-          content: 'Enlace',
-          defaultSize: { width: 80, height: 30 },
-          defaultStyles: { 
-            color: '#4285f4', 
-            textDecoration: 'underline',
-            display: 'flex',
-            alignItems: 'center'
-          }
-        },
-        {
-          type: 'menu',
-          name: 'Menú',
-          icon: 'fa fa-list-ul',
-          defaultSize: { width: 150, height: 200 },
-          defaultStyles: { 
-            backgroundColor: '#ffffff', 
-            borderWidth: 1, 
-            borderColor: '#ddd',
-            borderRadius: 4,
-            padding: '8px 0'
-          }
-        },
-        {
-          type: 'menuItem',
-          name: 'Elemento de menú',
-          icon: 'fa fa-minus',
-          content: 'Elemento de menú',
-          defaultSize: { width: 150, height: 40 },
-          defaultStyles: { 
-            padding: '10px 16px',
-            borderBottom: '1px solid #eee',
-            display: 'flex',
-            alignItems: 'center'
-          }
-        }
-      ]
-    },
-    {
-      name: 'Layouts',
-      components: [
-        {
-          type: 'card',
-          name: 'Tarjeta',
-          icon: 'fa fa-credit-card',
-          defaultSize: { width: 250, height: 300 },
-          defaultStyles: { 
-            backgroundColor: '#ffffff', 
-            borderRadius: 8, 
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            backgroundColor: '#FFFFFF', 
             padding: '16px',
-            display: 'flex',
-            flexDirection: 'column'
-          }
-        },
-        {
-          type: 'hero',
-          name: 'Hero',
-          icon: 'fa fa-picture-o',
-          content: 'Título Principal',
-          defaultSize: { width: 600, height: 400 },
-          defaultStyles: { 
-            backgroundColor: '#f8f9fa', 
-            color: '#333333',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontSize: 32,
-            fontWeight: 'bold'
-          }
-        },
-        {
-          type: 'footer',
-          name: 'Pie de página',
-          icon: 'fa fa-angle-double-down',
-          defaultSize: { width: 600, height: 100 },
-          defaultStyles: { 
-            backgroundColor: '#333333', 
-            color: '#ffffff',
-            padding: '20px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
-        },
-        {
-          type: 'carousel',
-          name: 'Carrusel',
-          icon: 'fa fa-exchange',
-          defaultSize: { width: 600, height: 300 },
-          defaultStyles: { 
-            backgroundColor: '#eeeeee', 
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            overflow: 'hidden'
-          }
-        }
-      ]
-    },
-    {
-      name: 'Multimedia',
-      components: [
-        {
-          type: 'image',
-          name: 'Imagen',
-          icon: 'fa fa-picture-o',
-          defaultSize: { width: 200, height: 150 },
-          defaultStyles: { backgroundColor: '#eeeeee', borderRadius: 4 }
-        },
-        {
-          type: 'icon',
-          name: 'Ícono',
-          icon: 'fa fa-star',
-          content: 'fa fa-star',
-          defaultSize: { width: 40, height: 40 },
-          defaultStyles: { color: '#4285f4', fontSize: 24, textAlign: 'center' }
-        },
-        {
-          type: 'video',
-          name: 'Video',
-          icon: 'fa fa-film',
-          defaultSize: { width: 320, height: 240 },
-          defaultStyles: { 
-            backgroundColor: '#000000', 
-            borderRadius: 4,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
-        },
-        {
-          type: 'avatar',
-          name: 'Avatar',
-          icon: 'fa fa-user-circle',
-          defaultSize: { width: 50, height: 50 },
-          defaultStyles: { 
-            backgroundColor: '#4285f4', 
-            borderRadius: '50%',
-            color: '#ffffff',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontSize: 20
-          }
-        }
-      ]
-    },
-    {
-      name: 'Informativo',
-      components: [
-        {
-          type: 'alert',
-          name: 'Alerta',
-          icon: 'fa fa-exclamation-triangle',
-          content: 'Mensaje de alerta',
-          defaultSize: { width: 300, height: 60 },
-          defaultStyles: { 
-            backgroundColor: '#f8d7da', 
-            color: '#721c24',
-            borderWidth: 1,
-            borderColor: '#f5c6cb',
-            borderRadius: 4,
-            padding: '12px',
-            display: 'flex',
-            alignItems: 'center'
-          }
-        },
-        {
-          type: 'badge',
-          name: 'Insignia',
-          icon: 'fa fa-certificate',
-          content: 'Nuevo',
-          defaultSize: { width: 60, height: 24 },
-          defaultStyles: { 
-            backgroundColor: '#4285f4', 
-            color: '#ffffff',
-            borderRadius: 12,
-            padding: '0 8px',
-            fontSize: 12,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
-        },
-        {
-          type: 'tooltip',
-          name: 'Tooltip',
-          icon: 'fa fa-comment',
-          content: 'Información adicional',
-          defaultSize: { width: 150, height: 40 },
-          defaultStyles: { 
-            backgroundColor: '#333333', 
-            color: '#ffffff',
-            borderRadius: 4,
-            padding: '8px',
-            fontSize: 12,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
-        },
-        {
-          type: 'progress',
-          name: 'Barra de progreso',
-          icon: 'fa fa-tasks',
-          defaultSize: { width: 300, height: 20 },
-          defaultStyles: { 
-            backgroundColor: '#e9ecef', 
-            borderRadius: 10,
-            overflow: 'hidden',
-            position: 'relative'
-          }
+            boxShadow: '2px 0 5px rgba(0,0,0,0.1)'
+          },
+          flutterWidget: 'Drawer'
         }
       ]
     }
   ];
-
 
   // Manejar la creación de un nuevo componente
   const handleCreateComponent = async (component) => {
@@ -341,20 +312,18 @@ const ComponentLibrary = () => {
         y: (project.canvas.height / 2) - ((component.defaultSize?.height || 100) / 2)
       };
       
-      console.log('Creando componente:', component.type, 'en posición:', position);
-      
-      // Crear el elemento con sus propiedades predeterminadas
+      // Crear el elemento con sus propiedades predeterminadas y el widget de Flutter
       await createElement({
         type: component.type,
         name: component.name,
         content: component.content || '',
         position,
         size: component.defaultSize || { width: 100, height: 100 },
-        styles: component.defaultStyles || {}
+        styles: component.defaultStyles || {},
+        flutterWidget: component.flutterWidget || component.type
       });
     } catch (error) {
       console.error('Error al crear componente:', error);
-      // Mostrar el error al usuario
       alert(`Error al crear componente: ${error.message || 'Error desconocido'}`);
     }
   };

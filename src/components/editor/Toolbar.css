@@ -1,80 +1,164 @@
 /* src/components/editor/Toolbar.css */
 .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 50px;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
-    padding: 0 16px;
-  }
-  
-  .toolbar-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .project-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-    margin-left: 6px;
-  }
-  
-  .toolbar-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background-color: transparent;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .toolbar-button:hover {
-    background-color: #f5f5f5;
-  }
-  
-  .toolbar-button.active {
-    background-color: #e3f2fd;
-    border-color: #bbdefb;
-    color: #4285f4;
-  }
-  
-  .zoom-selector {
-    display: flex;
-    align-items: center;
-  }
-  
-  .zoom-selector select {
-    padding: 6px 8px;
-    font-size: 14px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: white;
-    cursor: pointer;
-  }
-  
-  .export-button {
-    padding: 6px 12px;
-    background-color: #4285f4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .export-button:hover {
-    background-color: #3367d6;
-  }
-  
-  .export-button:disabled {
-    background-color: #b3b3b3;
-    cursor: not-allowed;
-  }
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 60px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E0E0E0;
+  z-index: 10;
+}
+
+.flutter-toolbar {
+  background-color: #0175C2; /* Flutter blue */
+  color: white;
+  border-bottom: none;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  margin-right: 24px;
+}
+
+.toolbar-section:last-child {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+.toolbar-button {
+  background: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 0 4px;
+  transition: background-color 0.2s;
+}
+
+.toolbar-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-button.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.project-name {
+  margin-left: 8px;
+  font-weight: 500;
+  font-size: 16px;
+  color: white;
+}
+
+.device-badge {
+  font-size: 11px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  margin-left: 10px;
+  text-transform: uppercase;
+}
+
+.zoom-selector {
+  margin: 0 4px;
+}
+
+.zoom-selector select {
+  background-color: rgba(255, 255, 255, 0.1);
+  /* color: white; */
+  border: none;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 24px;
+}
+
+.share-button, .export-button {
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+  margin-left: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.share-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.share-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.export-button {
+  background-color: #13B9FD; /* Flutter accent */
+  color: #033B7A;
+  font-weight: bold;
+}
+
+.export-button:hover {
+  background-color: #2BC4FF;
+}
+
+.export-button:disabled {
+  background-color: #BDBDBD;
+  color: #757575;
+  cursor: not-allowed;
+}
+
+/* Modos de vista */
+.view-modes {
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin-right: 16px;
+}
+
+.mode-button {
+  background: none;
+  border: none;
+  height: 36px;
+  padding: 0 12px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.mode-button i {
+  margin-right: 6px;
+}
+
+.mode-button.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 500;
+}
+
+.mode-button:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1);
+}

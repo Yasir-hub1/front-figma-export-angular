@@ -1,11 +1,11 @@
-// src/components/editor/Toolbar.js
+// src/components/editor/Toolbar.js (modificar para soportar los modos)
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditor } from '../../context/EditorContext';
 import './Toolbar.css';
 import ShareProjectModal from './ShareProjectModal';
 
-const Toolbar = () => {
+const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => {
   const { 
     project,
     zoom,
@@ -15,7 +15,7 @@ const Toolbar = () => {
     updateViewport,
     setGridVisible,
     setSnapToGrid,
-    exportToAngular,
+    exportToFlutter,
     exportLoading
   } = useEditor();
   
@@ -55,13 +55,13 @@ const Toolbar = () => {
     navigate('/dashboard');
   };
 
-  // Exportar a Angular
+  // Exportar código
   const handleExport = async () => {
-    await exportToAngular();
+    await exportToFlutter();
   };
 
   return (
-    <div className="toolbar">
+    <div className="toolbar flutter-toolbar">
       <div className="toolbar-section">
         <button 
           className="toolbar-button"
@@ -71,10 +71,32 @@ const Toolbar = () => {
           <i className="fas fa-arrow-left"></i>
         </button>
         
-        <span className="project-name">{project?.name}</span>
+        <span className="project-name">
+          {project?.name}
+          <span className="device-badge">{project?.deviceType || 'custom'}</span>
+        </span>
+      </div>
+      
+      <div className="toolbar-section view-modes">
+        <button 
+          className={`mode-button ${viewMode === 'design' ? 'active' : ''}`}
+          onClick={() => setViewMode('design')}
+          title="Modo Diseño"
+        >
+          <i className="fas fa-paint-brush"></i> Diseño
+        </button>
+      
       </div>
       
       <div className="toolbar-section">
+        <button 
+          className="toolbar-button"
+          onClick={toggleSidebar}
+          title="Mostrar/Ocultar Componentes"
+        >
+          <i className="fas fa-th-large"></i>
+        </button>
+
         <button 
           className={`toolbar-button ${gridVisible ? 'active' : ''}`}
           onClick={() => setGridVisible(!gridVisible)}
@@ -130,32 +152,31 @@ const Toolbar = () => {
       </div>
       
       <div className="toolbar-section">
-      <button 
-        className="share-button"
-        onClick={() => setShowShareModal(true)}
-        title="Compartir proyecto"
-      >
-        <i className="fa fa-share-alt"></i> Compartir
-      </button>
         <button 
-          className="export-button"
+          className="share-button"
+          onClick={() => setShowShareModal(true)}
+          title="Compartir proyecto"
+        >
+          <i className="fa fa-share-alt"></i> Compartir
+        </button>
+        
+        <button 
+          className="export-button flutter-export-button"
           onClick={handleExport}
           disabled={exportLoading}
-          title="Exportar a Angular"
+          title="Exportar a Flutter/Dart"
         >
-          {exportLoading ? 'Exportando...' : 'Exportar a Angular'}
+          {exportLoading ? 'Exportando...' : 'Exportar a Flutter'}
         </button>
       </div>
 
       {showShareModal && (
-      <ShareProjectModal 
-        project={project}
-        onClose={() => setShowShareModal(false)}
-      />
-    )}
+        <ShareProjectModal 
+          project={project}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
-
-    
   );
 };
 

@@ -1,75 +1,72 @@
-/* src/components/editor/Canvas.css */
+/* Añadir a src/components/editor/Canvas.css */
 .canvas-container {
-    flex: 1;
-    overflow: auto;
-    background-color: #e0e0e0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-  }
-  
-  .canvas {
-    position: relative;
-    background-color: white;
-    transform-origin: center;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  .canvas.grid-visible {
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-    background-size: 10px 10px;
-  }
-  
-  .editor-loading {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
-  .spinner {
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top: 3px solid #4285f4;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  .editor-error {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    text-align: center;
-    padding: 0 20px;
-  }
-  
-  .editor-error h2 {
-    margin-bottom: 16px;
-    color: #d32f2f;
-  }
-  
-  .editor-error button {
-    margin-top: 16px;
-    padding: 10px 20px;
-    background-color: #4285f4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .editor-error button:hover {
-    background-color: #3367d6;
-  }
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 20px;
+}
+
+.device-wrapper {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.device-info {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 100;
+}
+
+/* Estilos para diferentes modos */
+.preview-mode .grid-visible {
+  background-image: none !important;
+}
+
+.preview-mode .element-controls,
+.preview-mode .element-resize-handle,
+.preview-mode .element-name,
+.preview-mode .flutter-widget-tag {
+  display: none !important;
+}
+
+/* Estilos para los dispositivos */
+.device-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 50px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.device-iphone12::after,
+.device-iphone8::after,
+.device-pixel5::after,
+.device-samsungs21::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%;
+  height: 4px;
+  background-color: #333;
+  border-radius: 2px;
+  opacity: 0.3;
+}

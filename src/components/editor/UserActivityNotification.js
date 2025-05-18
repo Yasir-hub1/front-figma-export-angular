@@ -9,7 +9,7 @@ const UserActivityNotification = () => {
   
   // Listener para elemento eliminado
   useEffect(() => {
-    const socket = io('http://45.55.145.232:80');
+    const socket = io('http://localhost:5000');
     
     socket.on('element-deleted', (data) => {
       // Añadir notificación

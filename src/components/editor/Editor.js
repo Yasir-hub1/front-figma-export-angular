@@ -9,8 +9,6 @@ import Sidebar from './Sidebar';
 import ElementProperties from './ElementProperties';
 import ExportModal from './ExportModal';
 import './Editor.css';
-import UserActivityNotification from './UserActivityNotification';
-import ShareProjectModal from './ShareProjectModal';
 import ActivityNotification from './ActivityNotification';
 
 // Componente wrapper que proporciona el contexto
@@ -31,16 +29,16 @@ const EditorContent = () => {
     selectedElement,
     exportModalOpen,
     exportContent,
-    exportLoading ,
-   
+    exportLoading
   } = useEditor();
   
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [propertiesOpen, setPropertiesOpen] = useState(true);
+  const [viewMode, setViewMode] = useState('design'); // design, preview, code
 
   useEffect(() => {
-    document.title = project ? `${project.name} - Editor` : 'Cargando...';
+    document.title = project ? `${project.name} - Flutter Designer` : 'Cargando...';
   }, [project]);
 
   const toggleSidebar = () => {
@@ -55,7 +53,7 @@ const EditorContent = () => {
     return (
       <div className="editor-loading">
         <div className="spinner"></div>
-        <p>Cargando editor...</p>
+        <p>Cargando editor de Flutter...</p>
       </div>
     );
   }
@@ -84,40 +82,47 @@ const EditorContent = () => {
   }
 
   return (
-    <div className="editor-container">
-    <Navbar project={project} />
-    
-    <div className="editor-layout">
-      <Toolbar />
+    <div className="editor-container flutter-editor">
+      <Navbar project={project} />
       
-      <div className="editor-main">
-        {sidebarOpen && <Sidebar onClose={toggleSidebar} />}
+      <div className="editor-layout">
+        <Toolbar 
+          viewMode={viewMode} 
+          setViewMode={setViewMode}
+          toggleSidebar={toggleSidebar}
+          toggleProperties={toggleProperties}
+        />
         
-        <Canvas />
+        <div className="editor-main">
+          <div className={`editor-panels ${sidebarOpen ? 'sidebar-open' : ''} ${propertiesOpen && selectedElement ? 'properties-open' : ''}`}>
+            {sidebarOpen && (
+              <div className="editor-sidebar">
+                <Sidebar onClose={toggleSidebar} />
+              </div>
+            )}
+            
+            <div className="editor-canvas-container">
+              <Canvas viewMode={viewMode} />
+            </div>
+            
+            {selectedElement && propertiesOpen && (
+              <div className="editor-properties">
+                <ElementProperties onClose={toggleProperties} />
+              </div>
+            )}
+          </div>
+        </div>
         
-        {selectedElement && propertiesOpen && (
-          <ElementProperties onClose={toggleProperties} />
+        <ActivityNotification />
+        
+        {exportModalOpen && (
+          <ExportModal 
+            content={exportContent} 
+            loading={exportLoading} 
+          />
         )}
       </div>
-      
-      {/* Añadir el componente de notificaciones */}
-      <ActivityNotification  />
-      
-      {exportModalOpen && (
-        <ExportModal 
-          content={exportContent} 
-          loading={exportLoading} 
-        />
-      )}
-      
-      {/* {showShareModal && (
-        <ShareProjectModal 
-          project={project}
-          onClose={() => setShowShareModal(false)}
-        />
-      )} */}
     </div>
-  </div>
   );
 };
 

@@ -1,20 +1,184 @@
 /* src/components/editor/Editor.css */
 .editor-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: #f6f8fa;
+}
+
+.flutter-editor {
+  /* Colores y tema de Flutter */
+  --flutter-primary: #0175C2;
+  --flutter-secondary: #02569B;
+  --flutter-accent: #13B9FD;
+  --flutter-bg-light: #f6f8fa;
+  --flutter-bg-dark: #2C2C2C;
+  --flutter-panel-bg: #FFFFFF;
+  --flutter-border: #E0E0E0;
+  --flutter-text: #333333;
+  
+  /* Redefinimos algunos colores base */
+  background-color: var(--flutter-bg-light);
+  color: var(--flutter-text);
+}
+
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.editor-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.editor-panels {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Sidebar */
+.editor-sidebar {
+  width: 280px;
+  min-width: 280px;
+  height: 100%;
+  background-color: var(--flutter-panel-bg);
+  border-right: 1px solid var(--flutter-border);
+  overflow-y: auto;
+  transition: width 0.3s ease;
+  z-index: 5;
+}
+
+/* Canvas Container */
+.editor-canvas-container {
+  flex: 1;
+  height: 100%;
+  overflow: auto;
+  background-color: var(--flutter-bg-light);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+/* Properties Panel */
+.editor-properties {
+  width: 320px;
+  min-width: 320px;
+  height: 100%;
+  background-color: var(--flutter-panel-bg);
+  border-left: 1px solid var(--flutter-border);
+  overflow-y: auto;
+  transition: width 0.3s ease;
+  z-index: 5;
+}
+
+/* Ajustes responsivos */
+.editor-panels.sidebar-open .editor-canvas-container {
+  margin-left: 0;
+}
+
+.editor-panels.properties-open .editor-canvas-container {
+  margin-right: 0;
+}
+
+/* Spinner de carga */
+.editor-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--flutter-bg-light);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--flutter-border);
+  border-top-color: var(--flutter-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mensaje de error */
+.editor-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+  background-color: var(--flutter-bg-light);
+}
+
+.editor-error h2 {
+  color: #e53935;
+  margin-bottom: 16px;
+}
+
+.editor-error button {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background-color: var(--flutter-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Estilo para los modos de visualización */
+.editor-canvas-container.preview-mode {
+  background-color: #f0f0f0;
+}
+
+.editor-canvas-container.code-mode {
+  background-color: var(--flutter-bg-dark);
+}
+
+/* Estilos para dispositivos móviles */
+.mobile-device-canvas {
+  margin: 40px auto;
+  transition: all 0.3s ease;
+}
+
+/* Media queries para pantallas pequeñas */
+@media (max-width: 1200px) {
+  .editor-sidebar {
+    width: 240px;
+    min-width: 240px;
   }
   
-  .editor-layout {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
+  .editor-properties {
+    width: 280px;
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 992px) {
+  .editor-panels:not(.sidebar-open) .editor-canvas-container {
+    margin-left: 0;
   }
   
-  .editor-main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
+  .editor-panels:not(.properties-open) .editor-canvas-container {
+    margin-right: 0;
   }
+}

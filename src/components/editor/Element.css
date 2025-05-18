@@ -1,315 +1,542 @@
 /* src/components/editor/Element.css */
+/* Estilos básicos para todos los elementos */
 .editor-element {
-    position: absolute;
-    box-sizing: border-box;
-    user-select: none;
-    cursor: move;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
-  
-  .editor-element.selected {
-    outline: 2px solid #4285f4;
-    z-index: 10;
-  }
-  
-  .element-container-content {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .element-content {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .element-button {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background-color: #4285f4;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .element-image-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
-  
-  .element-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-  
-  .element-image-placeholder {
-    width: 100%;
-    height: 100%;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #888;
-  }
-  
-  .element-input {
-    width: 100%;
-    height: 100%;
-    padding: 5px;
-    box-sizing: border-box;
-    border: 1px solid #ddd;
-  }
-  
-  .element-checkbox-label,
-  .element-radio-label {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-  }
-  
-  .element-checkbox,
-  .element-radio {
-    margin-right: 8px;
-  }
-  
-  .element-select {
-    width: 100%;
-    height: 100%;
-    padding: 5px;
-    box-sizing: border-box;
-    border: 1px solid #ddd;
-  }
-  
-  .element-icon {
-    font-size: 24px;
-    color: #333;
-  }
-  
-  .element-controls {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-  }
-  
-  .element-resize-handle {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background-color: white;
-    border: 2px solid #4285f4;
-    pointer-events: all; /* Importante: permite que reciba eventos del mouse */
-    z-index: 11; /* Por encima del elemento seleccionado */
-  }
-  
-  .element-resize-handle.top-left {
-    top: -6px;
-    left: -6px;
-    cursor: nwse-resize;
-  }
-  
-  .element-resize-handle.top-right {
-    top: -6px;
-    right: -6px;
-    cursor: nesw-resize;
-  }
-  
-  .element-resize-handle.bottom-left {
-    bottom: -6px;
-    left: -6px;
-    cursor: nesw-resize;
-  }
-  
-  .element-resize-handle.bottom-right {
-    bottom: -6px;
-    right: -6px;
-    cursor: nwse-resize;
-  }
-  
-  .element-name {
-    position: absolute;
-    top: -24px;
-    left: 0;
-    background-color: #4285f4;
-    color: white;
-    padding: 2px 6px;
-    font-size: 12px;
-    border-radius: 3px;
-    white-space: nowrap;
-  }
+  position: absolute;
+  user-select: none;
+  box-sizing: border-box;
+  transition: box-shadow 0.2s;
+  font-family: 'Roboto', sans-serif;
+  overflow: hidden;
+}
 
+.editor-element.selected {
+  box-shadow: 0 0 0 2px #0175C2, 0 0 8px rgba(1, 117, 194, 0.5);
+  z-index: 100;
+}
 
-  /* src/components/editor/Element.css */
-  .editor-element {
-    position: absolute;
-    box-sizing: border-box;
-    user-select: none;
-    cursor: move; /* Indicador visual de que se puede arrastrar */
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    transition: box-shadow 0.2s;
-  }
-  
-  .editor-element.selected {
-    outline: 2px solid #4285f4;
-    z-index: 10;
-    box-shadow: 0 0 10px rgba(66, 133, 244, 0.3); /* Sombra más visible */
-  }
-/* El resto del CSS como estaba antes */
+/* Controles para elementos seleccionados */
+.element-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 
 .element-resize-handle {
   position: absolute;
-  width: 10px; /* Un poco más grande para facilitar su uso */
+  width: 10px;
   height: 10px;
-  background-color: white;
-  border: 2px solid #4285f4;
-  pointer-events: all; /* Importante para que reciba eventos */
-  z-index: 2; /* Por encima del elemento */
+  background-color: #FFFFFF;
+  border: 1px solid #0175C2;
+  border-radius: 50%;
+  pointer-events: all;
+  z-index: 200;
+  cursor: pointer;
 }
 
 .element-resize-handle.top-left {
-  top: -6px;
-  left: -6px;
+  top: -5px;
+  left: -5px;
   cursor: nwse-resize;
 }
 
 .element-resize-handle.top-right {
-  top: -6px;
-  right: -6px;
+  top: -5px;
+  right: -5px;
   cursor: nesw-resize;
 }
 
 .element-resize-handle.bottom-left {
-  bottom: -6px;
-  left: -6px;
+  bottom: -5px;
+  left: -5px;
   cursor: nesw-resize;
 }
 
 .element-resize-handle.bottom-right {
-  bottom: -6px;
-  right: -6px;
+  bottom: -5px;
+  right: -5px;
   cursor: nwse-resize;
 }
 
-.element-interaction-tooltip {
+.element-name {
   position: absolute;
-  top: -40px;
+  top: -24px;
   left: 0;
-  background-color: #333;
+  background-color: #0175C2;
   color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 1000;
-  pointer-events: none;
-  animation: fadeIn 0.3s;
-}
-
-.interaction-user {
-  display: flex;
-  align-items: center;
-}
-
-.interaction-avatar {
-  width: 20px;
-  height: 20px;
-  background-color: #4285f4;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 600;
+  padding: 1px 6px;
   font-size: 10px;
-  margin-right: 6px;
-}
-
-.interaction-username {
-  font-size: 12px;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Estilos para el elemento siendo editado */
-.editor-element.being-edited {
-  box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.7); /* Borde naranja para destacar */
-}
-
-/* Badge de usuario que está editando */
-.user-interaction-badge {
-  position: absolute;
-  top: -30px;
-  left: 0;
-  display: flex;
-  align-items: center;
-  z-index: 1000;
-  pointer-events: none; /* Para no interferir con los clics */
-}
-
-.user-initial {
-  width: 24px;
-  height: 24px;
-  background-color: #FF9500;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  font-size: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.interaction-tooltip {
-  background-color: #333;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 3px;
-  font-size: 12px;
-  margin-left: 5px;
+  border-radius: 2px;
+  pointer-events: none;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 150;
+}
+
+.flutter-widget-tag {
+  position: absolute;
+  bottom: -18px;
+  right: 0;
+  background-color: #03A9F4;
+  color: white;
+  padding: 2px 6px;
+  font-size: 10px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 150;
+}
+
+.editor-element:hover .flutter-widget-tag {
+  opacity: 0.8;
+}
+
+/* ============ ESTILOS ESPECÍFICOS PARA WIDGETS DE FLUTTER ============ */
+
+/* Container */
+.element-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.element-container-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Text */
+.element-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.element-content {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Añadir animación para llamar la atención */
-@keyframes highlight {
-  0% { box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.5); }
-  50% { box-shadow: 0 0 0 4px rgba(255, 165, 0, 0.7); }
-  100% { box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.5); }
+/* Buttons */
+.element-button {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  cursor: default;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.being-edited {
-  animation: highlight 2s infinite;
+.element-elevatedButton {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background-color: #2196F3;
+  color: white;
+}
+
+.element-outlinedButton {
+  background-color: transparent;
+  border: 1px solid #2196F3;
+  color: #2196F3;
+}
+
+.element-textButton {
+  background-color: transparent;
+  color: #2196F3;
+}
+
+/* TextField */
+.element-textField {
+  display: flex;
+  align-items: center;
+}
+
+.element-input {
+  width: 100%;
+  height: 100%;
+  padding: 8px 12px;
+  border: 1px solid #BDBDBD;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #FFFFFF;
+  outline: none;
+  box-sizing: border-box;
+}
+
+/* AppBar */
+.element-appBar {
+  background-color: #2196F3;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-bar-title {
+  font-size: 18px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.app-bar-actions {
+  display: flex;
+  align-items: center;
+}
+
+/* FloatingActionButton */
+.element-floatingActionButton {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.element-fab {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2196F3;
+  color: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.element-fab i {
+  font-size: 24px;
+}
+
+/* Card */
+.element-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Divider */
+.element-divider {
+  background-color: #E0E0E0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Switch */
+.element-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.switch-track {
+  width: 80%;
+  height: 40%;
+  background-color: #BDBDBD;
+  border-radius: 100px;
+  position: relative;
+}
+
+.switch-thumb {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  top: 50%;
+  left: 4px;
+  transform: translateY(-50%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Slider */
+.element-slider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.slider-track {
+  width: 100%;
+  height: 4px;
+  background-color: #E0E0E0;
+  border-radius: 2px;
+  position: relative;
+  margin: 0 10px;
+}
+
+.slider-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #2196F3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* BottomNavigationBar */
+.element-bottomNavigationBar {
+  background-color: white;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.element-bottom-nav {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #757575;
+  font-size: 10px;
+  padding: 8px 12px;
+}
+
+.nav-item i {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.nav-item:first-child {
+  color: #2196F3;
+}
+
+/* TabBar */
+.element-tabBar {
+  background-color: #2196F3;
+  color: white;
+}
+
+.element-tab-bar {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+}
+
+.tab-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+  position: relative;
+}
+
+.tab-item.active {
+  opacity: 1;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background-color: white;
+}
+
+/* Drawer */
+.element-drawer {
+  background-color: white;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-header {
+  height: 160px;
+  background-color: #2196F3;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+}
+
+.drawer-items {
+  flex: 1;
+}
+
+.drawer-item {
+  padding: 16px;
+  border-bottom: 1px solid #F5F5F5;
+  color: #212121;
+  font-size: 16px;
+}
+
+/* Row */
+.element-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(33, 150, 243, 0.1);
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  color: #757575;
+  font-size: 14px;
+}
+
+/* Column */
+.element-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(33, 150, 243, 0.1);
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  color: #757575;
+  font-size: 14px;
+}
+
+/* Stack */
+.element-stack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(33, 150, 243, 0.1);
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  color: #757575;
+  font-size: 14px;
+}
+
+/* Image */
+.element-image-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: #F5F5F5;
+}
+
+.element-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.element-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #BDBDBD;
+}
+
+.element-image-placeholder i {
+  font-size: 32px;
+}
+
+/* ====== Modificadores para Flutter ====== */
+
+/* Estilos para ElevatedButton */
+.flutter-widget-ElevatedButton {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Estilos para OutlinedButton */
+.flutter-widget-OutlinedButton {
+  box-shadow: none;
+}
+
+/* Estilos para Container */
+.flutter-widget-Container {
+  /* Puedes personalizar containers específicos de Flutter */
+}
+
+/* Estilos para AppBar */
+.flutter-widget-AppBar {
+  z-index: 10;
+}
+
+/* Estilos para manejar estados de interacción */
+.user-badge {
+  position: absolute;
+  top: -25px;
+  left: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Estos estilos aseguran que el elemento seleccionado esté por encima */
+.editor-element.selected {
+  z-index: 100 !important;
+}
+
+/* Ajustes para modo vista previa */
+.preview-mode .editor-element:hover .flutter-widget-tag,
+.preview-mode .editor-element.selected {
+  box-shadow: none;
+}
+
+.preview-mode .element-controls,
+.preview-mode .element-resize-handle,
+.preview-mode .element-name,
+.preview-mode .flutter-widget-tag {
+  display: none !important;
 }

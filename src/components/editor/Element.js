@@ -3,8 +3,8 @@ import React from 'react';
 import { useEditor } from '../../context/EditorContext';
 import './Element.css';
 
-const Element = ({ element, isSelected, onDragStart, onResizeStart }) => {
-  const { selectElement, elementInteractions } = useEditor();
+const Element = ({ element, isSelected, onSelect, onDragStart, onResizeStart }) => {
+  const { elementInteractions } = useEditor();
   
   const { 
     _id, 
@@ -13,15 +13,13 @@ const Element = ({ element, isSelected, onDragStart, onResizeStart }) => {
     content, 
     position, 
     size, 
-    styles = {} 
+    styles = {},
+    flutterWidget 
   } = element;
 
   // Verificar si hay una interacción activa para este elemento
   const interaction = elementInteractions && elementInteractions[_id];
-// Debug
-if (interaction) {
-  console.log('🟣 Elemento con interacción:', _id, interaction);
-}
+
   // Convertir estilos a formato CSS
   const getStyles = () => {
     const elementStyles = {
@@ -50,14 +48,17 @@ if (interaction) {
     return cssStyles;
   };
 
-  // Renderizar contenido según el tipo de elemento
+  // Función renderElementContent (tu implementación existente)
   const renderElementContent = () => {
+    // Tu código actual...
     switch (type) {
       case 'text':
-        return <p className="element-content">{content || 'Texto'}</p>;
+        return <p className="element-content">{content || 'Text'}</p>;
         
-      case 'button':
-        return <button className="element-button">{content || 'Botón'}</button>;
+      case 'elevatedButton':
+      case 'outlinedButton':
+      case 'textButton':
+        return <button className={`element-button ${type}`}>{content || 'Button'}</button>;
         
       case 'image':
         return (
@@ -65,103 +66,99 @@ if (interaction) {
             {content ? (
               <img src={content} alt={name} className="element-image" />
             ) : (
-              <div className="element-image-placeholder">Imagen</div>
+              <div className="element-image-placeholder">
+                <i className="fa fa-image"></i>
+              </div>
             )}
           </div>
         );
+      
+      case 'textField':
+        return <input type="text" className="element-input" placeholder={content || 'Hint text'} readOnly />;
         
-      case 'input':
-        return <input type="text" className="element-input" placeholder={content || 'Input'} readOnly />;
-        
-      case 'textarea':
-        return <textarea className="element-textarea" placeholder={content || 'Área de texto'} readOnly></textarea>;
-        
-      case 'checkbox':
+      case 'appBar':
         return (
-          <label className="element-checkbox-label">
-            <input type="checkbox" className="element-checkbox" readOnly />
-            {content || 'Checkbox'}
-          </label>
-        );
-        
-      case 'radio':
-        return (
-          <label className="element-radio-label">
-            <input type="radio" className="element-radio" readOnly />
-            {content || 'Radio'}
-          </label>
-        );
-        
-      case 'select':
-        return (
-          <select className="element-select" disabled>
-            <option>{content || 'Select'}</option>
-          </select>
-        );
-        
-      case 'icon':
-        return <i className={`element-icon ${content || 'fa fa-star'}`}></i>;
-        
-      case 'link':
-        return <a className="element-link" href="#">{content || 'Enlace'}</a>;
-        
-      case 'navbar':
-        return <div className="element-navbar">{content || 'Barra de navegación'}</div>;
-        
-      case 'menu':
-        return <div className="element-menu">{content || 'Menú'}</div>;
-        
-      case 'menuItem':
-        return <div className="element-menu-item">{content || 'Elemento de menú'}</div>;
-        
-      case 'card':
-        return <div className="element-card">{content || 'Tarjeta'}</div>;
-        
-      case 'hero':
-        return <div className="element-hero">{content || 'Sección Hero'}</div>;
-        
-      case 'footer':
-        return <div className="element-footer">{content || 'Pie de página'}</div>;
-        
-      case 'carousel':
-        return <div className="element-carousel">{content || 'Carrusel'}</div>;
-        
-      case 'video':
-        return (
-          <div className="element-video-container">
-            <div className="element-video-placeholder">
-              <i className="fa fa-play-circle"></i>
-              <span>{content || 'Video'}</span>
+          <div className="element-app-bar">
+            <div className="app-bar-title">{content || 'AppBar'}</div>
+            <div className="app-bar-actions">
+              <i className="fa fa-ellipsis-v"></i>
             </div>
           </div>
         );
         
-      case 'avatar':
-        return <div className="element-avatar">{content?.charAt(0) || 'U'}</div>;
-        
-      case 'alert':
+      case 'floatingActionButton':
         return (
-          <div className="element-alert">
-            <i className="fa fa-exclamation-circle"></i>
-            <span>{content || 'Mensaje de alerta'}</span>
+          <div className="element-fab">
+            <i className="fa fa-plus"></i>
           </div>
         );
         
-      case 'badge':
-        return <div className="element-badge">{content || 'Nuevo'}</div>;
+      case 'divider':
+        return <div className="element-divider"></div>;
         
-      case 'tooltip':
-        return <div className="element-tooltip">{content || 'Información adicional'}</div>;
-        
-      case 'progress':
+      case 'card':
         return (
-          <div className="element-progress">
-            <div 
-              className="element-progress-bar" 
-              style={{ width: '50%', height: '100%', backgroundColor: '#4285f4' }}
-            ></div>
+          <div className="element-card">
+            <div className="card-content">{content || 'Card Content'}</div>
           </div>
         );
+        
+      case 'switch':
+        return (
+          <div className="element-switch">
+            <div className="switch-track">
+              <div className="switch-thumb"></div>
+            </div>
+          </div>
+        );
+        
+      case 'slider':
+        return (
+          <div className="element-slider">
+            <div className="slider-track">
+              <div className="slider-thumb"></div>
+            </div>
+          </div>
+        );
+        
+      case 'bottomNavigationBar':
+        return (
+          <div className="element-bottom-nav">
+            <div className="nav-item"><i className="fa fa-home"></i></div>
+            <div className="nav-item"><i className="fa fa-search"></i></div>
+            <div className="nav-item"><i className="fa fa-user"></i></div>
+          </div>
+        );
+        
+      case 'tabBar':
+        return (
+          <div className="element-tab-bar">
+            <div className="tab-item active">Tab 1</div>
+            <div className="tab-item">Tab 2</div>
+            <div className="tab-item">Tab 3</div>
+          </div>
+        );
+
+      case 'drawer':
+        return (
+          <div className="element-drawer">
+            <div className="drawer-header"></div>
+            <div className="drawer-items">
+              <div className="drawer-item">Item 1</div>
+              <div className="drawer-item">Item 2</div>
+              <div className="drawer-item">Item 3</div>
+            </div>
+          </div>
+        );
+        
+      case 'row':
+        return <div className="element-row">{content || 'Row'}</div>;
+        
+      case 'column':
+        return <div className="element-column">{content || 'Column'}</div>;
+        
+      case 'stack':
+        return <div className="element-stack">{content || 'Stack'}</div>;
         
       case 'container':
       default:
@@ -169,28 +166,33 @@ if (interaction) {
     }
   };
 
+  // Manejar clic del elemento - Modificado para usar función de selección
   const handleClick = (e) => {
     e.stopPropagation();
-    selectElement(_id);
+    if (onSelect) {
+      onSelect();
+    }
   };
 
-  // Manejador para iniciar el arrastre
+  // Manejador para iniciar el arrastre - Ahora usa el elemento explícitamente
   const handleDragStart = (e) => {
     e.stopPropagation();
-    e.preventDefault(); // Importante para evitar comportamientos predeterminados del navegador
-    onDragStart(e);
+    e.preventDefault();
+    if (onDragStart) {
+      onDragStart(e);
+    }
   };
 
   return (
     <div
-      className={`editor-element element-${type} ${isSelected ? 'selected' : ''}`}
+      className={`editor-element element-${type} flutter-widget-${flutterWidget || type} ${isSelected ? 'selected' : ''}`}
       style={getStyles()}
       onClick={handleClick}
       onMouseDown={handleDragStart}
     >
       {renderElementContent()}
 
-         {/* Indicador de interacción */}
+      {/* Indicador de interacción */}
       {interaction && (
         <div className="user-badge" style={{position: 'absolute', top: '-25px', left: '0', zIndex: 1000}}>
           <div style={{
@@ -207,34 +209,47 @@ if (interaction) {
         </div>
       )}
       
+      {/* Widget de Flutter Tag */}
+      <div className="flutter-widget-tag">
+        {flutterWidget || type}
+      </div>
+      
       {isSelected && (
         <div className="element-controls">
           <div 
             className="element-resize-handle top-left"
             onMouseDown={(e) => {
               e.stopPropagation();
-              onResizeStart(e, 'top-left');
+              if (onResizeStart) {
+                onResizeStart(e, 'top-left');
+              }
             }}
           ></div>
           <div 
             className="element-resize-handle top-right"
             onMouseDown={(e) => {
               e.stopPropagation();
-              onResizeStart(e, 'top-right');
+              if (onResizeStart) {
+                onResizeStart(e, 'top-right');
+              }
             }}
           ></div>
           <div 
             className="element-resize-handle bottom-left"
             onMouseDown={(e) => {
               e.stopPropagation();
-              onResizeStart(e, 'bottom-left');
+              if (onResizeStart) {
+                onResizeStart(e, 'bottom-left');
+              }
             }}
           ></div>
           <div 
             className="element-resize-handle bottom-right"
             onMouseDown={(e) => {
               e.stopPropagation();
-              onResizeStart(e, 'bottom-right');
+              if (onResizeStart) {
+                onResizeStart(e, 'bottom-right');
+              }
             }}
           ></div>
         </div>

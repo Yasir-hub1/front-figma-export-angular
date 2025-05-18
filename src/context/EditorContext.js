@@ -30,64 +30,61 @@ export const EditorProvider = ({ children }) => {
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportContent, setExportContent] = useState(null);
   const [exportLoading, setExportLoading] = useState(false);
-  // Añadir este estado para seguir qué usuario está manipulando qué elemento
-const [elementInteractions, setElementInteractions] = useState({});
-// console.log("USUARIO ACTUAL ",currentUser)
-// Inicializar socket.io
-useEffect(() => {
-  if (!id || !currentUser) return;
+  const [elementInteractions, setElementInteractions] = useState({});
 
-  const newSocket = io('http://45.55.145.232:80', {
-    withCredentials: true,
-    transports: ['websocket'],
-  });
+  // Inicializar socket.io
+  useEffect(() => {
+    if (!id || !currentUser) return;
 
-  newSocket.on('connect', () => {
-    console.log('Conectado a Socket.IO');
-    setConnected(true);
-    
-    // Autenticar
-    newSocket.emit('authenticate', {
-      userId: currentUser.id,
-      username: currentUser.username,
-      token: localStorage.getItem('token')
+    const newSocket = io('http://localhost:5000', {
+      withCredentials: true,
+      transports: ['websocket'],
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Conectado a Socket.IO');
+      setConnected(true);
+      
+      // Autenticar
+      newSocket.emit('authenticate', {
+        userId: currentUser.id,
+        username: currentUser.username,
+        token: localStorage.getItem('token')
+      });
+      
+      // Unirse al proyecto
+      newSocket.emit('join-project', {
+        projectId: id
+      });
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('Desconectado de Socket.IO');
+      setConnected(false);
+    });
+
+    newSocket.on('user-joined', (data) => {
+      console.log('Usuario se unió al proyecto:', data.user);
+      setUsers(data.activeUsers);
     });
     
-    // Unirse al proyecto
-    newSocket.emit('join-project', {
-      projectId: id
+    newSocket.on('user-left', (data) => {
+      console.log('Usuario abandonó el proyecto:', data.user);
+      setUsers(data.activeUsers);
     });
-  });
 
-  newSocket.on('disconnect', () => {
-    console.log('Desconectado de Socket.IO');
-    setConnected(false);
-  });
+    newSocket.on('design-updated', (data) => {
+      if (data.type === 'element-added') {
+        setElements(prev => [...prev, data.element]);
+      } else if (data.type === 'element-updated') {
+        setElements(prev => prev.map(el => 
+          el._id === data.element._id ? data.element : el
+        ));
+      } else if (data.type === 'element-deleted') {
+        setElements(prev => prev.filter(el => el._id !== data.elementId));
+      }
+    });
 
-  newSocket.on('user-joined', (data) => {
-    console.log('Usuario se unió al proyecto:', data.user);
-    setUsers(data.activeUsers);
-  });
-  
-  newSocket.on('user-left', (data) => {
-    console.log('Usuario abandonó el proyecto:', data.user);
-    setUsers(data.activeUsers);
-  });
-
-  newSocket.on('design-updated', (data) => {
-    if (data.type === 'element-added') {
-      setElements(prev => [...prev, data.element]);
-    } else if (data.type === 'element-updated') {
-      setElements(prev => prev.map(el => 
-        el._id === data.element._id ? data.element : el
-      ));
-    } else if (data.type === 'element-deleted') {
-      setElements(prev => prev.filter(el => el._id !== data.elementId));
-    }
-  });
-
-   
-    
     newSocket.on('element-interaction', (data) => {
       console.log('Interacción recibida:', data);
       setElementInteractions(prev => ({
@@ -109,14 +106,14 @@ useEffect(() => {
       });
     });
 
-  setSocket(newSocket);
+    setSocket(newSocket);
 
-  return () => {
-    if (newSocket) {
-      newSocket.disconnect();
-    }
-  };
-}, [id, currentUser]);
+    return () => {
+      if (newSocket) {
+        newSocket.disconnect();
+      }
+    };
+  }, [id, currentUser]);
 
   // Cargar proyecto y elementos
   useEffect(() => {
@@ -151,78 +148,75 @@ useEffect(() => {
   };
 
   // Función para seleccionar un elemento
-// En EditorContext.js
-
-// Función para seleccionar un elemento
-const selectElement = (elementId, updatedElement = null) => {
-  if (!elementId) {
-    setSelectedElement(null);
-    return;
-  }
-  
-  if (updatedElement) {
-    // Si se proporciona un elemento actualizado, actualizarlo en el estado
-    setElements(prev => prev.map(el => 
-      el._id === elementId ? updatedElement : el
-    ));
-    setSelectedElement(updatedElement);
-  } else {
-    // Buscar el elemento en el estado
-    const element = elements.find(el => el._id === elementId);
-    setSelectedElement(element || null);
-  }
-};
-
-  // Función para crear un nuevo elemento
-
-
-const createElement = async (elementData) => {
-  try {
-    setError(null);
-    
-    // Asegurarse de que todos los campos necesarios estén presentes
-    const defaultStyles = elementData.styles || {};
-    
-    // Asegurar que se tienen valores predeterminados para position y size
-    const adjustedData = {
-      ...elementData,
-      position: elementData.position || { 
-        x: (project?.canvas?.width / 2 - (elementData.size?.width || 100) / 2) || 100,
-        y: (project?.canvas?.height / 2 - (elementData.size?.height || 100) / 2) || 100
-      },
-      size: elementData.size || { width: 100, height: 100 },
-      styles: defaultStyles
-    };
-    
-    // Añadir una impresión para depuración
-    console.log('Creando elemento:', adjustedData);
-    
-    const data = await elementService.createElement({
-      ...adjustedData,
-      projectId: id
-    });
-    
-    const newElement = data.element;
-    
-    // Actualizar estado local
-    setElements(prev => [...prev, newElement]);
-    
-    // Notificar a otros usuarios
-    if (socket && connected) {
-      socket.emit('update-design', {
-        projectId: id,
-        type: 'element-added',
-        element: newElement
-      });
+  const selectElement = (elementId, updatedElement = null) => {
+    if (!elementId) {
+      setSelectedElement(null);
+      return;
     }
     
-    return newElement;
-  } catch (err) {
-    console.error('Error detallado al crear elemento:', err);
-    setError(err.message || 'Error al crear el elemento');
-    throw err;
-  }
-};
+    if (updatedElement) {
+      // Si se proporciona un elemento actualizado, actualizarlo en el estado
+      setElements(prev => prev.map(el => 
+        el._id === elementId ? updatedElement : el
+      ));
+      setSelectedElement(updatedElement);
+    } else {
+      // Buscar el elemento en el estado
+      const element = elements.find(el => el._id === elementId);
+      setSelectedElement(element || null);
+    }
+  };
+
+  // Función para crear un nuevo elemento
+  const createElement = async (elementData) => {
+    try {
+      setError(null);
+      
+      // Asegurarse de que todos los campos necesarios estén presentes
+      const defaultStyles = elementData.styles || {};
+      
+      // Asegurar que se tienen valores predeterminados para position y size
+      const adjustedData = {
+        ...elementData,
+        position: elementData.position || { 
+          x: (project?.canvas?.width / 2 - (elementData.size?.width || 100) / 2) || 100,
+          y: (project?.canvas?.height / 2 - (elementData.size?.height || 100) / 2) || 100
+        },
+        size: elementData.size || { width: 100, height: 100 },
+        styles: defaultStyles,
+        flutterWidget: elementData.flutterWidget || elementData.type
+      };
+      
+      // Añadir una impresión para depuración
+      console.log('Creando elemento:', adjustedData);
+      
+      const data = await elementService.createElement({
+        ...adjustedData,
+        projectId: id
+      });
+      
+      const newElement = data.element;
+      
+      // Actualizar estado local
+      setElements(prev => [...prev, newElement]);
+      
+      // Notificar a otros usuarios
+      if (socket && connected) {
+        socket.emit('update-design', {
+          projectId: id,
+          type: 'element-added',
+          element: newElement
+        });
+      }
+      
+      return newElement;
+    } catch (err) {
+      console.error('Error detallado al crear elemento:', err);
+      setError(err.message || 'Error al crear el elemento');
+      throw err;
+    }
+  };
+
   // Función para actualizar un elemento
   const updateElement = async (elementId, elementData) => {
     try {
@@ -262,16 +256,15 @@ const createElement = async (elementData) => {
     try {
       setError(null);
 
-       // Notificar que un elemento será eliminado
-    if (socket && connected && currentUser) {
-      socket.emit('element-deleted', {
-        projectId: id,
-        elementId,
-        userId: currentUser.id,
-        username: currentUser.username
-      });
-    }
-
+      // Notificar que un elemento será eliminado
+      if (socket && connected && currentUser) {
+        socket.emit('element-deleted', {
+          projectId: id,
+          elementId,
+          userId: currentUser.id,
+          username: currentUser.username
+        });
+      }
 
       await elementService.deleteElement(elementId);
       
@@ -337,47 +330,45 @@ const createElement = async (elementData) => {
     }
   };
 
-  // Función para exportar a Angular
-  const exportToAngular = async () => {
+  // Función para exportar a Flutter
+  const exportToFlutter = async () => {
     try {
       setExportLoading(true);
       setError(null);
-      const data = await elementService.exportToAngular(id);
-      setExportContent(data.component);
+      const data = await elementService.exportToFlutter(id);
+      setExportContent(data);
       setExportModalOpen(true);
     } catch (err) {
-      setError(err.message || 'Error al exportar a Angular');
+      setError(err.message || 'Error al exportar a Flutter');
     } finally {
       setExportLoading(false);
     }
   };
 
+  const notifyElementInteraction = (elementId, action) => {
+    if (!socket || !connected || !currentUser) return;
+    
+    console.log('Notificando interacción:', elementId, action);
+    
+    socket.emit('element-interaction', {
+      projectId: id,
+      elementId,
+      userId: currentUser.id,
+      username: currentUser.username,
+      action
+    });
+  };
 
-
-const endElementInteraction = (elementId) => {
-  if (!socket || !connected) return;
-  
-  console.log('Finalizando interacción:', elementId);
-  
-  socket.emit('element-interaction-end', {
-    projectId: id,
-    elementId
-  });
-};
-
-const notifyElementInteraction = (elementId, action) => {
-  if (!socket || !connected || !currentUser) return;
-  
-  console.log('Notificando interacción:', elementId, action);
-  
-  socket.emit('element-interaction', {
-    projectId: id,
-    elementId,
-    userId: currentUser.id,
-    username: currentUser.username,
-    action
-  });
-};
+  const endElementInteraction = (elementId) => {
+    if (!socket || !connected) return;
+    
+    console.log('Finalizando interacción:', elementId);
+    
+    socket.emit('element-interaction-end', {
+      projectId: id,
+      elementId
+    });
+  };
 
   // Valores del contexto
   const value = {
@@ -403,12 +394,12 @@ const notifyElementInteraction = (elementId, action) => {
     updateViewport,
     setGridVisible,
     setSnapToGrid,
-    exportToAngular,
+    exportToFlutter,
     setExportModalOpen,
     socket,
     elementInteractions,
-  notifyElementInteraction,
-  endElementInteraction
+    notifyElementInteraction,
+    endElementInteraction
   };
 
   return (
