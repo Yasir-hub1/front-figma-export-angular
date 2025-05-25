@@ -10,6 +10,7 @@ import ElementProperties from './ElementProperties';
 import ExportModal from './ExportModal';
 import './Editor.css';
 import ActivityNotification from './ActivityNotification';
+import AIAssistant from './AIAssistant';
 
 // Componente wrapper que proporciona el contexto
 const EditorWithContext = () => {
@@ -36,6 +37,7 @@ const EditorContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [propertiesOpen, setPropertiesOpen] = useState(true);
   const [viewMode, setViewMode] = useState('design'); // design, preview, code
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false); // Estado para el Asistente IA
 
   useEffect(() => {
     document.title = project ? `${project.name} - Flutter Designer` : 'Cargando...';
@@ -48,6 +50,11 @@ const EditorContent = () => {
   const toggleProperties = () => {
     setPropertiesOpen(!propertiesOpen);
   };
+
+    // Función para alternar el Asistente IA
+    const toggleAiAssistant = () => {
+      setAiAssistantOpen(!aiAssistantOpen);
+    };
 
   if (loading) {
     return (
@@ -91,6 +98,10 @@ const EditorContent = () => {
           setViewMode={setViewMode}
           toggleSidebar={toggleSidebar}
           toggleProperties={toggleProperties}
+          toggleAiAssistant={toggleAiAssistant} // Pasar la función
+          aiAssistantOpen={aiAssistantOpen} // Pasar el estado
+        
+        
         />
         
         <div className="editor-main">
@@ -120,6 +131,23 @@ const EditorContent = () => {
             content={exportContent} 
             loading={exportLoading} 
           />
+        )}
+
+            {/* Renderizar el Asistente IA */}
+            <AIAssistant 
+          isOpen={aiAssistantOpen} 
+          onClose={toggleAiAssistant} 
+        />
+        
+        {/* Botón flotante para abrir el Asistente IA cuando está cerrado */}
+        {!aiAssistantOpen && (
+          <button 
+            className="ai-assistant-toggle"
+            onClick={toggleAiAssistant}
+            title="Asistente IA de Diseño"
+          >
+            <i className="fa fa-magic"></i>
+          </button>
         )}
       </div>
     </div>

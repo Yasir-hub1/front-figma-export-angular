@@ -38,6 +38,7 @@ const ElementProperties = ({ onClose }) => {
   if (!selectedElement) return null;
 
   const handleContentChange = (e) => {
+    e.stopPropagation(); // Prevenir la propagación del evento
     setContent(e.target.value);
     // Notificar que estamos editando
     notifyElementInteraction(selectedElement._id, "editando");
@@ -185,6 +186,12 @@ const ElementProperties = ({ onClose }) => {
     
     reader.readAsDataURL(file);
   };
+
+  // Ejemplo para el cambio de nombre
+const handleNameChange = (e) => {
+  e.stopPropagation();
+  setName(e.target.value);
+};
 
   // Renderizar las propiedades específicas de Flutter según el tipo de widget
   const renderFlutterSpecificProperties = () => {

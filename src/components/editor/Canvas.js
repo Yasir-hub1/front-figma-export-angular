@@ -27,7 +27,8 @@ const Canvas = ({ viewMode = 'design' }) => {
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [startSize, setStartSize] = useState({ width: 0, height: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [activeElementId, setActiveElementId] = useState(null); // Nuevo estado para rastrear elemento activo
+  const [activeElementId, setActiveElementId] = useState(null); // Estado para elemento activo
+  const [mouseMoveTimeout, setMouseMoveTimeout] = useState(null); // Estado para el debounce
 
   // Obtener información del dispositivo
   const deviceType = project?.deviceType || 'custom';
@@ -184,100 +185,107 @@ const Canvas = ({ viewMode = 'design' }) => {
     });
   };
 
-  // Manejar movimiento del mouse para arrastre/redimensionamiento
+  // Manejar movimiento del mouse para arrastre/redimensionamiento con debounce
   const handleMouseMove = (e) => {
     if (!isDragging && !isResizing) return;
     if (!selectedElement) return;
     
     e.preventDefault();
     
+    // Implementación de debounce para mejorar rendimiento
+    if (mouseMoveTimeout) {
+      clearTimeout(mouseMoveTimeout);
+    }
+    
     // Calcular movimiento para el elemento actualmente seleccionado
     const canvasRect = canvasRef.current.getBoundingClientRect();
     
-    if (isDragging) {
-      // Calcular nueva posición
-      let newX = (e.clientX - canvasRect.left - dragOffset.x) / zoom;
-      let newY = (e.clientY - canvasRect.top - dragOffset.y) / zoom;
-      
-      // Ajustar a la cuadrícula si está activado
-      if (snapToGrid) {
-        const gridSize = 10;
-        newX = Math.round(newX / gridSize) * gridSize;
-        newY = Math.round(newY / gridSize) * gridSize;
+    const timeoutId = setTimeout(() => {
+      if (isDragging) {
+        // Calcular nueva posición
+        let newX = (e.clientX - canvasRect.left - dragOffset.x) / zoom;
+        let newY = (e.clientY - canvasRect.top - dragOffset.y) / zoom;
+        
+        // Ajustar a la cuadrícula si está activado
+        if (snapToGrid) {
+          const gridSize = 10;
+          newX = Math.round(newX / gridSize) * gridSize;
+          newY = Math.round(newY / gridSize) * gridSize;
+        }
+        
+        // Limitar al canvas
+        newX = Math.max(0, Math.min(project.canvas.width - selectedElement.size.width, newX));
+        newY = Math.max(0, Math.min(project.canvas.height - selectedElement.size.height, newY));
+        
+        // Actualizar la posición visual del elemento
+        const updatedElement = {
+          ...selectedElement,
+          position: { x: newX, y: newY }
+        };
+        
+        // Actualizar el estado en tiempo real
+        selectElement(selectedElement._id, updatedElement);
+      } 
+      else if (isResizing) {
+        // Calcular cambio desde inicio
+        const deltaX = (e.clientX - dragOffset.x) / zoom;
+        const deltaY = (e.clientY - dragOffset.y) / zoom;
+        
+        let newWidth = startSize.width;
+        let newHeight = startSize.height;
+        let newX = startPos.x;
+        let newY = startPos.y;
+        
+        // Ajustar según dirección
+        switch (resizeDirection) {
+          case 'top-left':
+            newWidth = Math.max(20, startSize.width - deltaX);
+            newHeight = Math.max(20, startSize.height - deltaY);
+            newX = startPos.x + (startSize.width - newWidth);
+            newY = startPos.y + (startSize.height - newHeight);
+            break;
+          case 'top-right':
+            newWidth = Math.max(20, startSize.width + deltaX);
+            newHeight = Math.max(20, startSize.height - deltaY);
+            newY = startPos.y + (startSize.height - newHeight);
+            break;
+          case 'bottom-left':
+            newWidth = Math.max(20, startSize.width - deltaX);
+            newHeight = Math.max(20, startSize.height + deltaY);
+            newX = startPos.x + (startSize.width - newWidth);
+            break;
+          case 'bottom-right':
+            newWidth = Math.max(20, startSize.width + deltaX);
+            newHeight = Math.max(20, startSize.height + deltaY);
+            break;
+          default:
+            break;
+        }
+        
+        // Ajustar a la cuadrícula
+        if (snapToGrid) {
+          const gridSize = 10;
+          newWidth = Math.round(newWidth / gridSize) * gridSize;
+          newHeight = Math.round(newHeight / gridSize) * gridSize;
+          newX = Math.round(newX / gridSize) * gridSize;
+          newY = Math.round(newY / gridSize) * gridSize;
+        }
+        
+        // Actualizar el estado visual
+        const updatedElement = {
+          ...selectedElement,
+          position: { x: newX, y: newY },
+          size: { width: newWidth, height: newHeight }
+        };
+        
+        selectElement(selectedElement._id, updatedElement);
       }
-      
-      // Limitar al canvas
-      newX = Math.max(0, Math.min(project.canvas.width - selectedElement.size.width, newX));
-      newY = Math.max(0, Math.min(project.canvas.height - selectedElement.size.height, newY));
-      
-      // Actualizar la posición visual del elemento
-      const updatedElement = {
-        ...selectedElement,
-        position: { x: newX, y: newY }
-      };
-      
-      // Actualizar el estado en tiempo real
-      selectElement(selectedElement._id, updatedElement);
-    } 
-    else if (isResizing) {
-      // El código de redimensionamiento permanece igual
-      // ...
-      // Calcular cambio desde inicio
-      const deltaX = (e.clientX - dragOffset.x) / zoom;
-      const deltaY = (e.clientY - dragOffset.y) / zoom;
-      
-      let newWidth = startSize.width;
-      let newHeight = startSize.height;
-      let newX = startPos.x;
-      let newY = startPos.y;
-      
-      // Ajustar según dirección
-      switch (resizeDirection) {
-        case 'top-left':
-          newWidth = Math.max(20, startSize.width - deltaX);
-          newHeight = Math.max(20, startSize.height - deltaY);
-          newX = startPos.x + (startSize.width - newWidth);
-          newY = startPos.y + (startSize.height - newHeight);
-          break;
-        case 'top-right':
-          newWidth = Math.max(20, startSize.width + deltaX);
-          newHeight = Math.max(20, startSize.height - deltaY);
-          newY = startPos.y + (startSize.height - newHeight);
-          break;
-        case 'bottom-left':
-          newWidth = Math.max(20, startSize.width - deltaX);
-          newHeight = Math.max(20, startSize.height + deltaY);
-          newX = startPos.x + (startSize.width - newWidth);
-          break;
-        case 'bottom-right':
-          newWidth = Math.max(20, startSize.width + deltaX);
-          newHeight = Math.max(20, startSize.height + deltaY);
-          break;
-        default:
-          break;
-      }
-      
-      // Ajustar a la cuadrícula
-      if (snapToGrid) {
-        const gridSize = 10;
-        newWidth = Math.round(newWidth / gridSize) * gridSize;
-        newHeight = Math.round(newHeight / gridSize) * gridSize;
-        newX = Math.round(newX / gridSize) * gridSize;
-        newY = Math.round(newY / gridSize) * gridSize;
-      }
-      
-      // Actualizar el estado visual
-      const updatedElement = {
-        ...selectedElement,
-        position: { x: newX, y: newY },
-        size: { width: newWidth, height: newHeight }
-      };
-      
-      selectElement(selectedElement._id, updatedElement);
-    }
+    }, 10); // Pequeño delay para mejorar rendimiento
+    
+    setMouseMoveTimeout(timeoutId);
   };
 
-  // Finalizar operación - Modificado para usar el elemento activo
+  // Finalizar operación - Corregido para confirmar cambios correctamente
   const handleMouseUp = async (e) => {
     if (!isDragging && !isResizing) return;
     
@@ -293,26 +301,58 @@ const Canvas = ({ viewMode = 'design' }) => {
     
     try {
       if (isDragging) {
+        // Primero guardar una copia de la posición final
+        const updatedPosition = { ...selectedElement.position };
+        
         // Guardar la nueva posición en la base de datos
         await updateElement(elementId, { 
-          position: selectedElement.position 
+          position: updatedPosition 
+        });
+        
+        // Confirmar la posición localmente después de guardar en DB
+        selectElement(elementId, {
+          ...selectedElement,
+          position: updatedPosition
         });
       } 
       else if (isResizing) {
+        // Guardar copias de las dimensiones y posición finales
+        const updatedPosition = { ...selectedElement.position };
+        const updatedSize = { ...selectedElement.size };
+        
         // Guardar nuevas dimensiones y posición
         await updateElement(elementId, {
-          position: selectedElement.position,
-          size: selectedElement.size
+          position: updatedPosition,
+          size: updatedSize
+        });
+        
+        // Confirmar los cambios localmente
+        selectElement(elementId, {
+          ...selectedElement,
+          position: updatedPosition,
+          size: updatedSize
         });
       }
+      
+      // Finalizar la interacción
       endElementInteraction(elementId);
     } catch (error) {
       console.error('Error al actualizar el elemento:', error);
+      // Revertir cambios en caso de error
+      if (selectedElement) {
+        selectElement(elementId, selectedElement);
+      }
     } finally {
       // Limpiar los estados de arrastre pero mantener el elemento activo
       setIsDragging(false);
       setIsResizing(false);
       setResizeDirection(null);
+      
+      // Limpiar cualquier timeout pendiente
+      if (mouseMoveTimeout) {
+        clearTimeout(mouseMoveTimeout);
+        setMouseMoveTimeout(null);
+      }
     }
   };
 
@@ -331,9 +371,14 @@ const Canvas = ({ viewMode = 'design' }) => {
     }
   };
 
-  // Manejar eventos de teclado para eliminar elementos
+  // Manejar eventos de teclado para eliminar elementos - Corregido para no afectar inputs
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // No ejecutar si el evento ocurre en un input o textarea
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+      
       // Usar el elemento activo o el seleccionado
       const elementId = activeElementId || (selectedElement ? selectedElement._id : null);
       if (elementId && (e.key === 'Delete' || e.key === 'Backspace')) {

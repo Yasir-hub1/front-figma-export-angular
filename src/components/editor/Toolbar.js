@@ -16,7 +16,9 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
     setGridVisible,
     setSnapToGrid,
     exportToFlutter,
-    exportLoading
+    exportLoading,
+    toggleAiAssistant, // Añadir esta prop
+    aiAssistantOpen // Añadir esta prop
   } = useEditor();
   
   const navigate = useNavigate();
@@ -84,6 +86,15 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
           title="Modo Diseño"
         >
           <i className="fas fa-paint-brush"></i> Diseño
+        </button>
+
+         {/* Añadir un nuevo botón para el Asistente IA */}
+        <button 
+          className={`toolbar-button ${aiAssistantOpen ? 'active' : ''}`}
+          onClick={toggleAiAssistant}
+          title="Asistente IA de Diseño"
+        >
+          <i className="fa fa-magic"></i>
         </button>
       
       </div>
