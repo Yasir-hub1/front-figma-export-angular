@@ -1,403 +1,482 @@
-// src/context/EditorContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// src/context/EditorContext.js - CORREGIDO
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import projectService from '../services/projectService';
-import elementService from '../services/elementService';
-import io from 'socket.io-client';
-import { useAuth } from './AuthContext';
+import  projectService  from '../services/projectService';
+import  screenService  from '../services/screenService';
+import  elementService  from '../services/elementService';
 
 const EditorContext = createContext();
 
-export const useEditor = () => {
-  return useContext(EditorContext);
+const initialState = {
+  project: null,
+  screens: [],
+  currentScreen: null,
+  elements: [], // Elementos de la screen actual
+  selectedElement: null,
+  loading: true,
+  error: null,
+  zoom: 1,
+  position: { x: 0, y: 0 },
+  gridVisible: false,
+  snapToGrid: false,
+  exportModalOpen: false,
+  exportContent: null,
+  exportLoading: false,
+  elementInteractions: {}
 };
 
-export const EditorProvider = ({ children }) => {
-  const { id } = useParams();
-  const { currentUser } = useAuth();
-  const [project, setProject] = useState(null);
-  const [elements, setElements] = useState([]);
-  const [selectedElement, setSelectedElement] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [socket, setSocket] = useState(null);
-  const [connected, setConnected] = useState(false);
-  const [users, setUsers] = useState([]);
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [gridVisible, setGridVisible] = useState(true);
-  const [snapToGrid, setSnapToGrid] = useState(true);
-  const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [exportContent, setExportContent] = useState(null);
-  const [exportLoading, setExportLoading] = useState(false);
-  const [elementInteractions, setElementInteractions] = useState({});
-
-  // Inicializar socket.io
-  useEffect(() => {
-    if (!id || !currentUser) return;
-
-    const newSocket = io('http://localhost:5000', {
-      withCredentials: true,
-      transports: ['websocket'],
-    });
-
-    newSocket.on('connect', () => {
-      console.log('Conectado a Socket.IO');
-      setConnected(true);
-      
-      // Autenticar
-      newSocket.emit('authenticate', {
-        userId: currentUser.id,
-        username: currentUser.username,
-        token: localStorage.getItem('token')
-      });
-      
-      // Unirse al proyecto
-      newSocket.emit('join-project', {
-        projectId: id
-      });
-    });
-
-    newSocket.on('disconnect', () => {
-      console.log('Desconectado de Socket.IO');
-      setConnected(false);
-    });
-
-    newSocket.on('user-joined', (data) => {
-      console.log('Usuario se unió al proyecto:', data.user);
-      setUsers(data.activeUsers);
-    });
+function editorReducer(state, action) {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
     
-    newSocket.on('user-left', (data) => {
-      console.log('Usuario abandonó el proyecto:', data.user);
-      setUsers(data.activeUsers);
-    });
-
-    newSocket.on('design-updated', (data) => {
-      if (data.type === 'element-added') {
-        setElements(prev => [...prev, data.element]);
-      } else if (data.type === 'element-updated') {
-        setElements(prev => prev.map(el => 
-          el._id === data.element._id ? data.element : el
-        ));
-      } else if (data.type === 'element-deleted') {
-        setElements(prev => prev.filter(el => el._id !== data.elementId));
-      }
-    });
-
-    newSocket.on('element-interaction', (data) => {
-      console.log('Interacción recibida:', data);
-      setElementInteractions(prev => ({
-        ...prev,
-        [data.elementId]: {
-          userId: data.userId,
-          username: data.username,
-          action: data.action
+    case 'SET_ERROR':
+      return { ...state, error: action.payload, loading: false };
+    
+    case 'SET_PROJECT':
+      return { ...state, project: action.payload };
+    
+    case 'SET_SCREENS':
+      return { ...state, screens: action.payload };
+    
+    case 'SET_CURRENT_SCREEN':
+      return { 
+        ...state, 
+        currentScreen: action.payload,
+        elements: [], // Limpiar elementos cuando cambia la screen
+        selectedElement: null // Deseleccionar elemento
+      };
+    
+    case 'ADD_SCREEN':
+      return { ...state, screens: [...state.screens, action.payload] };
+    
+    case 'UPDATE_SCREEN':
+      return {
+        ...state,
+        screens: state.screens.map(screen =>
+          screen._id === action.payload._id ? action.payload : screen
+        ),
+        currentScreen: state.currentScreen?._id === action.payload._id ? action.payload : state.currentScreen
+      };
+    
+    case 'DELETE_SCREEN':
+      const filteredScreens = state.screens.filter(screen => screen._id !== action.payload);
+      return {
+        ...state,
+        screens: filteredScreens,
+        currentScreen: state.currentScreen?._id === action.payload 
+          ? (filteredScreens.length > 0 ? filteredScreens[0] : null) 
+          : state.currentScreen,
+        elements: state.currentScreen?._id === action.payload ? [] : state.elements
+      };
+    
+    case 'SET_ELEMENTS':
+      return { ...state, elements: action.payload || [] };
+    
+    case 'ADD_ELEMENT':
+      return { ...state, elements: [...state.elements, action.payload] };
+    
+    case 'UPDATE_ELEMENT':
+      return {
+        ...state,
+        elements: state.elements.map(element =>
+          element._id === action.payload._id ? action.payload : element
+        ),
+        selectedElement: state.selectedElement?._id === action.payload._id ? action.payload : state.selectedElement
+      };
+    
+    case 'DELETE_ELEMENT':
+      return {
+        ...state,
+        elements: state.elements.filter(element => element._id !== action.payload),
+        selectedElement: state.selectedElement?._id === action.payload ? null : state.selectedElement
+      };
+    
+    // CORREGIDO: Solo actualizar selectedElement, no hacer toggle
+    case 'SELECT_ELEMENT':
+      return { ...state, selectedElement: action.payload };
+    
+    case 'SET_VIEWPORT':
+      return { ...state, zoom: action.payload.zoom, position: action.payload.position };
+    
+    case 'SET_GRID_VISIBLE':
+      return { ...state, gridVisible: action.payload };
+    
+    case 'SET_SNAP_TO_GRID':
+      return { ...state, snapToGrid: action.payload };
+    
+    case 'SET_EXPORT_MODAL':
+      return { ...state, exportModalOpen: action.payload.open, exportContent: action.payload.content };
+    
+    case 'SET_EXPORT_LOADING':
+      return { ...state, exportLoading: action.payload };
+    
+    case 'SET_ELEMENT_INTERACTION':
+      return {
+        ...state,
+        elementInteractions: {
+          ...state.elementInteractions,
+          [action.payload.elementId]: action.payload.interaction
         }
-      }));
-    });
-
-    newSocket.on('element-interaction-end', (data) => {
-      console.log('Fin de interacción:', data);
-      setElementInteractions(prev => {
-        const newState = { ...prev };
-        delete newState[data.elementId];
-        return newState;
-      });
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      if (newSocket) {
-        newSocket.disconnect();
-      }
-    };
-  }, [id, currentUser]);
-
-  // Cargar proyecto y elementos
-  useEffect(() => {
-    const fetchProjectData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Obtener datos del proyecto
-        const projectData = await projectService.getProject(id);
-        setProject(projectData);
-        
-        // Obtener elementos
-        const elementsData = await elementService.getElements(id);
-        setElements(elementsData);
-      } catch (err) {
-        setError(err.message || 'Error al cargar el proyecto');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchProjectData();
-    }
-  }, [id]);
-
-  // Función para actualizar posición y zoom
-  const updateViewport = (newZoom, newPosition) => {
-    setZoom(newZoom);
-    setPosition(newPosition);
-  };
-
-  // Función para seleccionar un elemento
-  const selectElement = (elementId, updatedElement = null) => {
-    if (!elementId) {
-      setSelectedElement(null);
-      return;
-    }
+      };
     
-    if (updatedElement) {
-      // Si se proporciona un elemento actualizado, actualizarlo en el estado
-      setElements(prev => prev.map(el => 
-        el._id === elementId ? updatedElement : el
-      ));
-      setSelectedElement(updatedElement);
+    case 'REMOVE_ELEMENT_INTERACTION':
+      const { [action.payload]: removed, ...remainingInteractions } = state.elementInteractions;
+      return { ...state, elementInteractions: remainingInteractions };
+    
+    default:
+      return state;
+  }
+}
+
+export function EditorProvider({ children, projectId }) {
+  const [state, dispatch] = useReducer(editorReducer, initialState);
+  console.log('🏗️ EditorProvider iniciado con projectId:', projectId);
+  console.log('- Tipo de projectId:', typeof projectId);
+  console.log('- Es válido:', /^[a-f\d]{24}$/i.test(projectId));
+
+  // Cargar proyecto inicial
+  useEffect(() => {
+    if (projectId) {
+      console.log('🚀 Iniciando carga del proyecto:', projectId);
+      loadProject();
     } else {
-      // Buscar el elemento en el estado
-      const element = elements.find(el => el._id === elementId);
-      setSelectedElement(element || null);
+      console.error('❌ No se proporcionó projectId al EditorProvider');
+      console.error('❌ projectId recibido:', projectId);
+      dispatch({ type: 'SET_ERROR', payload: 'ID de proyecto no válido' });
+    }
+  }, [projectId]);
+
+  // Cargar elementos cuando cambia la screen actual
+  useEffect(() => {
+    if (state.currentScreen?._id) {
+      fetchElements(state.currentScreen._id);
+    }
+  }, [state.currentScreen?._id, projectId]);
+
+  const loadProject = async () => {
+    try {
+      console.log('🔄 Iniciando carga del proyecto:', projectId);
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+      
+      if (!projectId) {
+        throw new Error('ID de proyecto no proporcionado');
+      }
+      
+      console.log('📁 Obteniendo datos del proyecto...');
+      const project = await projectService.getProject(projectId);
+      console.log('✅ Proyecto obtenido:', project.name);
+      dispatch({ type: 'SET_PROJECT', payload: project });
+      
+      console.log('📱 Obteniendo screens del proyecto...');
+      const screens = await screenService.getScreens(projectId);
+      console.log(`✅ ${screens.length} screens obtenidas`);
+      
+      // Si no hay screens, crear una por defecto
+      if (screens.length === 0) {
+        console.log('🆕 Creando screen por defecto...');
+        try {
+          const defaultScreen = await screenService.createScreen(projectId, {
+            name: 'Pantalla Principal',
+            canvas: {
+              width: project.canvas?.width || 360,
+              height: project.canvas?.height || 640,
+              background: '#FFFFFF'
+            }
+          });
+          console.log('✅ Screen por defecto creada:', defaultScreen.name);
+          
+          const updatedScreens = [defaultScreen];
+          dispatch({ type: 'SET_SCREENS', payload: updatedScreens });
+          dispatch({ type: 'SET_CURRENT_SCREEN', payload: defaultScreen });
+        } catch (screenError) {
+          console.error('❌ Error al crear screen por defecto:', screenError);
+          dispatch({ type: 'SET_SCREENS', payload: [] });
+          dispatch({ type: 'SET_ERROR', payload: 'No se pudo crear la pantalla inicial' });
+        }
+      } else {
+        dispatch({ type: 'SET_SCREENS', payload: screens });
+        // Seleccionar la primera screen por defecto
+        console.log('🎯 Seleccionando primera screen:', screens[0].name);
+        dispatch({ type: 'SET_CURRENT_SCREEN', payload: screens[0] });
+      }
+      
+      console.log('🎉 Proyecto cargado exitosamente');
+      
+    } catch (error) {
+      console.error('❌ Error al cargar proyecto:', error);
+      dispatch({ type: 'SET_ERROR', payload: error.message || 'Error al cargar el proyecto' });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }
+
+  // Función para cargar elementos de una screen específica
+  const fetchElements = async (screenId) => {
+    try {
+      console.log('📦 Cargando elementos para screen:', screenId);
+      
+      if (!screenId) {
+        console.log('⚠️ No hay screenId, limpiando elementos');
+        dispatch({ type: 'SET_ELEMENTS', payload: [] });
+        return;
+      }
+      
+      const elements = await elementService.getElements(screenId);
+      console.log(`✅ ${elements.length} elementos cargados para screen ${screenId}`);
+      dispatch({ type: 'SET_ELEMENTS', payload: elements });
+    } catch (error) {
+      console.error('❌ Error al cargar elementos:', error);
+      // Si es 404, solo establecer elementos vacíos sin mostrar error
+      if (error.response?.status === 404 || error.message.includes('404') || error.message.includes('Not Found')) {
+        console.log('📝 Screen sin elementos, estableciendo array vacío');
+        dispatch({ type: 'SET_ELEMENTS', payload: [] });
+      } else {
+        console.error('💥 Error real al cargar elementos:', error.message);
+        dispatch({ type: 'SET_ELEMENTS', payload: [] });
+      }
     }
   };
 
-  // Función para crear un nuevo elemento
-  const createElement = async (elementData) => {
+  const getDataScreeForProject = async (projectId, screedId) => {
+    console.log('📱 Obteniendo screens del proyecto...');
+    const screens = await screenService.getScreens(projectId);
+    console.log(`✅ ${screens.length} screens obtenidas`);
+  
+    dispatch({ type: 'SET_SCREENS', payload: screens });
+  
+    // Buscar la screen que coincida con el screedId
+    const selectedScreen = screens.find(screen => screen._id === screedId);
+  
+    if (selectedScreen) {
+      console.log('🎯 Seleccionando screen:', selectedScreen.name);
+      fetchElements(screedId)
+      dispatch({ type: 'SET_CURRENT_SCREEN', payload: selectedScreen });
+    } else {
+      console.warn(`⚠️ Screen con ID ${screedId} no encontrada. Seleccionando la primera por defecto.`);
+      dispatch({ type: 'SET_CURRENT_SCREEN', payload: screens[0] });
+    }
+  };
+
+  // Funciones de Screen
+  const createScreen = async (name) => {
     try {
-      setError(null);
-      
-      // Asegurarse de que todos los campos necesarios estén presentes
-      const defaultStyles = elementData.styles || {};
-      
-      // Asegurar que se tienen valores predeterminados para position y size
-      const adjustedData = {
-        ...elementData,
-        position: elementData.position || { 
-          x: (project?.canvas?.width / 2 - (elementData.size?.width || 100) / 2) || 100,
-          y: (project?.canvas?.height / 2 - (elementData.size?.height || 100) / 2) || 100
-        },
-        size: elementData.size || { width: 100, height: 100 },
-        styles: defaultStyles,
-        flutterWidget: elementData.flutterWidget || elementData.type
+      const screenData = {
+        name,
+        canvas: {
+          width: state.project?.canvas?.width || 360,
+          height: state.project?.canvas?.height || 640,
+          background: '#FFFFFF'
+        }
       };
       
-      // Añadir una impresión para depuración
-      console.log('Creando elemento:', adjustedData);
+      const newScreen = await screenService.createScreen(projectId, screenData);
+      dispatch({ type: 'ADD_SCREEN', payload: newScreen });
       
-      const data = await elementService.createElement({
-        ...adjustedData,
-        projectId: id
-      });
-      
-      const newElement = data.element;
-      
-      // Actualizar estado local
-      setElements(prev => [...prev, newElement]);
-      
-      // Notificar a otros usuarios
-      if (socket && connected) {
-        socket.emit('update-design', {
-          projectId: id,
-          type: 'element-added',
-          element: newElement
-        });
-      }
-      
-      return newElement;
-    } catch (err) {
-      console.error('Error detallado al crear elemento:', err);
-      setError(err.message || 'Error al crear el elemento');
-      throw err;
+      // Cambiar a la nueva screen
+      setCurrentScreen(newScreen);
+      console.log('🎉 Nueva screen creada:', newScreen);
+      getDataScreeForProject(projectId, newScreen?.screen?._id || newScreen?._id);
+      return newScreen;
+    } catch (error) {
+      console.error('Error al crear screen:', error);
+      throw error;
     }
   };
 
-  // Función para actualizar un elemento
+  const updateScreen = async (screenId, screenData) => {
+    try {
+      console.log('🔄 Actualizando screen:', projectId, screenId, screenData);
+      const updatedScreen = await screenService.updateScreen(screenId, screenData);
+      dispatch({ type: 'UPDATE_SCREEN', payload: updatedScreen });
+      getDataScreeForProject(projectId, screenId)
+      return updatedScreen;
+    } catch (error) {
+      console.error('Error al actualizar screen:', error);
+      throw error;
+    }
+  };
+
+  const deleteScreen = async (screenId) => {
+    try {
+      await screenService.deleteScreen(projectId, screenId);
+      dispatch({ type: 'DELETE_SCREEN', payload: screenId });
+    } catch (error) {
+      console.error('Error al eliminar screen:', error);
+      throw error;
+    }
+  };
+
+  const setCurrentScreen = (screen) => {
+    dispatch({ type: 'SET_CURRENT_SCREEN', payload: screen });
+  };
+
+  // Funciones de Elementos
+  const createElement = async (elementData) => {
+    try {
+      if (!state.currentScreen?._id) {
+        throw new Error('No hay screen seleccionada');
+      }
+      
+      const newElement = await elementService.createElement(state.currentScreen._id, elementData);
+      dispatch({ type: 'ADD_ELEMENT', payload: newElement });
+      return newElement;
+    } catch (error) {
+      console.error('Error al crear elemento:', error);
+      throw error;
+    }
+  };
+
   const updateElement = async (elementId, elementData) => {
     try {
-      setError(null);
-      const data = await elementService.updateElement(elementId, elementData);
-      
-      const updatedElement = data.element;
-      
-      // Actualizar estado local
-      setElements(prev => prev.map(el => 
-        el._id === elementId ? updatedElement : el
-      ));
-      
-      // Actualizar el elemento seleccionado si es el que se modificó
-      if (selectedElement && selectedElement._id === elementId) {
-        setSelectedElement(updatedElement);
+      if (!state.currentScreen?._id) {
+        throw new Error('No hay screen seleccionada');
       }
       
-      // Notificar a otros usuarios
-      if (socket && connected) {
-        socket.emit('update-design', {
-          projectId: id,
-          type: 'element-updated',
-          element: updatedElement
-        });
-      }
-      
+      const updatedElement = await elementService.updateElement(elementId, elementData);
+      dispatch({ type: 'UPDATE_ELEMENT', payload: updatedElement });
       return updatedElement;
-    } catch (err) {
-      setError(err.message || 'Error al actualizar el elemento');
-      throw err;
+    } catch (error) {
+      console.error('Error al actualizar elemento:', error);
+      throw error;
     }
   };
 
-  // Función para eliminar un elemento
   const deleteElement = async (elementId) => {
     try {
-      setError(null);
-
-      // Notificar que un elemento será eliminado
-      if (socket && connected && currentUser) {
-        socket.emit('element-deleted', {
-          projectId: id,
-          elementId,
-          userId: currentUser.id,
-          username: currentUser.username
-        });
+      if (!state.currentScreen?._id) {
+        throw new Error('No hay screen seleccionada');
       }
-
+      
       await elementService.deleteElement(elementId);
-      
-      // Actualizar estado local
-      setElements(prev => prev.filter(el => el._id !== elementId));
-      
-      // Deseleccionar si era el elemento seleccionado
-      if (selectedElement && selectedElement._id === elementId) {
-        setSelectedElement(null);
-      }
-      
-      // Notificar a otros usuarios
-      if (socket && connected) {
-        socket.emit('update-design', {
-          projectId: id,
-          type: 'element-deleted',
-          elementId
-        });
-      }
-    } catch (err) {
-      setError(err.message || 'Error al eliminar el elemento');
-      throw err;
+      dispatch({ type: 'DELETE_ELEMENT', payload: elementId });
+    } catch (error) {
+      console.error('Error al eliminar elemento:', error);
+      throw error;
     }
   };
-
-  // Función para duplicar un elemento
+  
   const duplicateElement = async (elementId) => {
     try {
-      setError(null);
-      
-      // Log para depuración
-      console.log("Iniciando duplicación de elemento:", elementId);
-      
-      const data = await elementService.duplicateElement(elementId);
-      
-      if (!data || !data.element) {
-        throw new Error("La respuesta del servidor no contiene el elemento duplicado");
+      if (!state.currentScreen?._id) {
+        throw new Error('No hay screen seleccionada');
       }
       
-      const newElement = data.element;
-      console.log("Elemento duplicado recibido:", newElement);
-      
-      // Actualizar estado local
-      setElements(prev => [...prev, newElement]);
-      
-      // Seleccionar el nuevo elemento
-      setSelectedElement(newElement);
-      
-      // Notificar a otros usuarios
-      if (socket && connected) {
-        socket.emit('update-design', {
-          projectId: id,
-          type: 'element-added',
-          element: newElement
-        });
-      }
-      
-      return newElement;
-    } catch (err) {
-      console.error("Error completo al duplicar elemento:", err);
-      setError(err.message || 'Error al duplicar el elemento');
-      throw err;
+      const duplicatedElement = await elementService.duplicateElement(elementId);
+      dispatch({ type: 'ADD_ELEMENT', payload: duplicatedElement });
+      return duplicatedElement;
+    } catch (error) {
+      console.error('Error al duplicar elemento:', error);
+      throw error;
+    }
+  }
+
+  // CORREGIDO: selectElement - Sin toggle, solo establecer
+  const selectElement = (elementId, element = null) => {
+    if (elementId && element) {
+      // Si se proporciona el elemento completo, usarlo
+      dispatch({ type: 'SELECT_ELEMENT', payload: element });
+    } else if (elementId) {
+      // Si solo se proporciona el ID, buscar el elemento
+      const foundElement = state.elements.find(el => el._id === elementId);
+      dispatch({ type: 'SELECT_ELEMENT', payload: foundElement || null });
+    } else {
+      // Si no se proporciona nada, deseleccionar
+      dispatch({ type: 'SELECT_ELEMENT', payload: null });
     }
   };
 
-  // Función para exportar a Flutter
+  // Funciones de viewport
+  const updateViewport = (zoom, position) => {
+    dispatch({ type: 'SET_VIEWPORT', payload: { zoom, position } });
+  };
+
+  const setGridVisible = (visible) => {
+    dispatch({ type: 'SET_GRID_VISIBLE', payload: visible });
+  };
+
+  const setSnapToGrid = (snap) => {
+    dispatch({ type: 'SET_SNAP_TO_GRID', payload: snap });
+  };
+
+  // Funciones de exportación
   const exportToFlutter = async () => {
     try {
-      setExportLoading(true);
-      setError(null);
-      const data = await elementService.exportToFlutter(id);
-      setExportContent(data);
-      setExportModalOpen(true);
-    } catch (err) {
-      setError(err.message || 'Error al exportar a Flutter');
+      if (!state.currentScreen?._id) {
+        throw new Error('No hay screen seleccionada para exportar');
+      }
+      
+      dispatch({ type: 'SET_EXPORT_LOADING', payload: true });
+      
+      const exportData = await elementService.exportToFlutter(state.currentScreen._id);
+      
+      dispatch({ 
+        type: 'SET_EXPORT_MODAL', 
+        payload: { open: true, content: exportData } 
+      });
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      alert('Error al exportar: ' + (error.message || 'Error desconocido'));
+      throw error;
     } finally {
-      setExportLoading(false);
+      dispatch({ type: 'SET_EXPORT_LOADING', payload: false });
     }
   };
 
+  const setExportModalOpen = (open) => {
+    dispatch({ 
+      type: 'SET_EXPORT_MODAL', 
+      payload: { open, content: state.exportContent } 
+    });
+  };
+
+  // Funciones de interacción
   const notifyElementInteraction = (elementId, action) => {
-    if (!socket || !connected || !currentUser) return;
-    
-    console.log('Notificando interacción:', elementId, action);
-    
-    socket.emit('element-interaction', {
-      projectId: id,
-      elementId,
-      userId: currentUser.id,
-      username: currentUser.username,
-      action
+    dispatch({
+      type: 'SET_ELEMENT_INTERACTION',
+      payload: {
+        elementId,
+        interaction: {
+          username: 'Usuario',
+          action
+        }
+      }
     });
   };
 
   const endElementInteraction = (elementId) => {
-    if (!socket || !connected) return;
-    
-    console.log('Finalizando interacción:', elementId);
-    
-    socket.emit('element-interaction-end', {
-      projectId: id,
-      elementId
-    });
+    dispatch({ type: 'REMOVE_ELEMENT_INTERACTION', payload: elementId });
   };
 
-  // Valores del contexto
   const value = {
-    project,
-    elements,
-    selectedElement,
-    loading,
-    error,
-    connected,
-    users,
-    zoom,
-    position,
-    gridVisible,
-    snapToGrid,
-    exportModalOpen,
-    exportContent,
-    exportLoading,
-    selectElement,
+    // Estado
+    ...state,
+    
+    // Funciones de Screen
+    createScreen,
+    updateScreen,
+    deleteScreen,
+    setCurrentScreen,
+    fetchElements,
+    
+    // Funciones de Elementos
     createElement,
     updateElement,
     deleteElement,
     duplicateElement,
+    selectElement,
+    
+    // Funciones de viewport
     updateViewport,
     setGridVisible,
     setSnapToGrid,
+    
+    // Funciones de exportación
     exportToFlutter,
     setExportModalOpen,
-    socket,
-    elementInteractions,
+    
+    // Funciones de interacción
     notifyElementInteraction,
     endElementInteraction
   };
@@ -407,4 +486,14 @@ export const EditorProvider = ({ children }) => {
       {children}
     </EditorContext.Provider>
   );
+}
+
+export const useEditor = () => {
+  const context = useContext(EditorContext);
+  if (!context) {
+    throw new Error('useEditor debe ser usado dentro de EditorProvider');
+  }
+  return context;
 };
+
+export { EditorContext };

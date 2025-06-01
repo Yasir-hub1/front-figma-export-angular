@@ -1,0 +1,294 @@
+/* src/components/editor/ScreenTabs.css */
+
+.screen-tabs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e1e5e9;
+    padding: 8px 16px;
+    min-height: 60px;
+    overflow-x: auto;
+  }
+  
+  .tabs-container {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  
+  .tabs-container::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .tabs-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
+  
+  .tabs-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+  }
+  
+  .screen-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 140px;
+    max-width: 180px;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    user-select: none;
+  }
+  
+  .screen-tab:hover {
+    border-color: #adb5bd;
+    background: #f1f3f4;
+  }
+  
+  .screen-tab.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+  
+  .screen-tab.creating {
+    background: #e3f2fd;
+    border-color: #2196f3;
+    border-style: dashed;
+  }
+  
+  .screen-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+    text-align: center;
+    word-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  .screen-name-input {
+    background: white;
+    border: 1px solid #2196f3;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    width: 120px;
+  }
+  
+  .screen-actions {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    gap: 4px;
+  }
+  
+  .screen-tab:hover .screen-actions {
+    display: flex;
+  }
+  
+  .screen-tab.active .screen-actions {
+    display: flex;
+  }
+  
+  .edit-button,
+  .delete-button {
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.2s ease;
+  }
+  
+  .edit-button {
+    background: #28a745;
+    color: white;
+  }
+  
+  .edit-button:hover {
+    background: #218838;
+    transform: scale(1.1);
+  }
+  
+  .delete-button {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .delete-button:hover {
+    background: #c82333;
+    transform: scale(1.1);
+  }
+  
+  .screen-preview {
+    font-size: 11px;
+    opacity: 0.8;
+    text-align: center;
+  }
+  
+  .screen-tab.active .screen-preview {
+    opacity: 0.9;
+  }
+  
+  .elements-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  
+  .screen-tab.active .elements-count {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .add-screen-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 4px;
+  }
+  
+  .add-screen-button:hover {
+    background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  }
+  
+  .add-screen-button i {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+  
+  .screen-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    margin-left: 16px;
+    font-size: 12px;
+    color: #666;
+    min-width: 80px;
+  }
+  
+  .screen-count {
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  .device-type {
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #6c757d;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .screen-tabs {
+      padding: 6px 12px;
+      min-height: 50px;
+    }
+    
+    .screen-tab {
+      min-width: 100px;
+      max-width: 120px;
+      padding: 6px 8px;
+    }
+    
+    .screen-name {
+      font-size: 12px;
+    }
+    
+    .add-screen-button {
+      min-width: 90px;
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+    
+    .screen-info {
+      display: none;
+    }
+  }
+  
+  /* Animaciones */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .screen-tab {
+    animation: slideIn 0.3s ease;
+  }
+  
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    .screen-tabs {
+      background: #1a1a1a;
+      border-color: #333;
+    }
+    
+    .screen-tab {
+      background: #2a2a2a;
+      color: #e0e0e0;
+      border-color: #444;
+    }
+    
+    .screen-tab:hover {
+      background: #333;
+      border-color: #555;
+    }
+    
+    .screen-name-input {
+      background: #2a2a2a;
+      color: #e0e0e0;
+      border-color: #2196f3;
+    }
+    
+    .device-type {
+      background: #333;
+      color: #ccc;
+    }
+    
+    .screen-count {
+      color: #ccc;
+    }
+  }

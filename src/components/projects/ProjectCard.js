@@ -9,6 +9,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleEdit = () => {
+    console.log("handleEdit ",project)
     onEdit(project._id);
   };
 

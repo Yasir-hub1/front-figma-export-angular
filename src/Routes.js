@@ -1,4 +1,4 @@
-// src/Routes.js
+// src/Routes.js - CORREGIDO
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
@@ -12,19 +12,39 @@ import NotFound from './components/common/NotFound';
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   
+  console.log('🔒 PrivateRoute: Verificando autenticación');
+  console.log('- isAuthenticated():', isAuthenticated());
+  console.log('- loading:', loading);
+  
   if (loading) {
-    return <div>Cargando...</div>;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        Cargando...
+      </div>
+    );
   }
   
-  return isAuthenticated() ? children : <Navigate to="/login" />;
+  const authenticated = isAuthenticated();
+  console.log('✅ PrivateRoute: Usuario autenticado:', authenticated);
+  
+  return authenticated ? children : <Navigate to="/login" replace />;
 };
 
 const AppRoutes = () => {
+  console.log('🛣️ AppRoutes: Configurando rutas');
+  
   return (
     <Routes>
+      {/* Rutas públicas */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       
+      {/* Rutas protegidas */}
       <Route 
         path="/dashboard" 
         element={
@@ -34,8 +54,9 @@ const AppRoutes = () => {
         } 
       />
       
+      {/* CORRECCIÓN: Cambiar :id por :projectId */}
       <Route 
-        path="/editor/:id" 
+        path="/editor/:projectId" 
         element={
           <PrivateRoute>
             <Editor />
@@ -43,7 +64,8 @@ const AppRoutes = () => {
         } 
       />
       
-      <Route path="/" element={<Navigate to="/dashboard" />} />
+      {/* Rutas de redirección y 404 */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

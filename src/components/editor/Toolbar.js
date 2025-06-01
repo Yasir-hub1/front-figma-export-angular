@@ -1,11 +1,11 @@
-// src/components/editor/Toolbar.js (modificar para soportar los modos)
+// src/components/editor/Toolbar.js - CORREGIDO
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditor } from '../../context/EditorContext';
 import './Toolbar.css';
 import ShareProjectModal from './ShareProjectModal';
 
-const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => {
+const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties, toggleAiAssistant, aiAssistantOpen }) => {
   const { 
     project,
     zoom,
@@ -16,9 +16,7 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
     setGridVisible,
     setSnapToGrid,
     exportToFlutter,
-    exportLoading,
-    toggleAiAssistant, // Añadir esta prop
-    aiAssistantOpen // Añadir esta prop
+    exportLoading
   } = useEditor();
   
   const navigate = useNavigate();
@@ -32,7 +30,9 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
   const handleZoomChange = (newZoomPercent) => {
     const newZoom = newZoomPercent / 100;
     setCurrentZoom(newZoomPercent);
-    updateViewport(newZoom, position);
+    if (updateViewport) {
+      updateViewport(newZoom, position);
+    }
   };
   
   // Zoom con la rueda del mouse
@@ -49,7 +49,9 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
   // Restablecer la vista
   const handleResetView = () => {
     setCurrentZoom(100);
-    updateViewport(1, { x: 0, y: 0 });
+    if (updateViewport) {
+      updateViewport(1, { x: 0, y: 0 });
+    }
   };
 
   // Volver al dashboard
@@ -57,9 +59,19 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
     navigate('/dashboard');
   };
 
-  // Exportar código
+  // Exportar código - CORRECCIÓN: Manejo de errores
   const handleExport = async () => {
-    await exportToFlutter();
+    try {
+      if (exportToFlutter) {
+        await exportToFlutter();
+      } else {
+        console.error('Función exportToFlutter no disponible');
+        alert('Error: Función de exportación no disponible');
+      }
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      alert('Error al exportar: ' + (error.message || 'Error desconocido'));
+    }
   };
 
   return (
@@ -88,7 +100,7 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
           <i className="fas fa-paint-brush"></i> Diseño
         </button>
 
-         {/* Añadir un nuevo botón para el Asistente IA */}
+        {/* Botón para el Asistente IA */}
         <button 
           className={`toolbar-button ${aiAssistantOpen ? 'active' : ''}`}
           onClick={toggleAiAssistant}
@@ -96,7 +108,6 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
         >
           <i className="fa fa-magic"></i>
         </button>
-      
       </div>
       
       <div className="toolbar-section">
@@ -110,7 +121,7 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
 
         <button 
           className={`toolbar-button ${gridVisible ? 'active' : ''}`}
-          onClick={() => setGridVisible(!gridVisible)}
+          onClick={() => setGridVisible && setGridVisible(!gridVisible)}
           title="Mostrar/Ocultar Cuadrícula"
         >
           <i className="fas fa-th"></i>
@@ -118,7 +129,7 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties }) => 
         
         <button 
           className={`toolbar-button ${snapToGrid ? 'active' : ''}`}
-          onClick={() => setSnapToGrid(!snapToGrid)}
+          onClick={() => setSnapToGrid && setSnapToGrid(!snapToGrid)}
           title="Ajustar a Cuadrícula"
         >
           <i className="fas fa-magnet"></i>
