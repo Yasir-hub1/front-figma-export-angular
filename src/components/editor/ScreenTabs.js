@@ -1,4 +1,5 @@
-// src/components/editor/ScreenTabs.js - CORREGIDO
+// src/components/editor/ScreenTabs.js - VERSIÓN CORREGIDA COMPLETA
+
 import React, { useEffect, useState } from 'react';
 import { useEditor } from '../../context/EditorContext';
 import './ScreenTabs.css';
@@ -12,19 +13,17 @@ const ScreenTabs = () => {
     deleteScreen, 
     updateScreen,
     project,
-    elements, // Agregar elements para mostrar el conteo correcto
+    elements,
     fetchElements
   } = useEditor();
 
-
-
-  
   const [isCreating, setIsCreating] = useState(false);
   const [newScreenName, setNewScreenName] = useState('');
 
   const handleCreateScreen = async () => {
-    console.log("newScreenName ",newScreenName)
+    console.log("Creando screen con nombre:", newScreenName);
     if (!newScreenName.trim()) return;
+    
     try {
       await createScreen(newScreenName.trim());
       setNewScreenName('');
@@ -35,9 +34,10 @@ const ScreenTabs = () => {
     }
   };
 
-  const handleDeleteScreen = async (screenId, event) => {
+  const handleDeleteScreen = async (screen, event) => {
     event.stopPropagation();
-    console.log("handleDeleteScreen ",screenId)
+    console.log("Eliminando screen:", screen);
+    
     if (screens.length <= 1) {
       alert('No puedes eliminar la única pantalla del proyecto');
       return;
@@ -45,7 +45,8 @@ const ScreenTabs = () => {
     
     if (window.confirm('¿Estás seguro de que deseas eliminar esta pantalla?')) {
       try {
-        await deleteScreen(screenId?.screen?._id || screenId?._id);
+        // CORRECCIÓN: Usar directamente screen._id
+        await deleteScreen(screen._id);
       } catch (error) {
         console.error('Error eliminando screen:', error);
         alert('Error al eliminar pantalla: ' + (error.message || 'Error desconocido'));
@@ -54,12 +55,12 @@ const ScreenTabs = () => {
   };
 
   const handleRenameScreen = async (screen, newName) => {
-    console.log(" screen ",screen,newName)
+    console.log("Renombrando screen:", screen._id, "a:", newName);
     if (!newName.trim()) return;
     
     try {
-      console.log(" handleRenameScreen ",screen, newName)
-      await updateScreen(screen?.screen?._id || screen?._id , { name: newName.trim() });
+      // CORRECCIÓN: Usar directamente screen._id
+      await updateScreen(screen._id, { name: newName.trim() });
     } catch (error) {
       console.error('Error renombrando screen:', error);
       alert('Error al renombrar pantalla: ' + (error.message || 'Error desconocido'));
@@ -75,8 +76,10 @@ const ScreenTabs = () => {
     setIsCreating(false);
     setNewScreenName('');
   };
-console.log("screens ",screens)
-  // CORRECCIÓN: Siempre mostrar el componente, incluso sin screens
+
+  console.log("📱 ScreenTabs - screens:", screens);
+  console.log("📱 ScreenTabs - currentScreen:", currentScreen);
+
   return (
     <div className="screen-tabs">
       <div className="tabs-container">
@@ -87,7 +90,7 @@ console.log("screens ",screens)
             isActive={currentScreen?._id === screen._id}
             onClick={() => setCurrentScreen(screen)}
             onDelete={(e) => handleDeleteScreen(screen, e)}
-            onRename={(name) =>handleRenameScreen(screen, name)}
+            onRename={(name) => handleRenameScreen(screen, name)}
             canDelete={screens.length > 1}
             elementsCount={currentScreen?._id === screen._id ? elements.length : 0}
           />
@@ -135,12 +138,10 @@ console.log("screens ",screens)
   );
 };
 
-// CORRECCIÓN: Componente individual para cada tab
+// COMPONENTE INDIVIDUAL CORREGIDO
 const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, elementsCount }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(screen.name);
-
-  const { fetchElements} = useEditor();
 
   const handleStartEdit = (e) => {
     e.stopPropagation();
@@ -149,7 +150,7 @@ const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, e
   };
 
   const handleSaveEdit = () => {
-    console.log(" editName" ,editName)
+    console.log("Guardando nuevo nombre:", editName);
     if (editName.trim() && editName !== screen.name) {
       onRename(editName.trim());
     }
@@ -161,19 +162,10 @@ const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, e
     setEditName(screen.name);
   };
 
-  // CORRECCIÓN: Prevenir propagación en onClick para evitar crear tabs extra
   const handleTabClick = (e) => {
     e.stopPropagation();
     onClick();
   };
-
-  useEffect(() => {
-    console.log("ScreenTab useEffect: Fetching elements for screen", screen._id);
-    if(screen._id){
-      fetchElements(screen._id);
-    }
-  }, []);
-  
 
   return (
     <div className={`screen-tab ${isActive ? 'active' : ''}`} onClick={handleTabClick}>

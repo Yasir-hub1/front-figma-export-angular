@@ -1,4 +1,5 @@
-// src/components/editor/Toolbar.js - CORREGIDO
+// src/components/editor/Toolbar.js - CORRECCIÓN PARA EXPORTAR
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditor } from '../../context/EditorContext';
@@ -8,6 +9,7 @@ import ShareProjectModal from './ShareProjectModal';
 const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties, toggleAiAssistant, aiAssistantOpen }) => {
   const { 
     project,
+    currentScreen, // AGREGAR currentScreen
     zoom,
     position,
     gridVisible,
@@ -59,18 +61,48 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties, toggl
     navigate('/dashboard');
   };
 
-  // Exportar código - CORRECCIÓN: Manejo de errores
+  // FUNCIÓN EXPORTAR CORREGIDA
   const handleExport = async () => {
+    // Verificar que hay una screen seleccionada
+    if (!currentScreen || !currentScreen._id) {
+      alert('Error: No hay una pantalla seleccionada para exportar');
+      console.error('❌ No hay screen seleccionada para exportar');
+      return;
+    }
+
+    // Verificar que la función existe
+    if (!exportToFlutter) {
+      alert('Error: Función de exportación no disponible');
+      console.error('❌ Función exportToFlutter no disponible');
+      return;
+    }
+
     try {
-      if (exportToFlutter) {
-        await exportToFlutter();
-      } else {
-        console.error('Función exportToFlutter no disponible');
-        alert('Error: Función de exportación no disponible');
-      }
+      console.log('📤 Exportando screen:', {
+        screenId: currentScreen._id,
+        screenName: currentScreen.name,
+        projectId: project?._id
+      });
+
+      await exportToFlutter();
+      console.log('✅ Exportación completada exitosamente');
+      
     } catch (error) {
-      console.error('Error al exportar:', error);
-      alert('Error al exportar: ' + (error.message || 'Error desconocido'));
+      console.error('❌ Error al exportar:', error);
+      
+      // Mostrar mensaje de error más específico
+      let errorMessage = 'Error desconocido';
+      if (error.message) {
+        if (error.message.includes('404') || error.message.includes('Not Found')) {
+          errorMessage = 'No se encontró la pantalla para exportar';
+        } else if (error.message.includes('screen')) {
+          errorMessage = 'Error con la pantalla seleccionada';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      alert(`Error al exportar: ${errorMessage}`);
     }
   };
 
@@ -100,7 +132,6 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties, toggl
           <i className="fas fa-paint-brush"></i> Diseño
         </button>
 
-        {/* Botón para el Asistente IA */}
         <button 
           className={`toolbar-button ${aiAssistantOpen ? 'active' : ''}`}
           onClick={toggleAiAssistant}
@@ -182,15 +213,44 @@ const Toolbar = ({ viewMode, setViewMode, toggleSidebar, toggleProperties, toggl
           <i className="fa fa-share-alt"></i> Compartir
         </button>
         
+        {/* BOTÓN EXPORTAR MEJORADO CON VALIDACIONES */}
         <button 
           className="export-button flutter-export-button"
           onClick={handleExport}
-          disabled={exportLoading}
-          title="Exportar a Flutter/Dart"
+          disabled={exportLoading || !currentScreen || !currentScreen._id}
+          title={
+            !currentScreen || !currentScreen._id 
+              ? "Selecciona una pantalla para exportar" 
+              : "Exportar a Flutter/Dart"
+          }
         >
-          {exportLoading ? 'Exportando...' : 'Exportar a Flutter'}
+          {exportLoading ? (
+            <>
+              <i className="fa fa-spinner fa-spin"></i> Exportando...
+            </>
+          ) : (
+            <>
+              <i className="fab fa-flutter"></i> Exportar a Flutter
+            </>
+          )}
         </button>
       </div>
+
+      {/* DEBUG INFO - Solo en desarrollo */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          right: '10px',
+          backgroundColor: '#f0f0f0',
+          padding: '5px',
+          fontSize: '10px',
+          borderRadius: '3px',
+          zIndex: 1000
+        }}>
+          Screen: {currentScreen?._id ? `${currentScreen.name} (${currentScreen._id.slice(-6)})` : 'No seleccionada'}
+        </div>
+      )}
 
       {showShareModal && (
         <ShareProjectModal 

@@ -1,9 +1,11 @@
-// src/context/EditorContext.js - CORREGIDO
+// src/context/EditorContext.js - CON SOCKET.IO INTEGRADO
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import  projectService  from '../services/projectService';
-import  screenService  from '../services/screenService';
-import  elementService  from '../services/elementService';
+import projectService from '../services/projectService';
+import screenService from '../services/screenService';
+import elementService from '../services/elementService';
+import io from 'socket.io-client';
+import { useAuth } from './AuthContext';
 
 const EditorContext = createContext();
 
@@ -22,7 +24,11 @@ const initialState = {
   exportModalOpen: false,
   exportContent: null,
   exportLoading: false,
-  elementInteractions: {}
+  elementInteractions: {},
+  // Estados de Socket.IO
+  socket: null,
+  connected: false,
+  users: []
 };
 
 function editorReducer(state, action) {
@@ -37,26 +43,45 @@ function editorReducer(state, action) {
       return { ...state, project: action.payload };
     
     case 'SET_SCREENS':
-      return { ...state, screens: action.payload };
+      // NORMALIZAR screens para estructura consistente
+      const normalizedScreens = action.payload.map(screen => {
+        if (screen.screen) {
+          // Si tiene estructura anidada, usar la interna
+          return screen.screen;
+        }
+        return screen;
+      });
+      return { ...state, screens: normalizedScreens };
     
     case 'SET_CURRENT_SCREEN':
+      // NORMALIZAR currentScreen
+      const normalizedCurrentScreen = action.payload?.screen || action.payload;
       return { 
         ...state, 
-        currentScreen: action.payload,
-        elements: [], // Limpiar elementos cuando cambia la screen
-        selectedElement: null // Deseleccionar elemento
+        currentScreen: normalizedCurrentScreen,
+        elements: [], 
+        selectedElement: null 
       };
     
     case 'ADD_SCREEN':
-      return { ...state, screens: [...state.screens, action.payload] };
+      // NORMALIZAR nueva screen antes de añadir
+      const newScreen = action.payload?.screen || action.payload;
+      // Verificar que no exista ya (prevenir duplicados)
+      const exists = state.screens.some(screen => screen._id === newScreen._id);
+      if (exists) {
+        console.log('⚠️ Screen ya existe, no se agrega:', newScreen._id);
+        return state;
+      }
+      return { ...state, screens: [...state.screens, newScreen] };
     
     case 'UPDATE_SCREEN':
+      const updatedScreen = action.payload?.screen || action.payload;
       return {
         ...state,
         screens: state.screens.map(screen =>
-          screen._id === action.payload._id ? action.payload : screen
+          screen._id === updatedScreen._id ? updatedScreen : screen
         ),
-        currentScreen: state.currentScreen?._id === action.payload._id ? action.payload : state.currentScreen
+        currentScreen: state.currentScreen?._id === updatedScreen._id ? updatedScreen : state.currentScreen
       };
     
     case 'DELETE_SCREEN':
@@ -92,7 +117,6 @@ function editorReducer(state, action) {
         selectedElement: state.selectedElement?._id === action.payload ? null : state.selectedElement
       };
     
-    // CORREGIDO: Solo actualizar selectedElement, no hacer toggle
     case 'SELECT_ELEMENT':
       return { ...state, selectedElement: action.payload };
     
@@ -124,6 +148,16 @@ function editorReducer(state, action) {
       const { [action.payload]: removed, ...remainingInteractions } = state.elementInteractions;
       return { ...state, elementInteractions: remainingInteractions };
     
+    // Acciones de Socket.IO
+    case 'SET_SOCKET':
+      return { ...state, socket: action.payload };
+    
+    case 'SET_CONNECTED':
+      return { ...state, connected: action.payload };
+    
+    case 'SET_USERS':
+      return { ...state, users: action.payload };
+    
     default:
       return state;
   }
@@ -131,9 +165,164 @@ function editorReducer(state, action) {
 
 export function EditorProvider({ children, projectId }) {
   const [state, dispatch] = useReducer(editorReducer, initialState);
+  const { currentUser } = useAuth();
+  
   console.log('🏗️ EditorProvider iniciado con projectId:', projectId);
   console.log('- Tipo de projectId:', typeof projectId);
   console.log('- Es válido:', /^[a-f\d]{24}$/i.test(projectId));
+
+  // Inicializar Socket.IO
+  useEffect(() => {
+    if (!projectId || !currentUser) return;
+
+    console.log('🔌 Inicializando Socket.IO para proyecto:', projectId);
+
+    const newSocket = io('http://localhost:5000', {
+      withCredentials: true,
+      transports: ['websocket'],
+    });
+
+    newSocket.on('connect', () => {
+      console.log('✅ Conectado a Socket.IO');
+      dispatch({ type: 'SET_CONNECTED', payload: true });
+      
+      // Autenticar
+      newSocket.emit('authenticate', {
+        userId: currentUser.id,
+        username: currentUser.username,
+        token: localStorage.getItem('token')
+      });
+      
+      // Unirse al proyecto
+      newSocket.emit('join-project', {
+        projectId: projectId
+      });
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('❌ Desconectado de Socket.IO');
+      dispatch({ type: 'SET_CONNECTED', payload: false });
+    });
+
+    newSocket.on('user-joined', (data) => {
+      console.log('👤 Usuario se unió al proyecto:', data.user);
+      dispatch({ type: 'SET_USERS', payload: data.activeUsers });
+    });
+    
+    newSocket.on('user-left', (data) => {
+      console.log('👋 Usuario abandonó el proyecto:', data.user);
+      dispatch({ type: 'SET_USERS', payload: data.activeUsers });
+    });
+
+    // Manejar actualizaciones de diseño
+    newSocket.on('design-updated', (data) => {
+      console.log('🔄 Actualización de diseño recibida:', data);
+      
+      if (data.type === 'element-added') {
+        dispatch({ type: 'ADD_ELEMENT', payload: data.element });
+      } else if (data.type === 'element-updated') {
+        dispatch({ type: 'UPDATE_ELEMENT', payload: data.element });
+      } else if (data.type === 'element-deleted') {
+        dispatch({ type: 'DELETE_ELEMENT', payload: data.elementId });
+      } else if (data.type === 'screen-added') {
+        // NORMALIZAR screen antes de dispatch
+        const screen = data.screen?.screen || data.screen;
+        dispatch({ type: 'ADD_SCREEN', payload: screen });
+      } else if (data.type === 'screen-updated') {
+        const screen = data.screen?.screen || data.screen;
+        dispatch({ type: 'UPDATE_SCREEN', payload: screen });
+      } else if (data.type === 'screen-deleted') {
+        dispatch({ type: 'DELETE_SCREEN', payload: data.screenId });
+      }
+    });
+
+     // NUEVOS EVENTOS ESPECÍFICOS PARA MEJOR MANEJO COLABORATIVO
+     newSocket.on('screen-added-collaborative', (data) => {
+      console.log('📱 Screen añadida colaborativamente:', data);
+      const screen = data.screen?.screen || data.screen;
+      dispatch({ type: 'ADD_SCREEN', payload: screen });
+    });
+
+    newSocket.on('screen-updated-collaborative', (data) => {
+      console.log('📝 Screen actualizada colaborativamente:', data);
+      const screen = data.screen?.screen || data.screen;
+      dispatch({ type: 'UPDATE_SCREEN', payload: screen });
+    });
+
+    newSocket.on('screen-deleted-collaborative', (data) => {
+      console.log('🗑️ Screen eliminada colaborativamente:', data);
+      dispatch({ type: 'DELETE_SCREEN', payload: data.screenId });
+    });
+
+    newSocket.on('element-added-collaborative', (data) => {
+      console.log('➕ Elemento añadido colaborativamente:', data);
+      dispatch({ type: 'ADD_ELEMENT', payload: data.element });
+    });
+
+    newSocket.on('element-updated-collaborative', (data) => {
+      console.log('✏️ Elemento actualizado colaborativamente:', data);
+      dispatch({ type: 'UPDATE_ELEMENT', payload: data.element });
+    });
+
+    newSocket.on('element-deleted-collaborative', (data) => {
+      console.log('🗑️ Elemento eliminado colaborativamente:', data);
+      dispatch({ type: 'DELETE_ELEMENT', payload: data.elementId });
+    });
+  
+      // NUEVO: Manejo de sincronización
+      newSocket.on('sync-requested', (data) => {
+        console.log('🔄 Solicitud de sincronización recibida:', data);
+        
+        // Si tenemos elementos en la screen solicitada, enviarlos
+        if (data.screenId === state.currentScreen?._id && state.elements.length > 0) {
+          newSocket.emit('sync-response', {
+            projectId: projectId,
+            screenId: data.screenId,
+            elements: state.elements,
+            requestedBySocketId: data.requestedBy.socketId
+          });
+        }
+      });
+  
+      newSocket.on('sync-data', (data) => {
+        console.log('📥 Datos de sincronización recibidos:', data);
+        
+        // Solo aplicar si es para la screen actual
+        if (data.screenId === state.currentScreen?._id) {
+          dispatch({ type: 'SET_ELEMENTS', payload: data.elements });
+        }
+      });
+
+    // Manejar interacciones con elementos
+    newSocket.on('element-interaction', (data) => {
+      console.log('🎯 Interacción recibida:', data);
+      dispatch({
+        type: 'SET_ELEMENT_INTERACTION',
+        payload: {
+          elementId: data.elementId,
+          interaction: {
+            userId: data.userId,
+            username: data.username,
+            action: data.action
+          }
+        }
+      });
+    });
+
+    newSocket.on('element-interaction-end', (data) => {
+      console.log('🏁 Fin de interacción:', data);
+      dispatch({ type: 'REMOVE_ELEMENT_INTERACTION', payload: data.elementId });
+    });
+
+    dispatch({ type: 'SET_SOCKET', payload: newSocket });
+
+    return () => {
+      console.log('🔌 Cerrando conexión Socket.IO');
+      if (newSocket) {
+        newSocket.disconnect();
+      }
+    };
+  }, [projectId, currentUser]);
 
   // Cargar proyecto inicial
   useEffect(() => {
@@ -142,7 +331,6 @@ export function EditorProvider({ children, projectId }) {
       loadProject();
     } else {
       console.error('❌ No se proporcionó projectId al EditorProvider');
-      console.error('❌ projectId recibido:', projectId);
       dispatch({ type: 'SET_ERROR', payload: 'ID de proyecto no válido' });
     }
   }, [projectId]);
@@ -197,7 +385,6 @@ export function EditorProvider({ children, projectId }) {
         }
       } else {
         dispatch({ type: 'SET_SCREENS', payload: screens });
-        // Seleccionar la primera screen por defecto
         console.log('🎯 Seleccionando primera screen:', screens[0].name);
         dispatch({ type: 'SET_CURRENT_SCREEN', payload: screens[0] });
       }
@@ -210,7 +397,7 @@ export function EditorProvider({ children, projectId }) {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }
+  };
 
   // Función para cargar elementos de una screen específica
   const fetchElements = async (screenId) => {
@@ -228,7 +415,6 @@ export function EditorProvider({ children, projectId }) {
       dispatch({ type: 'SET_ELEMENTS', payload: elements });
     } catch (error) {
       console.error('❌ Error al cargar elementos:', error);
-      // Si es 404, solo establecer elementos vacíos sin mostrar error
       if (error.response?.status === 404 || error.message.includes('404') || error.message.includes('Not Found')) {
         console.log('📝 Screen sin elementos, estableciendo array vacío');
         dispatch({ type: 'SET_ELEMENTS', payload: [] });
@@ -239,27 +425,26 @@ export function EditorProvider({ children, projectId }) {
     }
   };
 
-  const getDataScreeForProject = async (projectId, screedId) => {
+  const getDataScreenForProject = async (projectId, screenId) => {
     console.log('📱 Obteniendo screens del proyecto...');
     const screens = await screenService.getScreens(projectId);
     console.log(`✅ ${screens.length} screens obtenidas`);
   
     dispatch({ type: 'SET_SCREENS', payload: screens });
   
-    // Buscar la screen que coincida con el screedId
-    const selectedScreen = screens.find(screen => screen._id === screedId);
+    const selectedScreen = screens.find(screen => screen._id === screenId);
   
     if (selectedScreen) {
       console.log('🎯 Seleccionando screen:', selectedScreen.name);
-      fetchElements(screedId)
+      fetchElements(screenId);
       dispatch({ type: 'SET_CURRENT_SCREEN', payload: selectedScreen });
     } else {
-      console.warn(`⚠️ Screen con ID ${screedId} no encontrada. Seleccionando la primera por defecto.`);
+      console.warn(`⚠️ Screen con ID ${screenId} no encontrada. Seleccionando la primera por defecto.`);
       dispatch({ type: 'SET_CURRENT_SCREEN', payload: screens[0] });
     }
   };
 
-  // Funciones de Screen
+  // Funciones de Screen con Socket.IO
   const createScreen = async (name) => {
     try {
       const screenData = {
@@ -271,29 +456,57 @@ export function EditorProvider({ children, projectId }) {
         }
       };
       
-      const newScreen = await screenService.createScreen(projectId, screenData);
+      const response = await screenService.createScreen(projectId, screenData);
+      console.log('📱 Respuesta del servidor al crear screen:', response);
+      
+      // NORMALIZAR respuesta del servidor
+      const newScreen = response?.screen || response;
+      
+      // Actualizar estado local primero
       dispatch({ type: 'ADD_SCREEN', payload: newScreen });
       
-      // Cambiar a la nueva screen
+      // Notificar a otros usuarios
+      if (state.socket && state.connected) {
+        state.socket.emit('update-design', {
+          projectId: projectId,
+          type: 'screen-added',
+          screen: newScreen // Enviar screen normalizada
+        });
+      }
+      
+      // Seleccionar la nueva screen
       setCurrentScreen(newScreen);
-      console.log('🎉 Nueva screen creada:', newScreen);
-      getDataScreeForProject(projectId, newScreen?.screen?._id || newScreen?._id);
+      console.log('✅ Screen creada y seleccionada:', newScreen.name);
+      
       return newScreen;
     } catch (error) {
-      console.error('Error al crear screen:', error);
+      console.error('❌ Error al crear screen:', error);
       throw error;
     }
   };
-
   const updateScreen = async (screenId, screenData) => {
     try {
-      console.log('🔄 Actualizando screen:', projectId, screenId, screenData);
-      const updatedScreen = await screenService.updateScreen(screenId, screenData);
+      console.log('🔄 Actualizando screen:', screenId, screenData);
+      const response = await screenService.updateScreen(screenId, screenData);
+      
+      // NORMALIZAR respuesta
+      const updatedScreen = response?.screen || response;
+      
+      // Actualizar estado local
       dispatch({ type: 'UPDATE_SCREEN', payload: updatedScreen });
-      getDataScreeForProject(projectId, screenId)
+      
+      // Notificar a otros usuarios
+      if (state.socket && state.connected) {
+        state.socket.emit('update-design', {
+          projectId: projectId,
+          type: 'screen-updated',
+          screen: updatedScreen
+        });
+      }
+      
       return updatedScreen;
     } catch (error) {
-      console.error('Error al actualizar screen:', error);
+      console.error('❌ Error al actualizar screen:', error);
       throw error;
     }
   };
@@ -301,18 +514,34 @@ export function EditorProvider({ children, projectId }) {
   const deleteScreen = async (screenId) => {
     try {
       await screenService.deleteScreen(projectId, screenId);
+      
+      // Actualizar estado local
       dispatch({ type: 'DELETE_SCREEN', payload: screenId });
+      
+      // Notificar a otros usuarios
+      if (state.socket && state.connected) {
+        state.socket.emit('update-design', {
+          projectId: projectId,
+          type: 'screen-deleted',
+          screenId: screenId
+        });
+      }
     } catch (error) {
-      console.error('Error al eliminar screen:', error);
+      console.error('❌ Error al eliminar screen:', error);
       throw error;
     }
   };
 
-  const setCurrentScreen = (screen) => {
-    dispatch({ type: 'SET_CURRENT_SCREEN', payload: screen });
+
+  // NUEVA FUNCIÓN: Solicitar sincronización cuando se cambia de screen
+ const setCurrentScreen = (screen) => {
+    console.log('🎯 Cambiando a screen:', screen?.name, screen?._id);
+    // NORMALIZAR screen antes de dispatch
+    const normalizedScreen = screen?.screen || screen;
+    dispatch({ type: 'SET_CURRENT_SCREEN', payload: normalizedScreen });
   };
 
-  // Funciones de Elementos
+  // FUNCIONES ELEMENTO CORREGIDAS
   const createElement = async (elementData) => {
     try {
       if (!state.currentScreen?._id) {
@@ -320,10 +549,22 @@ export function EditorProvider({ children, projectId }) {
       }
       
       const newElement = await elementService.createElement(state.currentScreen._id, elementData);
+      
+      // Actualizar estado local
       dispatch({ type: 'ADD_ELEMENT', payload: newElement });
+      
+      // Notificar a otros usuarios
+      if (state.socket && state.connected) {
+        state.socket.emit('update-design', {
+          projectId: projectId,
+          type: 'element-added',
+          element: newElement
+        });
+      }
+      
       return newElement;
     } catch (error) {
-      console.error('Error al crear elemento:', error);
+      console.error('❌ Error al crear elemento:', error);
       throw error;
     }
   };
@@ -335,10 +576,22 @@ export function EditorProvider({ children, projectId }) {
       }
       
       const updatedElement = await elementService.updateElement(elementId, elementData);
+      
+      // Actualizar estado local
       dispatch({ type: 'UPDATE_ELEMENT', payload: updatedElement });
+      
+      // Notificar a otros usuarios
+      if (state.socket && state.connected) {
+        state.socket.emit('update-design', {
+          projectId: projectId,
+          type: 'element-updated',
+          element: updatedElement
+        });
+      }
+      
       return updatedElement;
     } catch (error) {
-      console.error('Error al actualizar elemento:', error);
+      console.error('❌ Error al actualizar elemento:', error);
       throw error;
     }
   };
@@ -349,10 +602,23 @@ export function EditorProvider({ children, projectId }) {
         throw new Error('No hay screen seleccionada');
       }
       
+      // Eliminar del servidor primero
       await elementService.deleteElement(elementId);
+      
+      // Actualizar estado local
       dispatch({ type: 'DELETE_ELEMENT', payload: elementId });
+      
+      // Notificar a otros usuarios
+      if (state.socket && state.connected) {
+        state.socket.emit('update-design', {
+          projectId: projectId,
+          type: 'element-deleted',
+          elementId
+        });
+      }
+      
     } catch (error) {
-      console.error('Error al eliminar elemento:', error);
+      console.error('❌ Error al eliminar elemento:', error);
       throw error;
     }
   };
@@ -363,26 +629,41 @@ export function EditorProvider({ children, projectId }) {
         throw new Error('No hay screen seleccionada');
       }
       
+      console.log('📋 Duplicando elemento:', {
+        elementId,
+        screenId: state.currentScreen._id,
+        screenName: state.currentScreen.name
+      });
+      
       const duplicatedElement = await elementService.duplicateElement(elementId);
+      
+      // Actualizar estado local
       dispatch({ type: 'ADD_ELEMENT', payload: duplicatedElement });
+      
+      // Notificar a otros usuarios vía Socket.IO
+      if (state.socket && state.connected) {
+        state.socket.emit('update-design', {
+          projectId: projectId,
+          type: 'element-added',
+          element: duplicatedElement
+        });
+      }
+      
+      console.log('✅ Elemento duplicado exitosamente:', duplicatedElement);
       return duplicatedElement;
     } catch (error) {
-      console.error('Error al duplicar elemento:', error);
+      console.error('❌ Error al duplicar elemento:', error);
       throw error;
     }
-  }
+  };
 
-  // CORREGIDO: selectElement - Sin toggle, solo establecer
   const selectElement = (elementId, element = null) => {
     if (elementId && element) {
-      // Si se proporciona el elemento completo, usarlo
       dispatch({ type: 'SELECT_ELEMENT', payload: element });
     } else if (elementId) {
-      // Si solo se proporciona el ID, buscar el elemento
       const foundElement = state.elements.find(el => el._id === elementId);
       dispatch({ type: 'SELECT_ELEMENT', payload: foundElement || null });
     } else {
-      // Si no se proporciona nada, deseleccionar
       dispatch({ type: 'SELECT_ELEMENT', payload: null });
     }
   };
@@ -407,17 +688,51 @@ export function EditorProvider({ children, projectId }) {
         throw new Error('No hay screen seleccionada para exportar');
       }
       
+      console.log('📤 Iniciando exportación a Flutter:', {
+        screenId: state.currentScreen._id,
+        screenName: state.currentScreen.name,
+        projectId: projectId,
+        elementsCount: state.elements.length
+      });
+      
       dispatch({ type: 'SET_EXPORT_LOADING', payload: true });
       
+      // CORRECCIÓN: Usar state.currentScreen._id directamente
       const exportData = await elementService.exportToFlutter(state.currentScreen._id);
+      
+      console.log('✅ Datos de exportación recibidos:', exportData);
       
       dispatch({ 
         type: 'SET_EXPORT_MODAL', 
         payload: { open: true, content: exportData } 
       });
+      
+      console.log('🎉 Modal de exportación abierto');
+      
     } catch (error) {
-      console.error('Error al exportar:', error);
-      alert('Error al exportar: ' + (error.message || 'Error desconocido'));
+      console.error('❌ Error al exportar:', error);
+      
+      // Mejorar el manejo de errores
+      let errorMessage = 'Error desconocido';
+      
+      if (error.response) {
+        // Error del servidor
+        if (error.response.status === 404) {
+          errorMessage = `No se encontró la pantalla "${state.currentScreen?.name || 'desconocida'}" para exportar`;
+        } else if (error.response.status === 500) {
+          errorMessage = 'Error interno del servidor al generar el código';
+        } else {
+          errorMessage = `Error del servidor: ${error.response.data?.message || error.response.statusText}`;
+        }
+      } else if (error.message) {
+        if (error.message.includes('screen')) {
+          errorMessage = `Error con la pantalla: ${error.message}`;
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      alert(`Error al exportar: ${errorMessage}`);
       throw error;
     } finally {
       dispatch({ type: 'SET_EXPORT_LOADING', payload: false });
@@ -431,22 +746,30 @@ export function EditorProvider({ children, projectId }) {
     });
   };
 
-  // Funciones de interacción
+  // Funciones de interacción con Socket.IO
   const notifyElementInteraction = (elementId, action) => {
-    dispatch({
-      type: 'SET_ELEMENT_INTERACTION',
-      payload: {
-        elementId,
-        interaction: {
-          username: 'Usuario',
-          action
-        }
-      }
+    if (!state.socket || !state.connected || !currentUser) return;
+    
+    console.log('🎯 Notificando interacción:', elementId, action);
+    
+    state.socket.emit('element-interaction', {
+      projectId: projectId,
+      elementId,
+      userId: currentUser.id,
+      username: currentUser.username,
+      action
     });
   };
 
   const endElementInteraction = (elementId) => {
-    dispatch({ type: 'REMOVE_ELEMENT_INTERACTION', payload: elementId });
+    if (!state.socket || !state.connected) return;
+    
+    console.log('🏁 Finalizando interacción:', elementId);
+    
+    state.socket.emit('element-interaction-end', {
+      projectId: projectId,
+      elementId
+    });
   };
 
   const value = {

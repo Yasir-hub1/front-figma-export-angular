@@ -18,7 +18,8 @@ const Canvas = ({ viewMode = 'design' }) => {
     gridVisible,
     snapToGrid,
     notifyElementInteraction,
-    endElementInteraction
+    endElementInteraction,
+    fetchElements
   } = useEditor();
   
   const canvasRef = useRef(null);
@@ -29,6 +30,33 @@ const Canvas = ({ viewMode = 'design' }) => {
   const [startSize, setStartSize] = useState({ width: 0, height: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [dragElement, setDragElement] = useState(null); // Elemento que se está arrastrando
+
+  useEffect(() => {
+    if (currentScreen?._id && (!elements || elements.length === 0)) {
+      // Si no hay elementos locales, solicitar al servidor
+      fetchElements(currentScreen._id);
+    }
+  }, [currentScreen?._id, fetchElements]);
+
+
+    // Manejar eventos de teclado
+    useEffect(() => {
+      const handleKeyDown = (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          return;
+        }
+        
+        if (selectedElement && (e.key === 'Delete' || e.key === 'Backspace')) {
+          e.preventDefault();
+          handleDeleteElement(selectedElement._id);
+        }
+      };
+      
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }, [selectedElement]);
 
   // Si no hay screen actual, mostrar mensaje
   if (!currentScreen) {
@@ -48,6 +76,7 @@ const Canvas = ({ viewMode = 'design' }) => {
     ? elements.filter(element => element && element._id && element.type) 
     : [];
 
+  
   // Obtener información del dispositivo
   const deviceType = project?.deviceType || 'custom';
   
@@ -386,24 +415,7 @@ const Canvas = ({ viewMode = 'design' }) => {
     }
   };
 
-  // Manejar eventos de teclado
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        return;
-      }
-      
-      if (selectedElement && (e.key === 'Delete' || e.key === 'Backspace')) {
-        e.preventDefault();
-        handleDeleteElement(selectedElement._id);
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selectedElement]);
+
 
   return (
     <div 

@@ -1,10 +1,20 @@
-// src/components/editor/ElementProperties.js
+// src/components/editor/ElementProperties.js - CORRECCIONES
+
 import React, { useState, useEffect } from 'react';
 import { useEditor } from '../../context/EditorContext';
 import './ElementProperties.css';
 
 const ElementProperties = ({ onClose }) => {
-  const { selectedElement, updateElement, deleteElement, duplicateElement, selectElement, notifyElementInteraction,  endElementInteraction  } = useEditor();
+  const { 
+    selectedElement, 
+    updateElement, 
+    deleteElement, 
+    duplicateElement, 
+    selectElement, 
+    notifyElementInteraction,
+    endElementInteraction,
+    currentScreen // AGREGAR currentScreen para verificación
+  } = useEditor();
   
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
@@ -28,92 +38,128 @@ const ElementProperties = ({ onClose }) => {
     }
   }, [selectedElement]);
   
-  // Obtener el tipo del elemento seleccionado para usar en la UI
   const type = selectedElement?.type || '';
-  
 
-  // Si no hay un elemento seleccionado, no mostrar el panel
   if (!selectedElement) return null;
 
   const handleContentChange = (e) => {
     setContent(e.target.value);
-    // Notificar que estamos editando
     notifyElementInteraction(selectedElement._id, "editando");
   };
 
-const handleSave = async () => {
-  if (!selectedElement) return;
-  
-  setSaving(true);
-
-  
-  try {
-    console.log("Guardando cambios del elemento:", {
-      name,
-      content, // Verifica que este valor esté correcto
-      position: { x: Number(positionX), y: Number(positionY) },
-      size: { width: Number(width), height: Number(height) },
-      styles
-    });
+  const handleSave = async () => {
+    if (!selectedElement || !currentScreen) {
+      console.error('❌ No hay elemento seleccionado o screen actual');
+      return;
+    }
     
-    // Actualizar el elemento en el estado local primero, para una respuesta visual inmediata
-    selectElement(selectedElement._id, {
-      ...selectedElement,
-      name,
-      content,
-      position: { x: Number(positionX), y: Number(positionY) },
-      size: { width: Number(width), height: Number(height) },
-      styles
-    });
+    setSaving(true);
     
-    // Luego enviar la actualización al servidor
-    await updateElement(selectedElement._id, {
-      name,
-      content,
-      position: { x: Number(positionX), y: Number(positionY) },
-      size: { width: Number(width), height: Number(height) },
-      styles
-    });
-    endElementInteraction(selectedElement._id);
+    try {
+      console.log("🔄 Guardando cambios del elemento:", {
+        elementId: selectedElement._id,
+        screenId: currentScreen._id,
+        updates: {
+          name,
+          content,
+          position: { x: Number(positionX), y: Number(positionY) },
+          size: { width: Number(width), height: Number(height) },
+          styles
+        }
+      });
+      
+      // Actualizar el elemento en el estado local primero
+      selectElement(selectedElement._id, {
+        ...selectedElement,
+        name,
+        content,
+        position: { x: Number(positionX), y: Number(positionY) },
+        size: { width: Number(width), height: Number(height) },
+        styles
+      });
+      
+      // Luego enviar la actualización al servidor
+      await updateElement(selectedElement._id, {
+        name,
+        content,
+        position: { x: Number(positionX), y: Number(positionY) },
+        size: { width: Number(width), height: Number(height) },
+        styles
+      });
+      
+      console.log("✅ Elemento guardado exitosamente");
+      
+    } catch (error) {
+      console.error('❌ Error al guardar el elemento:', error);
+      alert('Error al guardar: ' + (error.message || 'Error desconocido'));
+    } finally {
+      setSaving(false);
+      endElementInteraction(selectedElement._id);
+    }
+  };
 
-  } catch (error) {
-    console.error('Error al guardar el elemento:', error);
-  } finally {
-    setSaving(false);
-    endElementInteraction(selectedElement._id); // Reportar fin
-
-  }
-};
-
-  // Eliminar el elemento
+  // FUNCIÓN ELIMINAR CORREGIDA
   const handleDelete = async () => {
-    if (!selectedElement) return;
+    if (!selectedElement || !currentScreen) {
+      console.error('❌ No hay elemento seleccionado o screen actual');
+      alert('Error: No hay elemento seleccionado o pantalla activa');
+      return;
+    }
     
     if (window.confirm('¿Estás seguro de que deseas eliminar este elemento?')) {
       try {
+        console.log("🗑️ Eliminando elemento:", {
+          elementId: selectedElement._id,
+          elementName: selectedElement.name,
+          screenId: currentScreen._id,
+          screenName: currentScreen.name
+        });
+        
         await deleteElement(selectedElement._id);
+        console.log("✅ Elemento eliminado exitosamente");
+        
+        // Cerrar el panel de propiedades después de eliminar
+        if (onClose) {
+          onClose();
+        }
+        
       } catch (error) {
-        console.error('Error al eliminar el elemento:', error);
+        console.error('❌ Error al eliminar el elemento:', error);
+        alert('Error al eliminar elemento: ' + (error.message || 'Error desconocido'));
       }
     }
   };
 
-  // Duplicar el elemento
+  // FUNCIÓN DUPLICAR CORREGIDA
   const handleDuplicate = async () => {
-    if (!selectedElement) return;
+    if (!selectedElement || !currentScreen) {
+      console.error('❌ No hay elemento seleccionado o screen actual');
+      alert('Error: No hay elemento seleccionado o pantalla activa');
+      return;
+    }
     
     try {
       setSaving(true);
-      console.log("Intentando duplicar elemento:", selectedElement._id);
+      console.log("📋 Duplicando elemento:", {
+        elementId: selectedElement._id,
+        elementName: selectedElement.name,
+        elementType: selectedElement.type,
+        screenId: currentScreen._id,
+        screenName: currentScreen.name
+      });
 
-      const result = await duplicateElement(selectedElement._id);
-      console.log("Elemento duplicado con éxito:", result);
+      const duplicatedElement = await duplicateElement(selectedElement._id);
+      console.log("✅ Elemento duplicado exitosamente:", duplicatedElement);
+      
+      // Seleccionar el elemento duplicado
+      if (duplicatedElement) {
+        selectElement(duplicatedElement._id, duplicatedElement);
+      }
 
     } catch (error) {
-      console.error('Error al duplicar el elemento:', error);
-      alert('Error al duplicar el elemento: ' + (error.message || 'Error desconocido'));
-
-    }finally {
+      console.error('❌ Error al duplicar el elemento:', error);
+      alert('Error al duplicar elemento: ' + (error.message || 'Error desconocido'));
+    } finally {
       setSaving(false);
     }
   };
@@ -130,21 +176,17 @@ const handleSave = async () => {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Mostrar indicador de carga
     setSaving(true);
     
-    // Crear una imagen para redimensionar
     const img = new Image();
     const reader = new FileReader();
     
     reader.onload = (event) => {
       img.onload = () => {
-        // Crear un canvas para redimensionar
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
         
-        // Mantener relación de aspecto y establecer un tamaño máximo
         const MAX_SIZE = 800;
         if (width > height && width > MAX_SIZE) {
           height = Math.round((height * MAX_SIZE) / width);
@@ -157,14 +199,11 @@ const handleSave = async () => {
         canvas.width = width;
         canvas.height = height;
         
-        // Dibujar imagen redimensionada
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Obtener como data URL con calidad reducida
         const compressedImageData = canvas.toDataURL('image/jpeg', 0.7);
         
-        // Actualizar contenido y guardar
         setContent(compressedImageData);
         updateElement(selectedElement._id, {
           ...selectedElement,
@@ -190,14 +229,28 @@ const handleSave = async () => {
     reader.readAsDataURL(file);
   };
 
-
-
   return (
     <div className="element-properties">
       <div className="properties-header">
         <h3>Propiedades del Elemento</h3>
         <button className="close-properties" onClick={onClose}>×</button>
       </div>
+      
+      {/* DEBUG INFO - Quitar en producción */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          fontSize: '10px', 
+          padding: '5px', 
+          backgroundColor: '#f0f0f0', 
+          marginBottom: '10px',
+          borderRadius: '3px'
+        }}>
+          <strong>🐛 Debug:</strong><br/>
+          Element ID: {selectedElement?._id}<br/>
+          Screen ID: {currentScreen?._id}<br/>
+          Screen Name: {currentScreen?.name}
+        </div>
+      )}
       
       <div className="properties-tabs">
         <button 
@@ -221,94 +274,81 @@ const handleSave = async () => {
       </div>
       
       <div className="properties-content">
-      {activeTab === 'general' && (
-  <div className="tab-content">
-    <div className="form-group">
-      <label>Nombre</label>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        onBlur={handleSave}
-      />
-    </div>
-    
-    {/* Contenido según el tipo de elemento */}
-    {type !== 'image' ? (
-      <div className="form-group">
-        <label>Contenido</label>
-        <input
-          type="text"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onBlur={handleSave}
-        />
-      </div>
-    ) : (
-      <div className="form-group">
-      <label>Imagen</label>
-      <div className="image-upload-container">
-        {content ? (
-          <div className="image-preview">
-            <img 
-              src={content} 
-              alt="Vista previa" 
-              className="image-preview-thumbnail" 
-            />
-            <button 
-              className="remove-image-button"
-              onClick={() => {
-                setContent('');
-                handleSave();
-              }}
-              disabled={saving}
-            >
-              <i className="fa fa-times"></i>
-            </button>
-          </div>
-        ) : (
-          <div className="upload-placeholder">
-            Sin imagen
-          </div>
-        )}
-        <input
-          type="file"
-          id="image-upload"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="file-input"
-          disabled={saving}
-        />
-        <label htmlFor="image-upload" className={`file-input-label ${saving ? 'disabled' : ''}`}>
-          {saving ? (
-            <>
-              <i className="fa fa-spinner fa-spin"></i> Procesando...
-            </>
-          ) : (
-            <>
-              <i className="fa fa-upload"></i> Seleccionar imagen
-            </>
-          )}
-        </label>
-        <div className="upload-help-text">
-          Se recomienda imágenes de menos de 2MB. Las imágenes serán redimensionadas automáticamente.
-        </div>
-      </div>
-    </div>
-    )}
+        {activeTab === 'general' && (
+          <div className="tab-content">
+            <div className="form-group">
+              <label>Nombre</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={handleSave}
+              />
+            </div>
             
-            {/* <div className="form-group">
-            <label>Contenido</label>
-            <input
-              type="text"
-              value={content}
-              onChange={(e) => {
-                setContent(e.target.value);
-                console.log("Contenido actualizado:", e.target.value); // Para depuración
-              }}
-              onBlur={handleSave} // Guarda al perder el foco
-            />
-          </div> */}
+            {/* Contenido según el tipo de elemento */}
+            {type !== 'image' ? (
+              <div className="form-group">
+                <label>Contenido</label>
+                <input
+                  type="text"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  onBlur={handleSave}
+                />
+              </div>
+            ) : (
+              <div className="form-group">
+                <label>Imagen</label>
+                <div className="image-upload-container">
+                  {content ? (
+                    <div className="image-preview">
+                      <img 
+                        src={content} 
+                        alt="Vista previa" 
+                        className="image-preview-thumbnail" 
+                      />
+                      <button 
+                        className="remove-image-button"
+                        onClick={() => {
+                          setContent('');
+                          handleSave();
+                        }}
+                        disabled={saving}
+                      >
+                        <i className="fa fa-times"></i>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="upload-placeholder">
+                      Sin imagen
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    id="image-upload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="file-input"
+                    disabled={saving}
+                  />
+                  <label htmlFor="image-upload" className={`file-input-label ${saving ? 'disabled' : ''}`}>
+                    {saving ? (
+                      <>
+                        <i className="fa fa-spinner fa-spin"></i> Procesando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa fa-upload"></i> Seleccionar imagen
+                      </>
+                    )}
+                  </label>
+                  <div className="upload-help-text">
+                    Se recomienda imágenes de menos de 2MB. Las imágenes serán redimensionadas automáticamente.
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="form-row">
               <div className="form-group">
@@ -525,21 +565,30 @@ const handleSave = async () => {
       </div>
       
       <div className="properties-actions">
-      <button
-    className="action-button duplicate"
-    onClick={handleDuplicate}
-    disabled={saving}
-    title="Duplicar Elemento"
-  >
-    {saving ? 'Duplicando...' : 'Duplicar'}
-  </button>
+        <button
+          className="action-button duplicate"
+          onClick={handleDuplicate}
+          disabled={saving || !currentScreen || !selectedElement}
+          title="Duplicar Elemento"
+        >
+          {saving ? (
+            <>
+              <i className="fa fa-spinner fa-spin"></i> Duplicando...
+            </>
+          ) : (
+            <>
+              <i className="fa fa-copy"></i> Duplicar
+            </>
+          )}
+        </button>
         
         <button
           className="action-button delete"
           onClick={handleDelete}
+          disabled={!currentScreen || !selectedElement}
           title="Eliminar Elemento"
         >
-          Eliminar
+          <i className="fa fa-trash"></i> Eliminar
         </button>
       </div>
     </div>
