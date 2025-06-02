@@ -203,7 +203,7 @@ const Dashboard = () => {
           </button>
         </header>
 
-        {/* DEBUG INFO - TEMPORAL */}
+        {/* DEBUG INFO - TEMPORAL
         {process.env.NODE_ENV === 'development' && (
           <div style={{ 
             padding: '10px', 
@@ -226,7 +226,7 @@ const Dashboard = () => {
               </details>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Sección para unirse a un proyecto compartido */}
         <div className="join-project-section">

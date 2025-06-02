@@ -177,7 +177,7 @@ export function EditorProvider({ children, projectId }) {
 
     console.log('🔌 Inicializando Socket.IO para proyecto:', projectId);
 
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io('http://159.203.124.196:80', {
       withCredentials: true,
       transports: ['websocket'],
     });

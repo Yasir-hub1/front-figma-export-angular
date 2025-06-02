@@ -1,7 +1,7 @@
 // src/services/elementService.js - CORREGIDO
 import axios from '../utils/axiosConfig';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://159.203.124.196/api';
 
 const elementService = {
   // CORRECCIÓN: Crear un nuevo elemento (agregando screenId al payload)
