@@ -682,63 +682,115 @@ export function EditorProvider({ children, projectId }) {
   };
 
   // Funciones de exportación
-  const exportToFlutter = async () => {
-    try {
-      if (!state.currentScreen?._id) {
-        throw new Error('No hay screen seleccionada para exportar');
-      }
-      
-      console.log('📤 Iniciando exportación a Flutter:', {
-        screenId: state.currentScreen._id,
-        screenName: state.currentScreen.name,
-        projectId: projectId,
-        elementsCount: state.elements.length
-      });
-      
-      dispatch({ type: 'SET_EXPORT_LOADING', payload: true });
-      
-      // CORRECCIÓN: Usar state.currentScreen._id directamente
-      const exportData = await elementService.exportToFlutter(state.currentScreen._id);
-      
-      console.log('✅ Datos de exportación recibidos:', exportData);
-      
-      dispatch({ 
-        type: 'SET_EXPORT_MODAL', 
-        payload: { open: true, content: exportData } 
-      });
-      
-      console.log('🎉 Modal de exportación abierto');
-      
-    } catch (error) {
-      console.error('❌ Error al exportar:', error);
-      
-      // Mejorar el manejo de errores
-      let errorMessage = 'Error desconocido';
-      
-      if (error.response) {
-        // Error del servidor
-        if (error.response.status === 404) {
-          errorMessage = `No se encontró la pantalla "${state.currentScreen?.name || 'desconocida'}" para exportar`;
-        } else if (error.response.status === 500) {
-          errorMessage = 'Error interno del servidor al generar el código';
-        } else {
-          errorMessage = `Error del servidor: ${error.response.data?.message || error.response.statusText}`;
-        }
-      } else if (error.message) {
-        if (error.message.includes('screen')) {
-          errorMessage = `Error con la pantalla: ${error.message}`;
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
-      alert(`Error al exportar: ${errorMessage}`);
-      throw error;
-    } finally {
-      dispatch({ type: 'SET_EXPORT_LOADING', payload: false });
-    }
-  };
+// Función exportToFlutter corregida para EditorContext.js
 
+// Función exportToFlutter corregida para tu EditorContext.js
+const exportToFlutter = async () => {
+  try {
+    // Verificar que hay una screen seleccionada
+    if (!state.currentScreen?._id) {
+      throw new Error('No hay screen seleccionada para exportar');
+    }
+    
+    console.log('📤 Iniciando exportación a Flutter:', {
+      screenId: state.currentScreen._id,
+      screenName: state.currentScreen.name,
+      projectId: projectId,
+      elementsCount: state.elements.length
+    });
+    
+    dispatch({ type: 'SET_EXPORT_LOADING', payload: true });
+    
+    // Asegurar que tenemos elementos para exportar (opcional, puede ser diseño vacío)
+    if (state.elements.length === 0) {
+      console.log('⚠️ La pantalla no tiene elementos, exportando diseño vacío');
+    }
+    
+    console.log('🔄 Llamando a elementService.exportToFlutter...');
+    
+    // CORRECCIÓN: Usar el servicio existente con el nuevo endpoint
+    const exportData = await elementService.exportToFlutter(state.currentScreen._id);
+    
+    console.log('✅ Datos de exportación recibidos:', {
+      screenName: exportData.screenName,
+      elementsCount: exportData.elementsCount,
+      hasWidget: !!exportData.widget,
+      hasScreen: !!exportData.screen,
+      hasPubspec: !!exportData.pubspec,
+      hasReadme: !!exportData.readme
+    });
+    
+    // Validar que recibimos los datos esperados
+    if (!exportData.screen && !exportData.widget) {
+      throw new Error('No se recibió código Flutter válido del servidor');
+    }
+    
+    // Actualizar el estado con los nuevos datos de exportación
+    dispatch({ 
+      type: 'SET_EXPORT_MODAL', 
+      payload: { 
+        open: true, 
+        content: {
+          widget: exportData.widget,           // Solo el widget componente
+          screen: exportData.screen,           // Aplicación completa con MaterialApp
+          pubspec: exportData.pubspec,         // pubspec.yaml
+          readme: exportData.readme,           // README.md
+          fullCode: exportData.fullCode,       // Código completo (para compatibilidad)
+          screenName: exportData.screenName,   // Nombre de la pantalla
+          projectName: exportData.projectName, // Nombre del proyecto
+          elementsCount: exportData.elementsCount, // Número de elementos
+          canvasSize: exportData.canvasSize,   // Tamaño del canvas
+          timestamp: exportData.timestamp      // Timestamp de exportación
+        }
+      } 
+    });
+    
+    console.log('🎉 Modal de exportación abierto exitosamente');
+    
+    return exportData;
+  } catch (error) {
+    console.error('❌ Error al exportar:', error);
+    
+    // Mejorar el manejo de errores específicos
+    let errorMessage = 'Error desconocido al exportar';
+    
+    if (error.response) {
+      // Error de axios/HTTP
+      const status = error.response.status;
+      const serverMessage = error.response.data?.message;
+      
+      switch (status) {
+        case 404:
+          errorMessage = `No se encontró la pantalla "${state.currentScreen?.name || 'desconocida'}" para exportar`;
+          break;
+        case 403:
+          errorMessage = 'No tienes permisos para exportar esta pantalla';
+          break;
+        case 500:
+          errorMessage = serverMessage || 'Error interno del servidor al generar el código Flutter';
+          break;
+        default:
+          errorMessage = serverMessage || `Error del servidor (${status})`;
+      }
+    } else if (error.message) {
+      if (error.message.includes('screen')) {
+        errorMessage = `Error con la pantalla: ${error.message}`;
+      } else if (error.message.includes('Network')) {
+        errorMessage = 'Error de conexión. Verifica tu internet y vuelve a intentar';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
+    // Actualizar el estado de error
+    dispatch({ type: 'SET_ERROR', payload: errorMessage });
+    
+    // Re-lanzar el error para que el componente pueda manejarlo
+    throw new Error(errorMessage);
+  } finally {
+    dispatch({ type: 'SET_EXPORT_LOADING', payload: false });
+  }
+};
   const setExportModalOpen = (open) => {
     dispatch({ 
       type: 'SET_EXPORT_MODAL', 

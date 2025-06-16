@@ -1,131 +1,355 @@
 /* src/components/editor/ExportModal.css */
+
 .export-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.export-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90vw;
+  max-width: 1200px;
+  height: 85vh;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.export-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.export-title h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-title h2::before {
+  content: "🚀";
+  font-size: 1.2em;
+}
+
+.export-info {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.export-info span {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.screen-name {
+  background: rgba(255, 255, 255, 0.25) !important;
+  font-weight: 600 !important;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.export-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 0 24px;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 16px 20px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6c757d;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.tab-button:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+  color: #495057;
+}
+
+.tab-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background-color: white;
+}
+
+.tab-button i {
+  font-size: 1rem;
+}
+
+.export-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #495057;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.file-info i {
+  color: #007bff;
+}
+
+.filename {
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-weight: 600;
+}
+
+.file-size {
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.code-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button-small {
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #495057;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+}
+
+.action-button-small:hover {
+  background: #e9ecef;
+  color: #343a40;
+}
+
+.code-preview {
+  flex: 1;
+  margin: 0;
+  padding: 24px;
+  background: #f8f9fa;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow: auto;
+  color: #2d3748;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.dart-code {
+  display: block;
+  font-family: inherit;
+  background: none;
+  color: inherit;
+}
+
+/* Syntax highlighting for Dart code */
+.code-preview {
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
+
+.code-preview .dart-code {
+  color: #d4d4d4;
+}
+
+.export-actions {
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.action-button.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-button.primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.action-button.secondary {
+  background: white;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.action-button.secondary:hover {
+  background: #e9ecef;
+  color: #343a40;
+}
+
+.export-footer {
+  padding: 16px 24px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.export-tips {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.export-tips h4 {
+  margin: 0 0 8px 0;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.export-tips ul {
+  margin: 0;
+  padding-left: 16px;
+  list-style: none;
+}
+
+.export-tips li {
+  margin-bottom: 4px;
+  position: relative;
+}
+
+.export-tips li::before {
+  content: "•";
+  color: #007bff;
+  font-weight: bold;
+  position: absolute;
+  left: -12px;
+}
+
+.export-tips strong {
+  color: #495057;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
   .export-modal {
-    background-color: white;
+    width: 95vw;
+    height: 90vh;
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    width: 90%;
-    max-width: 900px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
   }
   
   .export-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    border-bottom: 1px solid #eee;
+    padding: 16px 20px;
   }
   
-  .export-modal-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: #333;
+  .export-title h2 {
+    font-size: 1.3rem;
   }
   
-  .close-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #ca0808;
-  }
-  
-  .close-button:hover {
-    color: #333;
+  .export-info {
+    font-size: 0.8rem;
   }
   
   .export-tabs {
-    display: flex;
-    border-bottom: 1px solid #eee;
+    padding: 0 20px;
+    overflow-x: auto;
   }
   
   .tab-button {
-    padding: 12px 24px;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-size: 16px;
-    cursor: pointer;
-    color: #666;
-    transition: all 0.2s;
-  }
-  
-  .tab-button:hover {
-    color: #333;
-    background-color: #f9f9f9;
-  }
-  
-  .tab-button.active {
-    color: #4285f4;
-    border-bottom-color: #4285f4;
-    font-weight: 500;
-  }
-  
-  .export-content {
-    padding: 0;
-    flex: 1;
-    overflow: auto;
-    background-color: #f5f5f5;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
   
   .code-preview {
-    margin: 0;
-    padding: 16px;
-    overflow: auto;
-    font-family: monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #333;
-    background-color: #f5f5f5;
-    max-height: 400px;
-    white-space: pre-wrap;
+    padding: 16px 20px;
+    font-size: 12px;
   }
   
   .export-actions {
-    display: flex;
-    justify-content: flex-end;
-    padding: 16px 24px;
-    border-top: 1px solid #eee;
-    gap: 12px;
+    padding: 16px 20px;
+    flex-direction: column;
   }
   
   .action-button {
-    padding: 10px 20px;
-    background-color: #f5f5f5;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
+    justify-content: center;
   }
   
-  .action-button:hover {
-    background-color: #e5e5e5;
+  .export-footer {
+    padding: 12px 20px;
   }
-  
-  .action-button.primary {
-    background-color: #4285f4;
-    color: white;
-    border-color: #4285f4;
-  }
-  
-  .action-button.primary:hover {
-    background-color: #3367d6;
-  }
+}
