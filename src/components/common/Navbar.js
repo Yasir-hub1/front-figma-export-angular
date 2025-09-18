@@ -26,7 +26,7 @@ const Navbar = ({ project }) => {
     <nav className="navbar">
       <div className="navbar-left">
         <Link to="/dashboard" className="navbar-brand">
-          Figma Flutter Generator
+          UML Designer
         </Link>
         
         {project && (

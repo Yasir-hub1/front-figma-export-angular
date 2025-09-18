@@ -1,10 +1,10 @@
 // src/components/editor/ComponentLibrary.js
 import React from 'react';
-import { useEditor } from '../../context/EditorContext';
+import { useUML } from '../../context/uml_context';
 import './ComponentLibrary.css';
 
 const ComponentLibrary = () => {
-  const { createElement, project } = useEditor();
+  const { createUMLElement, project } = useUML();
   
   // Definición de componentes Flutter
   const componentCategories = [
@@ -313,7 +313,7 @@ const ComponentLibrary = () => {
       };
       
       // Crear el elemento con sus propiedades predeterminadas y el widget de Flutter
-      await createElement({
+      await createUMLElement({
         type: component.type,
         name: component.name,
         content: component.content || '',

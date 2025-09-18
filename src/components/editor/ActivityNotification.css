@@ -1,36 +1,76 @@
 /* src/components/editor/ActivityNotification.css */
 .activity-notifications {
     position: fixed;
-    top: 70px;
+    top: 80px;
     right: 20px;
-    z-index: 9999;
+    z-index: 1000;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    pointer-events: none;
+    max-width: 350px;
   }
   
-  .notification {
+  .notification-item {
     background-color: #333;
     color: white;
-    padding: 10px 15px;
-    border-radius: 4px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    padding: 10px 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     font-size: 14px;
-    animation: slideIn 0.3s ease;
-    opacity: 0.9;
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    animation: slideInRight 0.3s ease-out;
+    pointer-events: auto;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
   }
   
-  .notification-delete {
-    background-color: #d32f2f;
+  .notification-item:hover {
+    transform: translateX(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
   }
   
-  @keyframes slideIn {
+  .notification-item[data-type="delete"] {
+    background-color: #F44336;
+    border-left-color: #d32f2f;
+  }
+  
+  .notification-item[data-type="success"] {
+    background-color: #4CAF50;
+    border-left-color: #388e3c;
+  }
+  
+  .notification-item[data-type="interaction"] {
+    background-color: #2196F3;
+    border-left-color: #1976d2;
+  }
+  
+  .notification-item[data-type="info"] {
+    background-color: #333;
+    border-left-color: #555;
+  }
+  
+  @keyframes slideInRight {
     from {
       transform: translateX(100%);
       opacity: 0;
     }
     to {
       transform: translateX(0);
-      opacity: 0.9;
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
     }
   }

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import projectService from '../../services/projectService';
+import shareService from '../../services/shareService';
 import Navbar from '../common/Navbar';
 import ProjectCard from '../projects/ProjectCard';
 import ProjectForm from '../projects/ProjectForm';
@@ -95,7 +96,7 @@ const Dashboard = () => {
       console.log('✅ DASHBOARD: Proyecto encontrado:', project.name);
     }
     
-    const targetUrl = `/editor/${projectId}`;
+    const targetUrl = `/uml-editor/${projectId}`;
     console.log('🚀 DASHBOARD: Navegando a:', targetUrl);
     
     try {
@@ -140,7 +141,7 @@ const Dashboard = () => {
   };
 
   // CORRECCIÓN: Función mejorada para unirse a proyecto
-  const handleJoinProject = () => {
+  const handleJoinProject = async () => {
     try {
       console.log('🤝 DASHBOARD: Intentando unirse a proyecto:', joinLink);
       
@@ -153,17 +154,17 @@ const Dashboard = () => {
         return;
       }
       
-      let projectId;
+      let shareToken;
       try {
         const url = new URL(joinLink);
         const pathParts = url.pathname.split('/');
-        projectId = pathParts[pathParts.length - 1];
-        console.log('🔗 DASHBOARD: ID extraído de URL:', projectId);
+        shareToken = pathParts[pathParts.length - 1];
+        console.log('🔗 DASHBOARD: Token extraído de URL:', shareToken);
       } catch (error) {
-        // Si no es una URL válida, verificar si es solo el ID
-        if (/^[a-f\d]{24}$/i.test(joinLink)) {
-          projectId = joinLink;
-          console.log('🆔 DASHBOARD: Usando como ID directo:', projectId);
+        // Si no es una URL válida, verificar si es solo el token
+        if (/^[a-f\d]{64}$/i.test(joinLink)) {
+          shareToken = joinLink;
+          console.log('🔑 DASHBOARD: Usando como token directo:', shareToken);
         } else {
           setJoinError('El enlace proporcionado no es válido');
           setJoiningProject(false);
@@ -171,14 +172,31 @@ const Dashboard = () => {
         }
       }
       
-      if (!projectId || !/^[a-f\d]{24}$/i.test(projectId)) {
-        setJoinError('El ID del proyecto no es válido');
+      if (!shareToken || !/^[a-f\d]{64}$/i.test(shareToken)) {
+        setJoinError('El token del enlace no es válido');
         setJoiningProject(false);
         return;
       }
       
-      console.log('✅ DASHBOARD: Navegando a proyecto compartido:', projectId);
-      handleEditProject(projectId);
+      console.log('🔍 DASHBOARD: Verificando enlace de compartir...');
+      
+      // Llamar al servicio de compartir para verificar el enlace
+      const data = await shareService.joinProjectByLink(shareToken);
+      console.log('✅ DASHBOARD: Respuesta del backend:', data);
+      
+      if (data.requiresAuth) {
+        setJoinError('Debes iniciar sesión para unirte a este proyecto');
+        setJoiningProject(false);
+        return;
+      }
+      
+      if (data.project && data.project._id) {
+        console.log('✅ DASHBOARD: Navegando a proyecto compartido:', data.project._id);
+        handleEditProject(data.project._id);
+      } else {
+        setJoinError('No se pudo obtener la información del proyecto');
+        setJoiningProject(false);
+      }
       
     } catch (error) {
       console.error('❌ DASHBOARD: Error al unirse al proyecto:', error);

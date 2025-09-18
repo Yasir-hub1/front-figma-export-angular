@@ -65,11 +65,11 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
       </div>
       
       <div className="project-card-footer">
-        <button 
+        <button
           className="edit-button"
           onClick={handleEdit}
         >
-          ACTUALIZAR
+          ABRIR EDITOR UML
         </button>
         
         {isOwner && (

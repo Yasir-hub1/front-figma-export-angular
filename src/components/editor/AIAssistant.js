@@ -1,6 +1,6 @@
 // src/components/editor/AIAssistant.js - VERSIÓN ADAPTATIVA COMPLETA
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { useEditor } from "../../context/EditorContext";
+import { useUML } from "../../context/UMLcontext";
 import "./AIAssistant.css";
 import axios from "../../utils/axiosConfig";
 
@@ -42,14 +42,14 @@ const AIAssistant = ({
 	const [uploadSectionVisible, setUploadSectionVisible] = useState(false);
 
 	const {
-		createElement,
-		elements,
+		createUMLElement,
+		umlElements,
 		project,
-		currentScreen,
-		updateElement,
+		currentDiagram,
+		updateUMLElement,
 		selectElement,
-		deleteElement,
-	} = useEditor();
+		deleteUMLElement,
+	} = useUML();
 
 	// AGREGAR ESTA REFERENCIA después de las referencias existentes
 	const recordingIntervalRef = useRef(null);
@@ -1235,20 +1235,20 @@ const AIAssistant = ({
 		try {
 			console.log("🤖 AI: Enviando mensaje a la IA...");
 
-			if (!currentScreen) {
-				throw new Error("No hay pantalla seleccionada");
+			if (!currentDiagram) {
+				throw new Error("No hay diagrama seleccionado");
 			}
 
-			const validElements = Array.isArray(elements)
-				? elements.filter(el => el && el._id && el.type)
+			const validElements = Array.isArray(umlElements)
+				? umlElements.filter(el => el && el._id && el.type)
 				: [];
 
 			const canvasContext = {
 				canvas: {
-					width: currentScreen.canvas?.width || 360,
-					height: currentScreen.canvas?.height || 640,
-					deviceType: project?.deviceType || "custom",
-					backgroundColor: currentScreen.canvas?.background || "#FFFFFF",
+					width: currentDiagram.canvas?.width || 1200,
+					height: currentDiagram.canvas?.height || 800,
+					deviceType: "UML",
+					backgroundColor: currentDiagram.canvas?.background || "#FFFFFF",
 				},
 				elements: {
 					count: validElements.length,
@@ -1301,9 +1301,9 @@ const AIAssistant = ({
 					"opacity",
 				],
 				context: {
-					screenId: context.screenId || currentScreen._id,
+					diagramId: context.diagramId || currentDiagram._id,
 					projectId: context.projectId || project?._id,
-					screenName: context.screenName || currentScreen.name,
+					diagramName: context.diagramName || currentDiagram.name,
 				},
 			};
 
@@ -1619,8 +1619,8 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 						console.log("➕ Creando elemento:", action.elementType);
 
 						// Validar y ajustar posición dentro del canvas
-						const canvasWidth = currentScreen.canvas?.width || 360;
-						const canvasHeight = currentScreen.canvas?.height || 640;
+						const canvasWidth = currentDiagram.canvas?.width || 1200;
+						const canvasHeight = currentDiagram.canvas?.height || 800;
 						const elementWidth = Math.max(20, action.size?.width || 100);
 						const elementHeight = Math.max(20, action.size?.height || 50);
 
@@ -1693,7 +1693,7 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 
 						console.log("📋 Datos del elemento a crear:", elementData);
 
-						const createdElement = await createElement(elementData);
+						const createdElement = await createUMLElement(elementData);
 						createdElements.push(createdElement);
 						console.log("✅ Elemento creado exitosamente");
 						break;
@@ -1713,14 +1713,14 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 						if (action.flutterProps)
 							updateData.flutterProps = action.flutterProps;
 
-						await updateElement(action.elementId, updateData);
+						await updateUMLElement(action.elementId, updateData);
 						console.log("✅ Elemento actualizado exitosamente");
 						break;
 
 					case "select":
 						if (action.elementId) {
-							const validElements = Array.isArray(elements)
-								? elements.filter(el => el && el._id && el.type)
+							const validElements = Array.isArray(umlElements)
+								? umlElements.filter(el => el && el._id && el.type)
 								: [];
 							const element = validElements.find(
 								el => el._id === action.elementId
@@ -1734,7 +1734,7 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 
 					case "delete":
 						if (action.elementId) {
-							await deleteElement(action.elementId);
+							await deleteUMLElement(action.elementId);
 							console.log("✅ Elemento eliminado exitosamente");
 						}
 						break;

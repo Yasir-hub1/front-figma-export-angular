@@ -1,0 +1,214 @@
+
+/* UMLCanvas.css */
+.uml-canvas-container {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: #f1f5f9;
+  position: relative;
+}
+
+.uml-canvas-container.no-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+}
+
+.no-diagram-message {
+  text-align: center;
+  color: #0277bd;
+}
+
+.no-diagram-message .no-diagram-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.uml-canvas-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  padding: 40px;
+}
+
+.uml-canvas {
+  position: relative;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: default;
+  transform-origin: center;
+  border-radius: 8px;
+}
+
+.uml-canvas.grid-visible {
+  background-image: 
+    linear-gradient(rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.uml-connections-layer {
+  pointer-events: none;
+}
+
+.uml-diagram-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.diagram-info-display {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.diagram-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.diagram-type-badge {
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  align-self: flex-start;
+}
+
+.diagram-dimensions,
+.elements-count,
+.connections-count {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.connection-instructions {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+.instructions-content {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  text-align: center;
+}
+
+/* Estilos para relaciones de cardinalidad */
+.cardinality-label {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  fill: #666;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.intermediate-table-label {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  fill: #FF6B35;
+  text-anchor: middle;
+  dominant-baseline: central;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.multiplicity-label {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  fill: #333;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* Estilos específicos para diferentes tipos de relaciones de cardinalidad */
+.uml-connection.one-to-one {
+  stroke: #4CAF50;
+  stroke-width: 2;
+}
+
+.uml-connection.one-to-many {
+  stroke: #2196F3;
+  stroke-width: 2;
+}
+
+.uml-connection.many-to-one {
+  stroke: #FF9800;
+  stroke-width: 2;
+}
+
+.uml-connection.many-to-many {
+  stroke: #9C27B0;
+  stroke-width: 2;
+}
+
+.uml-connection.zero-to-one {
+  stroke: #607D8B;
+  stroke-width: 2;
+  stroke-dasharray: 5,5;
+}
+
+.uml-connection.zero-to-many {
+  stroke: #795548;
+  stroke-width: 2;
+  stroke-dasharray: 5,5;
+}
+
+.uml-connection.one-or-many {
+  stroke: #E91E63;
+  stroke-width: 2;
+}
+
+.uml-connection.intermediate-table {
+  stroke: #FF6B35;
+  stroke-width: 3;
+  stroke-dasharray: 3,3;
+}
+
+/* Hover effects para relaciones de cardinalidad */
+.uml-connection.one-to-one:hover,
+.uml-connection.one-to-many:hover,
+.uml-connection.many-to-one:hover,
+.uml-connection.many-to-many:hover,
+.uml-connection.zero-to-one:hover,
+.uml-connection.zero-to-many:hover,
+.uml-connection.one-or-many:hover,
+.uml-connection.intermediate-table:hover {
+  stroke-width: 3;
+  filter: brightness(1.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cardinality-label,
+  .intermediate-table-label,
+  .multiplicity-label {
+    font-size: 8px;
+  }
+}

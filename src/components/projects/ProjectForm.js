@@ -12,24 +12,24 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Dispositivos móviles predefinidos
-  const mobileDevices = [
-    { id: 'custom', name: 'Personalizado', width: 360, height: 640 },
-    { id: 'iphone12', name: 'iPhone 12/13', width: 390, height: 844 },
-    { id: 'iphone8', name: 'iPhone 8', width: 375, height: 667 },
-    { id: 'pixel5', name: 'Google Pixel 5', width: 393, height: 851 },
-    { id: 'samsungs21', name: 'Samsung Galaxy S21', width: 360, height: 800 },
-    { id: 'ipad', name: 'iPad', width: 768, height: 1024 },
+  // Tipos de diagramas UML predefinidos
+  const diagramTypes = [
+    { id: 'custom', name: 'Personalizado', width: 1000, height: 700 },
+    { id: 'class', name: 'Diagrama de Clases', width: 1200, height: 800 },
+    { id: 'sequence', name: 'Diagrama de Secuencia', width: 1000, height: 600 },
+    { id: 'usecase', name: 'Casos de Uso', width: 800, height: 600 },
+    { id: 'activity', name: 'Diagrama de Actividades', width: 900, height: 700 },
+    { id: 'state', name: 'Diagrama de Estados', width: 800, height: 600 },
   ];
 
-  // Manejar cambio de dispositivo
-  const handleDeviceChange = (e) => {
-    const selectedDevice = mobileDevices.find(device => device.id === e.target.value);
-    if (selectedDevice) {
-      setDeviceType(selectedDevice.id);
-      if (selectedDevice.id !== 'custom') {
-        setCanvasWidth(selectedDevice.width);
-        setCanvasHeight(selectedDevice.height);
+  // Manejar cambio de tipo de diagrama
+  const handleDiagramTypeChange = (e) => {
+    const selectedDiagram = diagramTypes.find(diagram => diagram.id === e.target.value);
+    if (selectedDiagram) {
+      setDeviceType(selectedDiagram.id);
+      if (selectedDiagram.id !== 'custom') {
+        setCanvasWidth(selectedDiagram.width);
+        setCanvasHeight(selectedDiagram.height);
       }
     }
   };
@@ -43,8 +43,8 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
       return;
     }
     
-    if (canvasWidth < 320 || canvasHeight < 240) {
-      setError('Las dimensiones del canvas son demasiado pequeñas');
+    if (canvasWidth < 600 || canvasHeight < 400) {
+      setError('Las dimensiones del diagrama son demasiado pequeñas');
       return;
     }
     
@@ -72,7 +72,7 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
 
   return (
     <div className="project-form">
-      <h2>{project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto Flutter'}</h2>
+      <h2>{project ? 'Editar Proyecto UML' : 'Crear Nuevo Proyecto UML'}</h2>
       
       {error && <div className="form-error">{error}</div>}
       
@@ -85,7 +85,7 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            placeholder="Mi app Flutter"
+            placeholder="Mi diagrama UML"
           />
         </div>
         
@@ -95,20 +95,20 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe tu proyecto aquí"
+            placeholder="Describe tu proyecto de diagramas UML aquí"
             rows={3}
           />
         </div>
         
         <div className="form-group">
-          <label htmlFor="deviceType">Dispositivo</label>
+          <label htmlFor="deviceType">Tipo de Diagrama</label>
           <select
             id="deviceType"
             value={deviceType}
-            onChange={handleDeviceChange}
+            onChange={handleDiagramTypeChange}
           >
-            {mobileDevices.map(device => (
-              <option key={device.id} value={device.id}>{device.name}</option>
+            {diagramTypes.map(diagram => (
+              <option key={diagram.id} value={diagram.id}>{diagram.name}</option>
             ))}
           </select>
         </div>
@@ -121,8 +121,8 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
               id="canvasWidth"
               value={canvasWidth}
               onChange={(e) => setCanvasWidth(e.target.value)}
-              min="320"
-              max="1200"
+              min="600"
+              max="2000"
               disabled={deviceType !== 'custom'}
               required
             />
@@ -135,8 +135,8 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
               id="canvasHeight"
               value={canvasHeight}
               onChange={(e) => setCanvasHeight(e.target.value)}
-              min="240"
-              max="2160"
+              min="400"
+              max="1600"
               disabled={deviceType !== 'custom'}
               required
             />

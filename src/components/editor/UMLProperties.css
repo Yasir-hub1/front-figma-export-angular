@@ -1,0 +1,483 @@
+
+/* UMLProperties.css */
+.uml-properties-container {
+  width: 350px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  background-color: white;
+  border-left: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.uml-properties-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+  flex-shrink: 0;
+}
+
+.uml-properties-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.uml-properties-toggle {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  color: #6b7280;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.uml-properties-toggle:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.properties-tabs {
+  display: flex;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.properties-tabs .tab-button {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+}
+
+.properties-tabs .tab-button:hover {
+  background-color: #f8fafc;
+  color: #374151;
+}
+
+.properties-tabs .tab-button.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+.properties-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.attributes-list,
+.operations-list {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f9fafb;
+}
+
+.attribute-item,
+.operation-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 12px;
+  background-color: white;
+}
+
+.attribute-item:last-child,
+.operation-item:last-child {
+  border-bottom: none;
+}
+
+.attribute-item select,
+.operation-item select {
+  width: auto;
+  min-width: 50px;
+  padding: 4px 6px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+.attribute-item input,
+.operation-item input {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+.remove-attribute,
+.remove-operation {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-attribute:hover,
+.remove-operation:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+.add-attribute-button,
+.add-operation-button {
+  width: 100%;
+  padding: 12px;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e0;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.add-attribute-button:hover,
+.add-operation-button:hover {
+  background: #f1f5f9;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.properties-actions {
+  padding: 20px;
+  border-top: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.action-button {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-button:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+.action-button.delete {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.action-button.delete:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-button:disabled:hover {
+  background: white;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+/* Responsive design */
+@media (max-width: 1400px) {
+  .uml-editor-main.properties-open {
+    margin-right: 300px;
+  }
+  
+  .uml-properties-container {
+    width: 300px;
+  }
+  
+  .uml-components-sidebar {
+    width: 260px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .uml-editor-main.properties-open {
+    margin-right: 0;
+  }
+  
+  .uml-properties-container {
+    width: 100%;
+    z-index: 200;
+  }
+  
+  .uml-components-sidebar {
+    width: 100%;
+    position: absolute;
+    z-index: 150;
+    background: white;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .diagram-type-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .canvas-controls {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .zoom-controls {
+    gap: 6px;
+  }
+  
+  .toolbar-section {
+    gap: 6px;
+  }
+}
+
+/* Estilos para la pestaña de conexiones */
+.connections-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px;
+  background: #f9f9f9;
+}
+
+.no-connections {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px;
+  margin: 0;
+}
+
+.connection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.connection-item:hover {
+  background: #f0f0f0;
+  border-color: #007ACC;
+}
+
+.connection-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.connection-type {
+  font-weight: bold;
+  color: #007ACC;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.connection-label {
+  color: #333;
+  font-size: 14px;
+}
+
+.connection-target {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.connection-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-connection-btn,
+.delete-connection-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.edit-connection-btn {
+  background: #007ACC;
+  color: white;
+}
+
+.edit-connection-btn:hover {
+  background: #005a9e;
+}
+
+.delete-connection-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-connection-btn:hover {
+  background: #c82333;
+}
+
+/* Estilos para tablas intermedias */
+.intermediate-table-info {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.intermediate-table-info .form-group {
+  margin-bottom: 15px;
+}
+
+.intermediate-table-info .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.table-attributes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.table-attribute-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.table-attribute-item input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+}
+
+.table-attribute-item select {
+  min-width: 100px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #6c757d;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Responsive para tablas intermedias */
+@media (max-width: 1024px) {
+  .table-attribute-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .table-attribute-item input[type="text"],
+  .table-attribute-item select {
+    width: 100%;
+    min-width: auto;
+  }
+}

@@ -1,98 +1,96 @@
-// src/components/editor/ScreenTabs.js - VERSIÓN CORREGIDA COMPLETA
+// src/components/editor/ScreenTabs.js - VERSIÓN ADAPTADA PARA UML DIAGRAMS
 
 import React, { useEffect, useState } from 'react';
-import { useEditor } from '../../context/EditorContext';
+import { useUML } from '../../context/UMLcontext';
 import './ScreenTabs.css';
 
 const ScreenTabs = () => {
   const { 
-    screens, 
-    currentScreen, 
-    setCurrentScreen, 
-    createScreen, 
-    deleteScreen, 
-    updateScreen,
+    diagrams, 
+    currentDiagram, 
+    setCurrentDiagram, 
+    createDiagram, 
+    deleteDiagram, 
+    updateDiagram,
     project,
-    elements,
-    fetchElements
-  } = useEditor();
+    umlElements,
+    fetchUMLElements
+  } = useUML();
 
   const [isCreating, setIsCreating] = useState(false);
-  const [newScreenName, setNewScreenName] = useState('');
+  const [newDiagramName, setNewDiagramName] = useState('');
 
-  const handleCreateScreen = async () => {
-    console.log("Creando screen con nombre:", newScreenName);
-    if (!newScreenName.trim()) return;
+  const handleCreateDiagram = async () => {
+    console.log("Creando diagrama con nombre:", newDiagramName);
+    if (!newDiagramName.trim()) return;
     
     try {
-      await createScreen(newScreenName.trim());
-      setNewScreenName('');
+      await createDiagram(newDiagramName.trim(), 'class');
+      setNewDiagramName('');
       setIsCreating(false);
     } catch (error) {
-      console.error('Error creando screen:', error);
-      alert('Error al crear pantalla: ' + (error.message || 'Error desconocido'));
+      console.error('Error creando diagrama:', error);
+      alert('Error al crear diagrama: ' + (error.message || 'Error desconocido'));
     }
   };
 
-  const handleDeleteScreen = async (screen, event) => {
+  const handleDeleteDiagram = async (diagram, event) => {
     event.stopPropagation();
-    console.log("Eliminando screen:", screen);
+    console.log("Eliminando diagrama:", diagram);
     
-    if (screens.length <= 1) {
-      alert('No puedes eliminar la única pantalla del proyecto');
+    if (diagrams.length <= 1) {
+      alert('No puedes eliminar el único diagrama del proyecto');
       return;
     }
     
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta pantalla?')) {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este diagrama?')) {
       try {
-        // CORRECCIÓN: Usar directamente screen._id
-        await deleteScreen(screen._id);
+        await deleteDiagram(diagram._id);
       } catch (error) {
-        console.error('Error eliminando screen:', error);
-        alert('Error al eliminar pantalla: ' + (error.message || 'Error desconocido'));
+        console.error('Error eliminando diagrama:', error);
+        alert('Error al eliminar diagrama: ' + (error.message || 'Error desconocido'));
       }
     }
   };
 
-  const handleRenameScreen = async (screen, newName) => {
-    console.log("Renombrando screen:", screen._id, "a:", newName);
+  const handleRenameDiagram = async (diagram, newName) => {
+    console.log("Renombrando diagrama:", diagram._id, "a:", newName);
     if (!newName.trim()) return;
     
     try {
-      // CORRECCIÓN: Usar directamente screen._id
-      await updateScreen(screen._id, { name: newName.trim() });
+      await updateDiagram(diagram._id, { name: newName.trim() });
     } catch (error) {
-      console.error('Error renombrando screen:', error);
-      alert('Error al renombrar pantalla: ' + (error.message || 'Error desconocido'));
+      console.error('Error renombrando diagrama:', error);
+      alert('Error al renombrar diagrama: ' + (error.message || 'Error desconocido'));
     }
   };
 
   const startCreating = () => {
     setIsCreating(true);
-    setNewScreenName(`Screen ${screens.length + 1}`);
+    setNewDiagramName(`Diagrama ${diagrams.length + 1}`);
   };
 
   const cancelCreating = () => {
     setIsCreating(false);
-    setNewScreenName('');
+    setNewDiagramName('');
   };
 
-  console.log("📱 ScreenTabs - screens:", screens);
-  console.log("📱 ScreenTabs - currentScreen:", currentScreen);
+  console.log("📱 ScreenTabs - diagrams:", diagrams);
+  console.log("📱 ScreenTabs - currentDiagram:", currentDiagram);
 
   return (
     <div className="screen-tabs">
       <div className="tabs-container">
-        {Array.isArray(screens) && screens.map((screen) => (
-          <ScreenTab
-            key={screen._id}
-            screen={screen}
-            isActive={currentScreen?._id === screen._id}
-            onClick={() => setCurrentScreen(screen)}
-            onDelete={(e) => handleDeleteScreen(screen, e)}
-            onRename={(name) => handleRenameScreen(screen, name)}
-            canDelete={screens.length > 1}
-            elementsCount={currentScreen?._id === screen._id ? elements.length : 0}
+        {Array.isArray(diagrams) && diagrams.map((diagram) => (
+          <DiagramTab
+            key={diagram._id}
+            diagram={diagram}
+            isActive={currentDiagram?._id === diagram._id}
+            onClick={() => setCurrentDiagram(diagram)}
+            onDelete={(e) => handleDeleteDiagram(diagram, e)}
+            onRename={(name) => handleRenameDiagram(diagram, name)}
+            canDelete={diagrams.length > 1}
+            elementsCount={currentDiagram?._id === diagram._id ? umlElements.length : 0}
           />
         ))}
         
@@ -100,13 +98,13 @@ const ScreenTabs = () => {
           <div className="screen-tab creating">
             <input
               type="text"
-              value={newScreenName}
-              onChange={(e) => setNewScreenName(e.target.value)}
+              value={newDiagramName}
+              onChange={(e) => setNewDiagramName(e.target.value)}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') handleCreateScreen();
+                if (e.key === 'Enter') handleCreateDiagram();
                 if (e.key === 'Escape') cancelCreating();
               }}
-              onBlur={handleCreateScreen}
+              onBlur={handleCreateDiagram}
               autoFocus
               className="screen-name-input"
             />
@@ -115,7 +113,7 @@ const ScreenTabs = () => {
           <button className="add-screen-button" onClick={startCreating}>
             <i className="fa fa-plus"></i>
             <span>
-              {Array.isArray(screens) && screens.length > 0 ? 'Nueva Pantalla' : 'Crear Primera Pantalla'}
+              {Array.isArray(diagrams) && diagrams.length > 0 ? 'Nuevo Diagrama' : 'Crear Primer Diagrama'}
             </span>
           </button>
         )}
@@ -123,14 +121,14 @@ const ScreenTabs = () => {
       
       <div className="screen-info">
         <span className="screen-count">
-          {Array.isArray(screens) ? screens.length : 0} pantalla{(Array.isArray(screens) ? screens.length : 0) !== 1 ? 's' : ''}
+          {Array.isArray(diagrams) ? diagrams.length : 0} diagrama{(Array.isArray(diagrams) ? diagrams.length : 0) !== 1 ? 's' : ''}
         </span>
         <span className="device-type">
-          {project?.deviceType || 'custom'}
+          {project?.deviceType || 'UML'}
         </span>
-        {currentScreen && (
+        {currentDiagram && (
           <span className="current-screen-info">
-            Actual: {currentScreen.name} ({elements?.length || 0} elementos)
+            Actual: {currentDiagram.name} ({umlElements?.length || 0} elementos)
           </span>
         )}
       </div>
@@ -138,20 +136,20 @@ const ScreenTabs = () => {
   );
 };
 
-// COMPONENTE INDIVIDUAL CORREGIDO
-const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, elementsCount }) => {
+// COMPONENTE INDIVIDUAL PARA DIAGRAMAS UML
+const DiagramTab = ({ diagram, isActive, onClick, onDelete, onRename, canDelete, elementsCount }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(screen.name);
+  const [editName, setEditName] = useState(diagram.name);
 
   const handleStartEdit = (e) => {
     e.stopPropagation();
     setIsEditing(true);
-    setEditName(screen.name);
+    setEditName(diagram.name);
   };
 
   const handleSaveEdit = () => {
     console.log("Guardando nuevo nombre:", editName);
-    if (editName.trim() && editName !== screen.name) {
+    if (editName.trim() && editName !== diagram.name) {
       onRename(editName.trim());
     }
     setIsEditing(false);
@@ -159,7 +157,7 @@ const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, e
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-    setEditName(screen.name);
+    setEditName(diagram.name);
   };
 
   const handleTabClick = (e) => {
@@ -187,13 +185,13 @@ const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, e
       ) : (
         <>
           <span className="screen-name" onDoubleClick={handleStartEdit}>
-            {screen.name}
+            {diagram.name}
           </span>
           <div className="screen-actions">
             <button
               className="edit-button"
               onClick={handleStartEdit}
-              title="Renombrar pantalla"
+              title="Renombrar diagrama"
             >
               <i className="fa fa-edit"></i>
             </button>
@@ -201,7 +199,7 @@ const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, e
               <button
                 className="delete-button"
                 onClick={onDelete}
-                title="Eliminar pantalla"
+                title="Eliminar diagrama"
               >
                 <i className="fa fa-times"></i>
               </button>
@@ -213,6 +211,9 @@ const ScreenTab = ({ screen, isActive, onClick, onDelete, onRename, canDelete, e
       <div className="screen-preview">
         <div className="elements-count">
           {elementsCount || 0} elementos
+        </div>
+        <div className="diagram-type">
+          {diagram.type || 'class'}
         </div>
       </div>
     </div>

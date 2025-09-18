@@ -1,259 +1,226 @@
-// src/components/editor/ShareProjectModal.js
+// src/components/editor/ShareProjectModal.js - Modal para compartir proyecto colaborativo
 import React, { useState, useEffect } from 'react';
-import projectService from '../../services/projectService';
+import { useUML } from '../../context/UMLcontext';
 import './ShareProjectModal.css';
 
-const ShareProjectModal = ({ project, onClose }) => {
-  const [collaborators, setCollaborators] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
+const ShareProjectModal = ({ isOpen, onClose }) => {
+  const { project, currentDiagram, generateShareLink, shareSettings, updateShareSettings } = useUML();
+  
+  const [shareLink, setShareLink] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [permissions] = useState({
+    canEdit: true,
+    canCreateDiagrams: true,
+    canDeleteDiagrams: true,
+    canInviteOthers: true,
+    canExport: true
+  });
+  const [expirationDays, setExpirationDays] = useState(30);
+  const [isPublic, setIsPublic] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [activeUsers, setActiveUsers] = useState([]);
-  
+
   useEffect(() => {
-    // Generar URL para compartir
-    const baseUrl = window.location.origin;
-    setShareUrl(`${baseUrl}/editor/${project._id}`);
+    if (isOpen && project) {
+      loadShareSettings();
+    }
+  }, [isOpen, project]);
+
+  const loadShareSettings = async () => {
+    try {
+      if (shareSettings) {
+        setExpirationDays(shareSettings.expirationDays || 30);
+        setIsPublic(shareSettings.isPublic || false);
+        if (shareSettings.shareLink) {
+          setShareLink(shareSettings.shareLink);
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando configuración de compartir:', error);
+    }
+  };
+
+  const handleGenerateLink = async () => {
+    if (!project) return;
     
-    // Cargar colaboradores actuales
-    fetchCollaborators();
-    
-    // Cargar usuarios activos
-    fetchActiveUsers();
-  }, [project]);
-  
-  const fetchCollaborators = async () => {
+    setIsGenerating(true);
     try {
-      setLoading(true);
-      const data = await projectService.getCollaborators(project._id);
-      setCollaborators(data);
-    } catch (error) {
-      console.error('Error al cargar colaboradores:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const fetchActiveUsers = async () => {
-    try {
-      const data = await projectService.getActiveUsers(project._id);
-      setActiveUsers(data);
-    } catch (error) {
-      console.error('Error al cargar usuarios activos:', error);
-    }
-  };
-  
-  const searchUsers = async (term) => {
-    if (term.length < 3) {
-      setUsers([]);
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      const data = await projectService.searchUsers(term);
-      // Filtrar usuarios que ya son colaboradores
-      const filteredUsers = data.filter(user => 
-        !collaborators.some(collab => collab._id === user._id)
-      );
-      setUsers(filteredUsers);
-    } catch (error) {
-      console.error('Error al buscar usuarios:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    searchUsers(e.target.value);
-  };
-  
-  const addCollaborator = async (userId) => {
-    try {
-      console.log('Intentando añadir colaborador con ID:', userId);
-      setLoading(true);
+      const settings = {
+        permissions,
+        expirationDays,
+        isPublic,
+        projectId: project._id,
+        diagramId: currentDiagram?._id
+      };
       
-      // Llamar al servicio para añadir el colaborador
-      const response = await projectService.addCollaborator(project._id, userId);
-      console.log('Respuesta del servidor:', response);
-      
-      // Actualizar lista de colaboradores
-      fetchCollaborators();
-      
-      // Limpiar búsqueda
-      setSearchTerm('');
-      setUsers([]);
+      const link = await generateShareLink(settings);
+      setShareLink(link);
+      setCopied(false);
     } catch (error) {
-      console.error('Error al añadir colaborador:', error);
-      alert('Error al añadir colaborador: ' + (error.message || 'Error desconocido'));
+      console.error('Error generando enlace de compartir:', error);
+      alert('Error al generar enlace de compartir: ' + (error.message || 'Error desconocido'));
     } finally {
-      setLoading(false);
+      setIsGenerating(false);
     }
   };
-  
-  const removeCollaborator = async (userId) => {
+
+  const handleCopyLink = async () => {
     try {
-      setLoading(true);
-      await projectService.removeCollaborator(project._id, userId);
-      
-      // Actualizar lista de colaboradores
-      fetchCollaborators();
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Error al eliminar colaborador:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error copiando enlace:', error);
+      alert('Error al copiar enlace');
     }
   };
-  
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(err => {
-        console.error('Error al copiar el enlace:', err);
+
+  const handleSaveSettings = async () => {
+    try {
+      await updateShareSettings({
+        permissions,
+        expirationDays,
+        isPublic
       });
+      alert('Configuración de compartir guardada');
+    } catch (error) {
+      console.error('Error guardando configuración:', error);
+      alert('Error al guardar configuración');
+    }
   };
-  
+
+
+  if (!isOpen) return null;
+
   return (
-    <div className="share-modal-overlay">
-      <div className="share-modal">
-        <div className="share-modal-header">
-          <h2>Compartir Proyecto</h2>
-          <button 
-            className="close-button" 
-            onClick={onClose}
-          >
-            &times;
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="share-project-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>
+            <i className="fas fa-share-alt"></i>
+            Compartir Proyecto
+          </h2>
+          <button className="close-button" onClick={onClose}>
+            <i className="fas fa-times"></i>
           </button>
         </div>
-        
-        <div className="share-modal-content">
-          <div className="share-link-section">
-            <h3>Enlace para compartir</h3>
-            <div className="share-link-container">
-              <input 
-                type="text" 
-                value={shareUrl} 
-                readOnly 
-                className="share-link-input"
-              />
+
+        <div className="modal-content">
+          <div className="project-info">
+            <h3>{project?.name}</h3>
+            <p>Diagrama actual: {currentDiagram?.name || 'Ninguno'}</p>
+          </div>
+
+          <div className="share-section">
+            <h4>Configuración de Compartir</h4>
+            
+            <div className="form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                />
+                <span>Hacer proyecto público (cualquiera con el enlace puede acceder)</span>
+              </label>
+            </div>
+
+            <div className="form-group">
+              <label>
+                Días de expiración:
+                <select 
+                  value={expirationDays} 
+                  onChange={(e) => setExpirationDays(Number(e.target.value))}
+                >
+                  <option value={1}>1 día</option>
+                  <option value={7}>7 días</option>
+                  <option value={30}>30 días</option>
+                  <option value={90}>90 días</option>
+                  <option value={0}>Nunca expira</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+
+          <div className="link-section">
+            <h4>Enlace de Compartir</h4>
+            
+            {!shareLink ? (
               <button 
-                className="copy-button"
-                onClick={copyToClipboard}
+                className="generate-button"
+                onClick={handleGenerateLink}
+                disabled={isGenerating}
               >
-                {copied ? 'Copiado!' : 'Copiar'}
+                {isGenerating ? (
+                  <>
+                    <i className="fa fa-spinner fa-spin"></i>
+                    Generando enlace...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-link"></i>
+                    Generar Enlace de Compartir
+                  </>
+                )}
               </button>
-            </div>
-            <p className="share-info">
-              Cualquier persona con este enlace podrá acceder al proyecto.
-            </p>
-          </div>
-          
-          <div className="collaborators-section">
-            <h3>Colaboradores</h3>
-            
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Buscar usuarios por nombre o email"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="search-input"
-              />
-              
-              <div className="search-results">
-              {loading ? (
-                <div className="loading-results">Buscando...</div>
-              ) : users.length > 0 ? (
-                users.map(user => (
-                  <div key={user._id} className="user-item">
-                    <div className="user-info">
-                      <div className="user-avatar">
-                        {user.username.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="user-details">
-                        <div className="user-name">{user.username}</div>
-                        <div className="user-email">{user.email}</div>
-                      </div>
-                    </div>
-                    <button 
-                      className="add-user-button"
-                      onClick={() => addCollaborator(user._id)}
-                      disabled={loading}
-                    >
-                      <i className="fa fa-plus"></i> Añadir
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="no-results">No se encontraron usuarios</div>
-              )}
-            </div>
-            </div>
-            
-            <div className="collaborators-list">
-              <h4>Colaboradores actuales</h4>
-              {loading ? (
-                <div className="loading-collaborators">Cargando colaboradores...</div>
-              ) : collaborators.length > 0 ? (
-                collaborators.map(user => (
-                  <div key={user._id} className="collaborator-item">
-                    <div className="user-info">
-                      <div className="user-avatar">
-                        {user.username.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="user-details">
-                        <div className="user-name">
-                          {user.username}
-                          {project.owner === user._id && <span className="owner-badge">Propietario</span>}
-                          {activeUsers.some(activeUser => activeUser.userId === user._id) && (
-                            <span className="online-badge">En línea</span>
-                          )}
-                        </div>
-                        <div className="user-email">{user.email}</div>
-                      </div>
-                    </div>
-                    
-                    {project.owner !== user._id && (
-                      <button 
-                        className="remove-user-button"
-                        onClick={() => removeCollaborator(user._id)}
-                        disabled={loading}
-                        title="Eliminar colaborador"
-                      >
-                        <i className="fa fa-times"></i>
-                      </button>
+            ) : (
+              <div className="link-container">
+                <div className="link-input-group">
+                  <input
+                    type="text"
+                    value={shareLink}
+                    readOnly
+                    className="share-link-input"
+                    placeholder="Enlace de compartir..."
+                  />
+                  <button 
+                    className="copy-button"
+                    onClick={handleCopyLink}
+                    title="Copiar enlace"
+                  >
+                    {copied ? (
+                      <>
+                        <i className="fas fa-check"></i>
+                        ¡Copiado!
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-copy"></i>
+                        Copiar
+                      </>
                     )}
-                  </div>
-                ))
-              ) : (
-                <div className="no-collaborators">No hay colaboradores</div>
-              )}
-            </div>
+                  </button>
+                </div>
+                
+                <div className="link-actions">
+                  <button 
+                    className="regenerate-button"
+                    onClick={handleGenerateLink}
+                    disabled={isGenerating}
+                  >
+                    <i className="fas fa-refresh"></i>
+                    Regenerar
+                  </button>
+                  
+                  <button 
+                    className="save-settings-button"
+                    onClick={handleSaveSettings}
+                  >
+                    <i className="fas fa-save"></i>
+                    Guardar Configuración
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          
-          <div className="active-users-section">
-            <h3>Usuarios activos ahora</h3>
-            <div className="active-users-list">
-              {activeUsers.length > 0 ? (
-                activeUsers.map(user => (
-                  <div key={user.socketId} className="active-user">
-                    <div className="user-avatar online">
-                      {user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="active-user-name">{user.username}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="no-active-users">No hay usuarios activos actualmente</div>
-              )}
-            </div>
-          </div>
+
+       
+        </div>
+
+        <div className="modal-footer">
+          <button className="cancel-button" onClick={onClose}>
+            Cerrar
+          </button>
         </div>
       </div>
     </div>

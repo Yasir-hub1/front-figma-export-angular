@@ -27,7 +27,7 @@
   min-width: 0;
 }
 
-/* Toolbar superior del canvas */
+/* UMLToolbar superior del canvas */
 .canvas-toolbar {
   height: 50px;
   background: white;

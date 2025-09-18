@@ -13,6 +13,7 @@
     "axios": "^1.8.4",
     "date-fns": "^4.1.0",
     "jszip": "^3.10.1",
+    "plantuml-encoder": "^1.4.0",
     "react": "^19.1.0",
     "react-color": "^2.19.3",
     "react-dnd": "^16.0.1",
@@ -23,7 +24,8 @@
     "react-scripts": "5.0.1",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.17",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xml2js": "^0.6.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -31,6 +33,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:5002",
   "eslintConfig": {
     "extends": [
       "react-app",
