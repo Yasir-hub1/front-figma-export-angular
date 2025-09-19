@@ -212,9 +212,16 @@ function umlReducer(state, action) {
 
     case 'DELETE_CONNECTION':
       const connectionsToDeleteFrom = Array.isArray(state.connections) ? state.connections : [];
+      console.log('DELETE_CONNECTION reducer ejecutándose:', {
+        connectionIdToDelete: action.payload,
+        currentConnectionsCount: connectionsToDeleteFrom.length,
+        connectionIds: connectionsToDeleteFrom.map(c => c._id)
+      });
+      const filteredConnections = connectionsToDeleteFrom.filter(connection => connection._id !== action.payload);
+      console.log('Conexiones después del filtro:', filteredConnections.length);
       return {
         ...state,
-        connections: connectionsToDeleteFrom.filter(connection => connection._id !== action.payload),
+        connections: filteredConnections,
         selectedConnection: state.selectedConnection?._id === action.payload ? null : state.selectedConnection
       };
 
@@ -389,7 +396,9 @@ export function UMLProvider({ children, projectId }) {
         dispatch({ type: 'UPDATE_CONNECTION', payload: data.connection });
       } else if (data.type === 'connection-deleted') {
         console.log('Aplicando eliminación de conexión desde socket:', data.connectionId);
+        console.log('Estado actual de conexiones antes de eliminar:', state.connections?.length || 0);
         dispatch({ type: 'DELETE_CONNECTION', payload: data.connectionId });
+        console.log('Despachada acción DELETE_CONNECTION para ID:', data.connectionId);
       } else if (data.type === 'diagram-added') {
         const diagram = data.diagram?.diagram || data.diagram;
         dispatch({ type: 'ADD_DIAGRAM', payload: diagram });
@@ -820,13 +829,18 @@ export function UMLProvider({ children, projectId }) {
       }
 
       console.log('Eliminando conexión UML:', connectionId);
-      await umlElementService.deleteConnection(connectionId);
+      console.log('Estado actual de conexiones antes de eliminar:', state.connections?.length || 0);
+      
+      const response = await umlElementService.deleteConnection(connectionId);
+      console.log('Respuesta del servicio deleteConnection:', response);
 
       // Actualizar estado local
+      console.log('Despachando DELETE_CONNECTION para ID:', connectionId);
       dispatch({ type: 'DELETE_CONNECTION', payload: connectionId });
 
       // Deseleccionar la conexión si estaba seleccionada
       if (state.selectedConnection?._id === connectionId) {
+        console.log('Deseleccionando conexión eliminada');
         dispatch({ type: 'SELECT_CONNECTION', payload: null });
       }
 

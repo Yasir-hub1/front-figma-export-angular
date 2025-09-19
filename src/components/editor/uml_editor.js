@@ -406,7 +406,7 @@ const UMLEditor = () => {
         <button 
           className="uml-ai-assistant-toggle"
           onClick={toggleAiAssistant}
-          title="Asistente IA para UML (Ctrl+K)"
+          title="Asistente IA UML (Ctrl+K)"
         >
           <i className="fa fa-magic"></i>
           <span className="keyboard-hint">⌘K</span>

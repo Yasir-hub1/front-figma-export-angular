@@ -137,13 +137,13 @@ const UMLSidebar = ({ onClose, connectionMode, setConnectionMode, diagramType })
             description: 'Relación de herencia (is-a)',
             style: { strokeDasharray: 'none', markerEnd: 'triangle' }
           },
-          {
-            type: UML_RELATIONSHIP_TYPES.REALIZATION,
-            name: 'Realización',
-            icon: 'fa fa-long-arrow-up',
-            description: 'Implementación de interfaz',
-            style: { strokeDasharray: '5,5', markerEnd: 'triangle' }
-          },
+          // {
+          //   type: UML_RELATIONSHIP_TYPES.REALIZATION,
+          //   name: 'Realización',
+          //   icon: 'fa fa-long-arrow-up',
+          //   description: 'Implementación de interfaz',
+          //   style: { strokeDasharray: '5,5', markerEnd: 'triangle' }
+          // },
           {
             type: UML_RELATIONSHIP_TYPES.ASSOCIATION,
             name: 'Asociación',

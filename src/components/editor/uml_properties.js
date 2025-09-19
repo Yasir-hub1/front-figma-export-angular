@@ -30,7 +30,6 @@ const UMLProperties = ({ onClose, selectedElement, selectedConnection }) => {
   const [connectionLabel, setConnectionLabel] = useState('');
   const [sourceMultiplicity, setSourceMultiplicity] = useState('');
   const [targetMultiplicity, setTargetMultiplicity] = useState('');
-  const [connectionRole, setConnectionRole] = useState('');
   
   const [activeTab, setActiveTab] = useState('general');
   const [saving, setSaving] = useState(false);
@@ -92,7 +91,6 @@ const UMLProperties = ({ onClose, selectedElement, selectedConnection }) => {
       setConnectionLabel(selectedConnection.label || '');
       setSourceMultiplicity(selectedConnection.sourceMultiplicity || '');
       setTargetMultiplicity(selectedConnection.targetMultiplicity || '');
-      setConnectionRole(selectedConnection.role || '');
     }
   }, [selectedConnection]);
 
@@ -209,7 +207,7 @@ const UMLProperties = ({ onClose, selectedElement, selectedConnection }) => {
       console.log("Guardando cambios de la conexión UML:", {
         connectionId: selectedConnection._id,
         diagramId: currentDiagram._id,
-        updates: { type: connectionType, label: connectionLabel, sourceMultiplicity, targetMultiplicity, role: connectionRole }
+        updates: { type: connectionType, label: connectionLabel, sourceMultiplicity, targetMultiplicity }
       });
       
       // Prepare connection update data
@@ -219,15 +217,12 @@ const UMLProperties = ({ onClose, selectedElement, selectedConnection }) => {
         label: connectionLabel,
         sourceMultiplicity,
         targetMultiplicity,
-        role: connectionRole,
         // Mantener también en properties para compatibilidad
         properties: {
           ...selectedConnection.properties,
           name: connectionLabel,
           sourceMultiplicity,
-          targetMultiplicity,
-          sourceRole: connectionRole,
-          targetRole: connectionRole
+          targetMultiplicity
         }
       };
       
@@ -821,16 +816,6 @@ const UMLProperties = ({ onClose, selectedElement, selectedConnection }) => {
               </div>
             </div>
             
-            <div className="form-group">
-              <label>Rol</label>
-              <input
-                type="text"
-                value={connectionRole}
-                onChange={(e) => setConnectionRole(e.target.value)}
-                onBlur={handleSaveConnection}
-                placeholder="Rol de la relación..."
-              />
-            </div>
             
             {/* Sección especial para tablas intermedias */}
             {connectionType === 'intermediate-table' && selectedConnection?.properties?.intermediateTableInfo && (

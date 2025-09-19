@@ -302,7 +302,7 @@ const UMLToolbar = ({
           Compartir
         </button>
 
-        <button 
+        {/* <button 
           className="export-button uml-export-button"
           onClick={handleExport}
           disabled={exportLoading || !currentDiagram || !currentDiagram._id}
@@ -321,7 +321,7 @@ const UMLToolbar = ({
               <i className="fas fa-download"></i> Exportar UML
             </>
           )}
-        </button>
+        </button> */}
       </div>
 
       {/* Debug info */}

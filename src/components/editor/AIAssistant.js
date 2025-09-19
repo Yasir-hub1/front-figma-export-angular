@@ -15,7 +15,7 @@ const AIAssistant = ({
 		{
 			role: "assistant",
 			content:
-				"¡Hola! Soy tu asistente de diseño Flutter especializado. Puedo ayudarte a crear interfaces completas, agregar componentes específicos, y optimizar tu diseño. \n\n¿Qué te gustaría diseñar hoy?",
+				"¡Hola! Soy tu asistente UML especializado. Puedo ayudarte a crear diagramas de clases completos, agregar relaciones entre entidades, y diseñar sistemas de base de datos. \n\n¿Qué diagrama UML te gustaría crear hoy?",
 			timestamp: Date.now(),
 		},
 	]);
@@ -49,6 +49,7 @@ const AIAssistant = ({
 		updateUMLElement,
 		selectElement,
 		deleteUMLElement,
+		createConnection,
 	} = useUML();
 
 	// AGREGAR ESTA REFERENCIA después de las referencias existentes
@@ -1256,301 +1257,299 @@ const AIAssistant = ({
 					details: validElements.map(el => ({
 						id: el._id,
 						type: el.type,
-						flutterWidget: el.flutterWidget,
 						name: el.name,
 						content:
 							el.content?.substring(0, 50) +
 							(el.content?.length > 50 ? "..." : ""),
 						position: el.position,
 						size: el.size,
-						hasCustomStyles: Object.keys(el.styles || {}).length > 0,
+						hasAttributes: (el.properties?.attributes || []).length > 0,
+						hasOperations: (el.properties?.operations || []).length > 0,
+						stereotype: el.properties?.stereotype || "",
+						isAbstract: el.properties?.isAbstract || false,
 					})),
 				},
-				availableWidgets: [
-					"container",
-					"text",
-					"elevatedButton",
-					"outlinedButton",
-					"textButton",
-					"row",
-					"column",
-					"stack",
-					"expanded",
-					"appBar",
-					"floatingActionButton",
-					"textField",
-					"card",
-					"divider",
-					"switch",
-					"checkbox",
-					"slider",
-					"bottomNavigationBar",
-					"tabBar",
-					"drawer",
-					"image",
-					"icon",
-					"listView",
-					"gridView",
-					"wrap",
-					"center",
-					"align",
-					"padding",
-					"margin",
-					"decoratedBox",
-					"clipRRect",
-					"opacity",
+				availableElements: [
+					"class",
+					"interface", 
+					"abstract_class",
+					"enum",
+					"package",
+					"component",
+					"actor",
+					"use_case",
+					"note"
+				],
+				availableRelations: [
+					"association",
+					"inheritance",
+					"realization",
+					"aggregation",
+					"composition",
+					"dependency",
+					"one-to-one",
+					"one-to-many",
+					"many-to-one",
+					"many-to-many",
+					"zero-to-one",
+					"zero-to-many",
+					"one-or-many",
+					"intermediate-table"
 				],
 				context: {
 					diagramId: context.diagramId || currentDiagram._id,
 					projectId: context.projectId || project?._id,
 					diagramName: context.diagramName || currentDiagram.name,
+					diagramType: context.diagramType || 'class',
 				},
 			};
 
-			const systemPrompt = `Eres un experto en diseño UI/UX y desarrollo Flutter especializado en crear interfaces móviles profesionales.
+			const systemPrompt = `Eres un experto en UML (Unified Modeling Language) especializado en crear diagramas de clases, relaciones y estructuras de base de datos.
 
-CONTEXTO DEL PROYECTO:
-- Canvas: ${canvasContext.canvas.width}x${canvasContext.canvas.height} px (${
-				canvasContext.canvas.deviceType
-			})
-- Elementos actuales: ${
-				canvasContext.elements.count
-			} (${canvasContext.elements.types.join(", ")})
-- Fondo: ${canvasContext.canvas.backgroundColor}
+CONTEXTO DEL PROYECTO UML:
+- Canvas: ${canvasContext.canvas.width}x${canvasContext.canvas.height} px
+- Elementos actuales: ${canvasContext.elements.count} (${canvasContext.elements.types.join(", ")})
+- Tipo de diagrama: ${canvasContext.diagramType || 'class'}
 
-WIDGETS DISPONIBLES: ${canvasContext.availableWidgets.join(", ")}
+ELEMENTOS UML DISPONIBLES:
+- Clases (class)
+- Interfaces (interface) 
+- Clases abstractas (abstract_class)
+- Enumeraciones (enum)
+- Paquetes (package)
+- Componentes (component)
+- Actores (actor)
+- Casos de uso (use_case)
+- Notas (note)
+
+RELACIONES UML DISPONIBLES:
+- Asociación (association)
+- Herencia (inheritance)
+- Realización (realization)
+- Agregación (aggregation)
+- Composición (composition)
+- Dependencia (dependency)
+- Uno a Uno (one-to-one)
+- Uno a Muchos (one-to-many)
+- Muchos a Uno (many-to-one)
+- Muchos a Muchos (many-to-many)
+- Cero a Uno (zero-to-one)
+- Cero a Muchos (zero-to-many)
+- Uno o Muchos (one-or-many)
+- Tabla Intermedia (intermediate-table)
 
 ELEMENTOS EXISTENTES:
 ${canvasContext.elements.details
 	.map(
 		el =>
-			`- ${el.name} (${el.type}): ${el.position.x},${el.position.y} [${el.size.width}x${el.size.height}]`
+			`- ${el.name} (${el.type}): pos(${el.position.x},${el.position.y}) tamaño[${el.size.width}x${el.size.height}]`
 	)
-	.join("\n")}
+	.join("\n") || 'Ninguno'}
 
 IMPORTANTE: Los comandos pueden venir de voz transcrita y pueden tener variaciones gramaticales. Interpreta la intención del usuario incluso si la gramática no es perfecta.
 
-MAPEO DE COMANDOS COMUNES (SENSIBLE A VOZ):
-- "app bar" / "appbar" / "barra superior" / "header" → appBar
-- "navbar" / "nav bar" / "navegación inferior" / "barra navegación" → bottomNavigationBar  
-- "botón" / "boton" / "button" → elevatedButton
-- "login" / "formulario login" → campos de email/password + botón
-- "card" / "tarjeta" → card con contenido
-- "texto" / "título" → text widget
-- "imagen" / "image" → container con backgroundImage
-- "campo texto" / "input" → textField
+MAPEO DE COMANDOS UML COMUNES (SENSIBLE A VOZ):
+- "tabla producto" / "clase producto" / "entidad producto" → crear clase Producto
+- "categoría" / "categorias" → crear clase Categoria
+- "uno a muchos" / "1:*" / "1 a muchos" → relación one-to-many
+- "muchos a muchos" / "*:*" → relación many-to-many
+- "hereda de" / "extiende" / "es un" → relación inheritance
+- "implementa" / "realiza" → relación realization
 
-IMPORTANTE PARA VOZ: 
-- Los comandos de voz pueden ser informales: "créame un app bar", "pon una navbar"
-- Interpretar variaciones: "barra superior" = "app bar", "navegación" = "navbar"
-- Auto-detectar intención incluso con gramática imperfecta
+INSTRUCCIONES PARA CREAR ELEMENTOS UML:
 
-INSTRUCCIONES PARA CREAR ELEMENTOS:
-
-1. BOTONES SIMPLES:
+1. CLASE SIMPLE CON ATRIBUTOS:
 \`\`\`json
 {
   "actions": [
     {
       "type": "create",
-      "elementType": "elevatedButton",
-      "name": "Botón Principal",
-      "content": "Presionar",
-      "position": {"x": 130, "y": 295},
-      "size": {"width": 100, "height": 45},
-      "styles": {
-        "backgroundColor": "#2196F3",
-        "textColor": "#FFFFFF",
-        "borderRadius": 8,
-        "fontSize": 16
-      },
-      "flutterProps": {
-        "onPressed": "onPressed",
-        "elevation": 4
-      }
-    }
-  ]
-}
-\`\`\`
-
-2. BARRA DE APLICACIÓN SUPERIOR (AppBar):
-\`\`\`json
-{
-  "actions": [
-    {
-      "type": "create",
-      "elementType": "appBar",
-      "name": "Barra Superior",
-      "content": "Mi App",
-      "position": {"x": 0, "y": 0},
-      "size": {"width": ${canvasContext.canvas.width}, "height": 56},
-      "styles": {
-        "backgroundColor": "#2196F3",
-        "textColor": "#FFFFFF",
-        "elevation": 4
-      },
-      "flutterProps": {
-        "title": "Mi Aplicación",
-        "centerTitle": true
-      }
-    }
-  ]
-}
-\`\`\`
-
-3. BARRA DE NAVEGACIÓN INFERIOR:
-\`\`\`json
-{
-  "actions": [
-    {
-      "type": "create",
-      "elementType": "bottomNavigationBar",
-      "name": "Navegación Inferior",
-      "position": {"x": 0, "y": ${canvasContext.canvas.height - 56}},
-      "size": {"width": ${canvasContext.canvas.width}, "height": 56},
-      "styles": {
-        "backgroundColor": "#FFFFFF",
-        "selectedItemColor": "#2196F3",
-        "unselectedItemColor": "#757575"
-      },
-      "flutterProps": {
-        "currentIndex": 0,
-        "type": "fixed",
-        "items": ["Inicio", "Búsqueda", "Perfil"]
-      }
-    }
-  ]
-}
-\`\`\`
-
-4. FORMULARIO DE LOGIN:
-\`\`\`json
-{
-  "actions": [
-    {
-      "type": "create",
-      "elementType": "textField",
-      "name": "Campo Email",
-      "content": "",
-      "position": {"x": 30, "y": 200},
-      "size": {"width": 300, "height": 50},
-      "styles": {
-        "borderColor": "#E0E0E0",
-        "borderRadius": 8,
-        "padding": 16
-      },
-      "flutterProps": {
-        "hintText": "Email",
-        "keyboardType": "email"
-      }
-    },
-    {
-      "type": "create",
-      "elementType": "textField",
-      "name": "Campo Password",
-      "content": "",
-      "position": {"x": 30, "y": 270},
-      "size": {"width": 300, "height": 50},
-      "styles": {
-        "borderColor": "#E0E0E0",
-        "borderRadius": 8,
-        "padding": 16
-      },
-      "flutterProps": {
-        "hintText": "Contraseña",
-        "obscureText": true
-      }
-    },
-    {
-      "type": "create",
-      "elementType": "elevatedButton",
-      "name": "Botón Login",
-      "content": "Iniciar Sesión",
-      "position": {"x": 130, "y": 340},
-      "size": {"width": 100, "height": 45},
-      "styles": {
-        "backgroundColor": "#4CAF50",
-        "textColor": "#FFFFFF",
-        "borderRadius": 8
-      }
-    }
-  ]
-}
-\`\`\`
-
-5. TARJETA CON CONTENIDO:
-\`\`\`json
-{
-  "actions": [
-    {
-      "type": "create",
-      "elementType": "card",
-      "name": "Tarjeta Principal",
-      "position": {"x": 20, "y": 100},
-      "size": {"width": 320, "height": 200},
-      "styles": {
-        "backgroundColor": "#FFFFFF",
-        "borderRadius": 12,
-        "elevation": 4,
-        "padding": 16
-      },
-      "content": [
-        {
-          "type": "create",
-          "elementType": "container",
-          "name": "Imagen de Tarjeta",
-          "position": {"x": 0, "y": 0},
-          "size": {"width": 288, "height": 120},
-          "styles": {
-            "backgroundImage": "https://picsum.photos/320/150",
-            "borderRadius": 8
-          }
-        },
-        {
-          "type": "create",
-          "elementType": "text",
-          "name": "Título de Tarjeta",
-          "content": "Título Ejemplo",
-          "position": {"x": 0, "y": 130},
-          "size": {"width": 288, "height": 25},
-          "styles": {
-            "color": "#333333",
-            "fontSize": 18,
-            "fontWeight": "bold"
-          }
-        },
-        {
-          "type": "create",
-          "elementType": "text",
-          "name": "Descripción",
-          "content": "Descripción de la tarjeta",
-          "position": {"x": 0, "y": 160},
-          "size": {"width": 288, "height": 20},
-          "styles": {
-            "color": "#666666",
-            "fontSize": 14
-          }
-        }
+      "elementType": "class",
+      "name": "Producto",
+      "position": {"x": 100, "y": 100},
+      "size": {"width": 200, "height": 150},
+      "attributes": [
+        {"name": "id", "type": "String", "visibility": "private"},
+        {"name": "nombre", "type": "String", "visibility": "private"},
+        {"name": "precio", "type": "Number", "visibility": "private"},
+        {"name": "descripcion", "type": "String", "visibility": "private"},
+        {"name": "categoriaId", "type": "String", "visibility": "private"},
+        {"name": "createdAt", "type": "Date", "visibility": "private"},
+        {"name": "updatedAt", "type": "Date", "visibility": "private"}
+      ],
+      "operations": [
+        {"name": "getId", "returnType": "String", "visibility": "public"},
+        {"name": "setId", "parameters": [{"name": "id", "type": "String"}], "returnType": "void", "visibility": "public"},
+        {"name": "getNombre", "returnType": "String", "visibility": "public"},
+        {"name": "setNombre", "parameters": [{"name": "nombre", "type": "String"}], "returnType": "void", "visibility": "public"}
       ]
     }
   ]
 }
 \`\`\`
 
+2. SISTEMA COMPLETO CON RELACIONES:
+\`\`\`json
+{
+  "actions": [
+    {
+      "type": "create",
+      "elementType": "class",
+      "name": "Producto",
+      "position": {"x": 100, "y": 100},
+      "size": {"width": 200, "height": 150},
+      "attributes": [
+        {"name": "id", "type": "String", "visibility": "private"},
+        {"name": "nombre", "type": "String", "visibility": "private"},
+        {"name": "precio", "type": "Number", "visibility": "private"},
+        {"name": "categoriaId", "type": "String", "visibility": "private"},
+        {"name": "createdAt", "type": "Date", "visibility": "private"}
+      ],
+      "operations": [
+        {"name": "getId", "returnType": "String", "visibility": "public"},
+        {"name": "getNombre", "returnType": "String", "visibility": "public"},
+        {"name": "getPrecio", "returnType": "Number", "visibility": "public"}
+      ]
+    },
+    {
+      "type": "create",
+      "elementType": "class", 
+      "name": "Categoria",
+      "position": {"x": 400, "y": 100},
+      "size": {"width": 200, "height": 150},
+      "attributes": [
+        {"name": "id", "type": "String", "visibility": "private"},
+        {"name": "nombre", "type": "String", "visibility": "private"},
+        {"name": "descripcion", "type": "String", "visibility": "private"},
+        {"name": "createdAt", "type": "Date", "visibility": "private"}
+      ],
+      "operations": [
+        {"name": "getId", "returnType": "String", "visibility": "public"},
+        {"name": "getNombre", "returnType": "String", "visibility": "public"}
+      ]
+    },
+    {
+      "type": "create_connection",
+      "connectionType": "one-to-many",
+      "sourceElementName": "Categoria",
+      "targetElementName": "Producto",
+      "properties": {
+        "sourceMultiplicity": "1",
+        "targetMultiplicity": "*",
+        "sourceRole": "categoria",
+        "targetRole": "productos"
+      }
+    }
+  ]
+}
+\`\`\`
+
+3. HERENCIA:
+\`\`\`json
+{
+  "actions": [
+    {
+      "type": "create",
+      "elementType": "abstract_class",
+      "name": "Vehiculo",
+      "position": {"x": 100, "y": 100},
+      "size": {"width": 200, "height": 120},
+      "attributes": [
+        {"name": "marca", "type": "String", "visibility": "protected"},
+        {"name": "modelo", "type": "String", "visibility": "protected"},
+        {"name": "año", "type": "Number", "visibility": "protected"}
+      ],
+      "operations": [
+        {"name": "acelerar", "parameters": [], "returnType": "void", "visibility": "public", "isAbstract": true},
+        {"name": "frenar", "parameters": [], "returnType": "void", "visibility": "public"}
+      ]
+    },
+    {
+      "type": "create",
+      "elementType": "class",
+      "name": "Auto",
+      "position": {"x": 100, "y": 300},
+      "size": {"width": 200, "height": 120},
+      "attributes": [
+        {"name": "numeroPuertas", "type": "Number", "visibility": "private"}
+      ],
+      "operations": [
+        {"name": "acelerar", "parameters": [], "returnType": "void", "visibility": "public"}
+      ]
+    },
+    {
+      "type": "create_connection",
+      "connectionType": "inheritance",
+      "sourceElementName": "Auto",
+      "targetElementName": "Vehiculo",
+      "properties": {
+        "sourceRole": "hijo",
+        "targetRole": "padre"
+      }
+    }
+  ]
+}
+\`\`\`
+
+4. INTERFAZ CON REALIZACIÓN:
+\`\`\`json
+{
+  "actions": [
+    {
+      "type": "create",
+      "elementType": "interface",
+      "name": "Pagable",
+      "position": {"x": 100, "y": 100},
+      "size": {"width": 200, "height": 120},
+      "operations": [
+        {"name": "procesarPago", "parameters": [{"name": "monto", "type": "Number"}], "returnType": "boolean", "visibility": "public"},
+        {"name": "validarTarjeta", "parameters": [{"name": "numero", "type": "String"}], "returnType": "boolean", "visibility": "public"}
+      ]
+    },
+    {
+      "type": "create",
+      "elementType": "class",
+      "name": "PagoTarjeta",
+      "position": {"x": 400, "y": 100},
+      "size": {"width": 200, "height": 120},
+      "attributes": [
+        {"name": "numeroTarjeta", "type": "String", "visibility": "private"},
+        {"name": "fechaVencimiento", "type": "Date", "visibility": "private"}
+      ],
+      "operations": [
+        {"name": "procesarPago", "parameters": [{"name": "monto", "type": "Number"}], "returnType": "boolean", "visibility": "public"},
+        {"name": "validarTarjeta", "parameters": [{"name": "numero", "type": "String"}], "returnType": "boolean", "visibility": "public"}
+      ]
+    },
+    {
+      "type": "create_connection",
+      "connectionType": "realization",
+      "sourceElementName": "PagoTarjeta",
+      "targetElementName": "Pagable",
+      "properties": {
+        "sourceRole": "implementador",
+        "targetRole": "interfaz"
+      }
+    }
+  ]
+}
+\`\`\`
+
 REGLAS IMPORTANTES:
-- SIEMPRE incluye el bloque JSON cuando vayas a crear elementos
+- SIEMPRE incluye el bloque JSON cuando vayas a crear elementos UML
 - Ajusta las posiciones para que no se superpongan con elementos existentes
-- Usa colores coherentes con Material Design
-- Para imágenes usa URLs de picsum: "https://picsum.photos/ancho/alto"
-- Los elementos deben quedar dentro del canvas (${canvasContext.canvas.width}x${
-				canvasContext.canvas.height
-			})
+- Para relaciones uno a muchos, el elemento "uno" va a la izquierda
+- Agrega automáticamente atributos comunes (id, timestamps)
+- Genera métodos getter/setter básicos
+- Usa nombres en español pero con convenciones de programación (camelCase)
 
 INTERPRETACIÓN DE COMANDOS DE VOZ:
-- Si el comando menciona "barra superior" o similar → crear appBar
-- Si menciona "navegación" o "navbar" → crear bottomNavigationBar
-- Si menciona "login" → crear formulario completo
-- Si es ambiguo, pregunta para clarificar o elige la opción más común`;
+- "crea una tabla producto con relación uno a muchos con categoría" → 2 clases + relación
+- "diseña un sistema de usuarios y roles" → clases User, Role + relaciones
+- "modela la herencia entre vehiculo, auto y moto" → 3 clases + herencia
+- "agrega una interfaz pagable" → interface + realización
+
+Analiza el mensaje del usuario y proporciona el JSON completo para crear los elementos UML solicitados.`;
 
 			const formattedMessages = [
 				{ role: "system", content: systemPrompt },
@@ -1589,7 +1588,7 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 	};
 
 	const executeAIActions = async actions => {
-		console.log("⚡ Ejecutando acciones recibidas:", actions);
+		console.log("⚡ Ejecutando acciones UML recibidas:", actions);
 
 		if (!Array.isArray(actions)) {
 			console.error("❌ Las acciones no son un array:", actions);
@@ -1600,104 +1599,158 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 		let total = actions.length;
 		const errors = [];
 		const createdElements = [];
+		const createdConnections = [];
 
-		for (let i = 0; i < actions.length; i++) {
-			const action = actions[i];
-			console.log(`🔧 Ejecutando acción ${i + 1}/${total}:`, action);
+		// Primero crear todos los elementos, luego las conexiones
+		const elementActions = actions.filter(action => action.type === 'create');
+		const connectionActions = actions.filter(action => action.type === 'create_connection');
+
+		// Ejecutar creación de elementos
+		for (let i = 0; i < elementActions.length; i++) {
+			const action = elementActions[i];
+			console.log(`🔧 Ejecutando creación de elemento ${i + 1}/${elementActions.length}:`, action);
 
 			try {
-				if (!action.type) {
-					throw new Error(`Acción ${i + 1}: Tipo de acción requerido`);
+				if (!action.elementType) {
+					throw new Error("Tipo de elemento requerido para crear");
 				}
 
+				console.log("➕ Creando elemento UML:", action.elementType);
+
+				// Validar y ajustar posición dentro del canvas
+				const canvasWidth = currentDiagram.canvas?.width || 1200;
+				const canvasHeight = currentDiagram.canvas?.height || 800;
+				const elementWidth = Math.max(100, action.size?.width || 200);
+				const elementHeight = Math.max(80, action.size?.height || 120);
+
+				const elementData = {
+					type: action.elementType,
+					name: action.name || `${action.elementType} IA`,
+					content: action.content || "",
+					position: {
+						x: Math.max(
+							0,
+							Math.min(
+								canvasWidth - elementWidth,
+								action.position?.x || 100 + (i * 300)
+							)
+						),
+						y: Math.max(
+							0,
+							Math.min(
+								canvasHeight - elementHeight,
+								action.position?.y || 100
+							)
+						),
+					},
+					size: {
+						width: elementWidth,
+						height: elementHeight,
+					},
+					// Propiedades específicas UML
+					properties: {
+						stereotype: action.stereotype || "",
+						attributes: action.attributes || [],
+						operations: action.operations || [],
+						visibility: action.visibility || 'public',
+						isAbstract: action.isAbstract || false
+					},
+					styles: {
+						// Estilos por defecto para elementos UML
+						backgroundColor: "#FFFFFF",
+						borderColor: "#000000",
+						borderWidth: 1,
+						borderRadius: 4,
+						fontSize: 12,
+						fontFamily: "Arial, sans-serif",
+						textColor: "#000000",
+						// Sobrescribir con estilos personalizados
+						...(action.styles || {}),
+					}
+				};
+
+				console.log("📋 Datos del elemento UML a crear:", elementData);
+
+				const createdElement = await createUMLElement(elementData);
+				createdElements.push(createdElement);
+				console.log("✅ Elemento UML creado exitosamente:", createdElement.name);
+				successful++;
+
+				// Pausa entre elementos para estabilidad
+				if (i < elementActions.length - 1) {
+					await new Promise(resolve => setTimeout(resolve, 200));
+				}
+			} catch (error) {
+				console.error(`❌ Error en creación de elemento ${i + 1}:`, error);
+				errors.push(`Elemento ${i + 1}: ${error.message}`);
+			}
+		}
+
+		// Ahora ejecutar creación de conexiones
+		for (let i = 0; i < connectionActions.length; i++) {
+			const action = connectionActions[i];
+			console.log(`🔗 Ejecutando creación de conexión ${i + 1}/${connectionActions.length}:`, action);
+
+			try {
+				if (!action.connectionType) {
+					throw new Error("Tipo de conexión requerido");
+				}
+
+				// Buscar los elementos por nombre
+				const sourceElement = createdElements.find(el => el.name === action.sourceElementName);
+				const targetElement = createdElements.find(el => el.name === action.targetElementName);
+
+				if (!sourceElement) {
+					throw new Error(`Elemento origen '${action.sourceElementName}' no encontrado`);
+				}
+				if (!targetElement) {
+					throw new Error(`Elemento destino '${action.targetElementName}' no encontrado`);
+				}
+
+				console.log("🔗 Creando conexión UML:", action.connectionType, "entre", sourceElement.name, "y", targetElement.name);
+
+				const connectionData = {
+					sourceElementId: sourceElement._id,
+					targetElementId: targetElement._id,
+					type: action.connectionType,
+					properties: {
+						...action.properties,
+						sourceMultiplicity: action.properties?.sourceMultiplicity || "",
+						targetMultiplicity: action.properties?.targetMultiplicity || "",
+						sourceRole: action.properties?.sourceRole || "",
+						targetRole: action.properties?.targetRole || "",
+						label: action.properties?.label || ""
+					}
+				};
+
+				console.log("📋 Datos de la conexión UML a crear:", connectionData);
+
+				const createdConnection = await createConnection(connectionData);
+				createdConnections.push(createdConnection);
+				console.log("✅ Conexión UML creada exitosamente");
+				successful++;
+
+				// Pausa entre conexiones
+				if (i < connectionActions.length - 1) {
+					await new Promise(resolve => setTimeout(resolve, 300));
+				}
+			} catch (error) {
+				console.error(`❌ Error en creación de conexión ${i + 1}:`, error);
+				errors.push(`Conexión ${i + 1}: ${error.message}`);
+			}
+		}
+
+		// Ejecutar otras acciones (update, select, delete)
+		const otherActions = actions.filter(action => 
+			!['create', 'create_connection'].includes(action.type)
+		);
+
+		for (let i = 0; i < otherActions.length; i++) {
+			const action = otherActions[i];
+			console.log(`🔧 Ejecutando otra acción ${i + 1}/${otherActions.length}:`, action);
+
+			try {
 				switch (action.type) {
-					case "create":
-						if (!action.elementType) {
-							throw new Error("Tipo de elemento requerido para crear");
-						}
-
-						console.log("➕ Creando elemento:", action.elementType);
-
-						// Validar y ajustar posición dentro del canvas
-						const canvasWidth = currentDiagram.canvas?.width || 1200;
-						const canvasHeight = currentDiagram.canvas?.height || 800;
-						const elementWidth = Math.max(20, action.size?.width || 100);
-						const elementHeight = Math.max(20, action.size?.height || 50);
-
-						const elementData = {
-							type: action.elementType,
-							name: action.name || `${action.elementType} IA`,
-							content: action.content || "",
-							position: {
-								x: Math.max(
-									0,
-									Math.min(
-										canvasWidth - elementWidth,
-										action.position?.x || 100
-									)
-								),
-								y: Math.max(
-									0,
-									Math.min(
-										canvasHeight - elementHeight,
-										action.position?.y || 100
-									)
-								),
-							},
-							size: {
-								width: elementWidth,
-								height: elementHeight,
-							},
-							styles: {
-								// Estilos por defecto según tipo de elemento
-								...(action.elementType === "text" && {
-									color: "#000000",
-									fontSize: 16,
-									fontWeight: "normal",
-								}),
-								...(action.elementType === "elevatedButton" && {
-									backgroundColor: "#2196F3",
-									textColor: "#FFFFFF",
-									borderRadius: 8,
-									elevation: 4,
-								}),
-								...(action.elementType === "card" && {
-									backgroundColor: "#FFFFFF",
-									borderRadius: 12,
-									elevation: 2,
-									padding: 16,
-								}),
-								...(action.elementType === "container" && {
-									backgroundColor: "#F5F5F5",
-									borderRadius: 8,
-								}),
-								// Sobrescribir con estilos personalizados
-								...(action.styles || {}),
-							},
-							flutterWidget: action.elementType,
-							flutterProps: {
-								// Props por defecto según tipo
-								...(action.elementType === "elevatedButton" && {
-									onPressed: "onPressed",
-								}),
-								...(action.elementType === "text" && {
-									textAlign: "left",
-								}),
-								...(action.elementType === "image" && {
-									fit: "cover",
-								}),
-								// Sobrescribir con props personalizados
-								...(action.flutterProps || {}),
-							},
-						};
-
-						console.log("📋 Datos del elemento a crear:", elementData);
-
-						const createdElement = await createUMLElement(elementData);
-						createdElements.push(createdElement);
-						console.log("✅ Elemento creado exitosamente");
-						break;
-
 					case "update":
 						if (!action.elementId) {
 							throw new Error("ID de elemento requerido para actualizar");
@@ -1705,13 +1758,11 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 
 						const updateData = {};
 						if (action.name) updateData.name = action.name;
-						if (action.content !== undefined)
-							updateData.content = action.content;
+						if (action.content !== undefined) updateData.content = action.content;
 						if (action.position) updateData.position = action.position;
 						if (action.size) updateData.size = action.size;
 						if (action.styles) updateData.styles = action.styles;
-						if (action.flutterProps)
-							updateData.flutterProps = action.flutterProps;
+						if (action.properties) updateData.properties = action.properties;
 
 						await updateUMLElement(action.elementId, updateData);
 						console.log("✅ Elemento actualizado exitosamente");
@@ -1722,9 +1773,7 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 							const validElements = Array.isArray(umlElements)
 								? umlElements.filter(el => el && el._id && el.type)
 								: [];
-							const element = validElements.find(
-								el => el._id === action.elementId
-							);
+							const element = validElements.find(el => el._id === action.elementId);
 							if (element) {
 								selectElement(action.elementId, element);
 								console.log("✅ Elemento seleccionado exitosamente");
@@ -1745,24 +1794,31 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 
 				successful++;
 
-				// Pausa entre acciones para estabilidad
-				if (i < actions.length - 1) {
+				// Pausa entre acciones
+				if (i < otherActions.length - 1) {
 					await new Promise(resolve => setTimeout(resolve, 150));
 				}
 			} catch (error) {
-				console.error(`❌ Error en acción ${i + 1}:`, error);
+				console.error(`❌ Error en otra acción ${i + 1}:`, error);
 				errors.push(`Acción ${i + 1}: ${error.message}`);
 			}
 		}
 
 		if (errors.length > 0) {
-			console.warn("⚠️ Errores en ejecución:", errors);
+			console.warn("⚠️ Errores en ejecución UML:", errors);
 		}
 
-		console.log(`📊 Resultado final: ${successful}/${total} acciones exitosas`);
-		console.log(`🎨 Elementos creados: ${createdElements.length}`);
+		console.log(`📊 Resultado final UML: ${successful}/${total} acciones exitosas`);
+		console.log(`🎨 Elementos UML creados: ${createdElements.length}`);
+		console.log(`🔗 Conexiones UML creadas: ${createdConnections.length}`);
 
-		return { successful, total, errors, createdElements };
+		return { 
+			successful, 
+			total, 
+			errors, 
+			createdElements,
+			createdConnections
+		};
 	};
 
 	const clearChat = () => {
@@ -1770,7 +1826,7 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 			{
 				role: "assistant",
 				content:
-					"¡Chat limpio! ¿En qué puedo ayudarte ahora? Puedes escribir, usar el micrófono o subir una imagen de mockup.",
+					"¡Chat limpio! ¿En qué puedo ayudarte ahora? Puedes escribir, usar el micrófono o subir una imagen de diagrama UML.",
 				timestamp: Date.now(),
 			},
 		]);
@@ -1792,7 +1848,7 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 			<div className="ai-assistant-header">
 				<div className="header-content">
 					<div className="assistant-info">
-						<h3>🤖 Asistente Flutter IA</h3>
+						<h3>🤖 Asistente UML IA</h3>
 						<span className="status-indicator">
 							{isAnalyzingImage
 								? "🖼️ Analizando imagen..."
@@ -1859,13 +1915,13 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 			</div>
 
 			<div className="ai-assistant-examples">
-				<div className="examples-label">💡 Ejemplos rápidos:</div>
+				<div className="examples-label">💡 Ejemplos UML rápidos:</div>
 				<div className="example-buttons">
 					{[
-						"Crea un botón azul centrado",
-						"Diseña una card con imagen y texto",
-						"Agrega una barra de navegación inferior",
-						"Agrega un campo de texto para búsqueda",
+						"Crea una tabla producto con relación uno a muchos con categoría",
+						"Diseña un sistema de usuarios y roles con herencia",
+						"Agrega una clase vehículo con auto y moto que hereden",
+						// "Crea una interfaz pagable con implementación",
 					].map((example, i) => (
 						<button
 							key={i}
@@ -1885,25 +1941,25 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 			</div>
 			<div className="ai-assistant-image-upload">
 				{/* Botón para mostrar/ocultar upload */}
-				<button
+				{/* <button
 					className="upload-toggle-button"
 					onClick={() => setUploadSectionVisible(!uploadSectionVisible)}
 					disabled={isAnalyzingImage}>
 					<span>
-						{uploadSectionVisible ? "📱 Ocultar" : "🖼️ Analizar Mockup"}
+						{uploadSectionVisible ? "📊 Ocultar" : "🖼️ Analizar Diagrama UML"}
 					</span>
 					<i
 						className={`fa fa-chevron-${
 							uploadSectionVisible ? "up" : "down"
 						}`}></i>
-				</button>
+				</button> */}
 
 				{/* Sección colapsible */}
 				<div
 					className={`upload-section ${
 						uploadSectionVisible ? "expanded" : "collapsed"
 					}`}>
-					<div className="upload-label">🖼️ Análisis de Mockup/Diseño:</div>
+					<div className="upload-label">🖼️ Análisis de Diagrama UML:</div>
 
 					{/* ZONA DE DRAG & DROP */}
 					<div
@@ -1939,9 +1995,9 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 							</div>
 						) : (
 							<div className="drop-zone-content">
-								<div className="drop-icon">📱</div>
+								<div className="drop-icon">📊</div>
 								<div className="drop-text">
-									<strong>Arrastra una imagen de mockup aquí</strong>
+									<strong>Arrastra una imagen de diagrama UML aquí</strong>
 									<span>o haz clic para seleccionar</span>
 								</div>
 								<div className="drop-formats">
@@ -2019,7 +2075,7 @@ INTERPRETACIÓN DE COMANDOS DE VOZ:
 						value={input}
 						onChange={handleInputChange}
 						onKeyPress={handleKeyPress}
-						placeholder="Describe lo que quieres diseñar... Puedes escribir, usar el micrófono o subir una imagen de mockup. (Presiona Enter para enviar)"
+						placeholder="Describe el diagrama UML que quieres crear... Puedes escribir, usar el micrófono o subir una imagen de diagrama. (Presiona Enter para enviar)"
 						disabled={
 							isTyping ||
 							isExecuting ||

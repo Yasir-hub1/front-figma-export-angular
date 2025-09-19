@@ -34,7 +34,29 @@ const UMLConnection = ({
     return null;
   }
 
-  const { type, properties, styles, sourceMultiplicity, targetMultiplicity, label, role } = connection;
+  const { type, properties, styles, label, role } = connection;
+  
+  // Obtener multiplicidades desde properties o directamente del objeto connection
+  const sourceMultiplicity = connection.sourceMultiplicity || properties?.sourceMultiplicity || '';
+  const targetMultiplicity = connection.targetMultiplicity || properties?.targetMultiplicity || '';
+  
+  // Debug: verificar valores de multiplicidad
+  console.log('UMLConnection Debug:', {
+    connectionId: connection._id,
+    type: type,
+    sourceMultiplicity: sourceMultiplicity,
+    targetMultiplicity: targetMultiplicity,
+    properties: properties,
+    connectionSourceMultiplicity: connection.sourceMultiplicity,
+    connectionTargetMultiplicity: connection.targetMultiplicity
+  });
+  
+  // Filtrar labels que contengan patrones no deseados como "to", "TablaIntermedia", etc.
+  const filteredLabel = label && typeof label === 'string' && 
+    !label.toLowerCase().includes(' to ') && 
+    !label.toLowerCase().includes('tablaintermedia') && 
+    !label.toLowerCase().includes('newclass') 
+    ? label : null;
 
   // Calcular posiciones de conexión
   const calculateConnectionPoints = () => {
@@ -120,14 +142,14 @@ const UMLConnection = ({
         return {
           ...baseStyle,
           strokeDasharray: 'none',
-          markerEnd: 'url(#triangle-empty)'
+          markerEnd: 'url(#triangle-empty-large)'
         };
 
       case UML_RELATIONSHIP_TYPES.REALIZATION:
         return {
           ...baseStyle,
           strokeDasharray: '5,5',
-          markerEnd: 'url(#triangle-empty)'
+          markerEnd: 'url(#triangle-empty-large)'
         };
 
       case UML_RELATIONSHIP_TYPES.ASSOCIATION:
@@ -142,7 +164,7 @@ const UMLConnection = ({
           ...baseStyle,
           strokeDasharray: 'none',
           markerStart: 'url(#diamond-empty)',
-          markerEnd: 'url(#arrow)'
+          markerEnd: 'none'
         };
 
       case UML_RELATIONSHIP_TYPES.COMPOSITION:
@@ -150,7 +172,7 @@ const UMLConnection = ({
           ...baseStyle,
           strokeDasharray: 'none',
           markerStart: 'url(#diamond-filled)',
-          markerEnd: 'url(#arrow)'
+          markerEnd: 'none'
         };
 
       case UML_RELATIONSHIP_TYPES.DEPENDENCY:
@@ -169,14 +191,14 @@ const UMLConnection = ({
           markerEnd: 'url(#arrow)'
         };
 
-      // Estilos para relaciones de cardinalidad
+      // Estilos para relaciones de cardinalidad (sin flechas, líneas rectas)
       case 'one-to-one':
         return {
           ...baseStyle,
           stroke: '#4CAF50',
           strokeWidth: 2,
           strokeDasharray: 'none',
-          markerEnd: 'url(#arrow)'
+          markerEnd: 'none'
         };
 
       case 'one-to-many':
@@ -185,7 +207,7 @@ const UMLConnection = ({
           stroke: '#2196F3',
           strokeWidth: 2,
           strokeDasharray: 'none',
-          markerEnd: 'url(#arrow)'
+          markerEnd: 'none'
         };
 
       case 'many-to-one':
@@ -194,7 +216,7 @@ const UMLConnection = ({
           stroke: '#FF9800',
           strokeWidth: 2,
           strokeDasharray: 'none',
-          markerEnd: 'url(#arrow)'
+          markerEnd: 'none'
         };
 
       case 'many-to-many':
@@ -203,7 +225,7 @@ const UMLConnection = ({
           stroke: '#9C27B0',
           strokeWidth: 2,
           strokeDasharray: 'none',
-          markerEnd: 'url(#arrow)'
+          markerEnd: 'none'
         };
 
       case 'zero-to-one':
@@ -211,8 +233,8 @@ const UMLConnection = ({
           ...baseStyle,
           stroke: '#607D8B',
           strokeWidth: 2,
-          strokeDasharray: '5,5',
-          markerEnd: 'url(#arrow)'
+          strokeDasharray: 'none',
+          markerEnd: 'none'
         };
 
       case 'zero-to-many':
@@ -220,8 +242,8 @@ const UMLConnection = ({
           ...baseStyle,
           stroke: '#795548',
           strokeWidth: 2,
-          strokeDasharray: '5,5',
-          markerEnd: 'url(#arrow)'
+          strokeDasharray: 'none',
+          markerEnd: 'none'
         };
 
       case 'one-or-many':
@@ -230,7 +252,7 @@ const UMLConnection = ({
           stroke: '#E91E63',
           strokeWidth: 2,
           strokeDasharray: 'none',
-          markerEnd: 'url(#arrow)'
+          markerEnd: 'none'
         };
 
       case 'intermediate-table':
@@ -327,30 +349,43 @@ const UMLConnection = ({
           <path d="M0,0 L0,6 L9,3 z" fill="white" stroke="black" strokeWidth="1" />
         </marker>
 
+        {/* Triángulo vacío grande (herencia y realización) */}
+        <marker
+          id="triangle-empty-large"
+          viewBox="0 0 15 15"
+          refX="14"
+          refY="7.5"
+          markerWidth="10"
+          markerHeight="10"
+          orient="auto"
+        >
+          <path d="M0,0 L0,15 L15,7.5 z" fill="white" stroke="black" strokeWidth="1.5" />
+        </marker>
+
         {/* Diamante vacío (agregación) */}
         <marker
           id="diamond-empty"
-          viewBox="0 0 10 6"
+          viewBox="0 0 12 8"
           refX="0"
-          refY="3"
-          markerWidth="6"
-          markerHeight="6"
+          refY="4"
+          markerWidth="8"
+          markerHeight="8"
           orient="auto"
         >
-          <path d="M0,3 L5,0 L10,3 L5,6 z" fill="white" stroke="black" strokeWidth="1" />
+          <path d="M0,4 L6,0 L12,4 L6,8 z" fill="white" stroke="black" strokeWidth="1.5" />
         </marker>
 
         {/* Diamante relleno (composición) */}
         <marker
           id="diamond-filled"
-          viewBox="0 0 10 6"
+          viewBox="0 0 12 8"
           refX="0"
-          refY="3"
-          markerWidth="6"
-          markerHeight="6"
+          refY="4"
+          markerWidth="8"
+          markerHeight="8"
           orient="auto"
         >
-          <path d="M0,3 L5,0 L10,3 L5,6 z" fill="black" />
+          <path d="M0,4 L6,0 L12,4 L6,8 z" fill="black" stroke="black" strokeWidth="1.5" />
         </marker>
       </defs>
 
@@ -379,121 +414,59 @@ const UMLConnection = ({
         onDoubleClick={handleDoubleClick}
       />
 
-      {/* Etiquetas */}
-      {(properties?.name || label) && (
+      {/* Renderizar solo cardinalidad, multiplicidad y roles - sin nombres de elementos */}
+      
+      {/* Cardinalidad del origen */}
+      {sourceMultiplicity && sourceMultiplicity.trim() !== '' && (
+        <text
+          x={sourcePoint.x + (sourcePoint.x < targetPoint.x ? -15 : 15)}
+          y={sourcePoint.y - 8}
+          textAnchor={sourcePoint.x < targetPoint.x ? 'end' : 'start'}
+          fontSize="12"
+          fill="#333"
+          fontWeight="bold"
+        >
+          {sourceMultiplicity}
+        </text>
+      )}
+      
+      {/* Cardinalidad del destino */}
+      {targetMultiplicity && targetMultiplicity.trim() !== '' && (
+        <text
+          x={targetPoint.x + (targetPoint.x > sourcePoint.x ? 15 : -15)}
+          y={targetPoint.y - 8}
+          textAnchor={targetPoint.x > sourcePoint.x ? 'start' : 'end'}
+          fontSize="12"
+          fill="#333"
+          fontWeight="bold"
+        >
+          {targetMultiplicity}
+        </text>
+      )}
+      
+      {/* Rol (solo si es un rol válido, no nombres de elementos) */}
+      {role && !role.toLowerCase().includes('to') && !role.toLowerCase().includes('tablaintermedia') && (
         <text
           x={midPoint.x}
           y={midPoint.y - 10}
           textAnchor="middle"
-          className="connection-label"
-          fontSize="10"
+          fontSize="11"
           fill="#333"
         >
-          {label || properties?.name || ''}
+          {role}
         </text>
       )}
-
-      {properties?.stereotype && (
+      
+      {/* Label filtrado (solo si no contiene patrones no deseados) */}
+      {filteredLabel && (
         <text
           x={midPoint.x}
-          y={midPoint.y + 5}
+          y={midPoint.y + 15}
           textAnchor="middle"
-          className="connection-stereotype"
-          fontSize="8"
-          fill="#666"
-          fontStyle="italic"
-        >
-          «{properties.stereotype}»
-        </text>
-      )}
-
-      {/* Multiplicidades - Mejorar visualización para relaciones de cardinalidad */}
-      {(sourceMultiplicity || properties?.sourceMultiplicity) && (
-        <text
-          x={sourcePoint.x + 15}
-          y={sourcePoint.y - 5}
-          textAnchor="start"
-          className="multiplicity-label"
-          fontSize="10"
-          fontWeight="bold"
+          fontSize="11"
           fill="#333"
         >
-          {sourceMultiplicity || properties?.sourceMultiplicity}
-        </text>
-      )}
-
-      {(targetMultiplicity || properties?.targetMultiplicity) && (
-        <text
-          x={targetPoint.x - 15}
-          y={targetPoint.y - 5}
-          textAnchor="end"
-          className="multiplicity-label"
-          fontSize="10"
-          fontWeight="bold"
-          fill="#333"
-        >
-          {targetMultiplicity || properties?.targetMultiplicity}
-        </text>
-      )}
-
-      {/* Cardinalidad central para relaciones especiales */}
-      {(type === 'one-to-one' || type === 'one-to-many' || type === 'many-to-one' || 
-        type === 'many-to-many' || type === 'zero-to-one' || type === 'zero-to-many' || 
-        type === 'one-or-many') && (
-        <text
-          x={(sourcePoint.x + targetPoint.x) / 2}
-          y={(sourcePoint.y + targetPoint.y) / 2 - 10}
-          textAnchor="middle"
-          className="cardinality-label"
-          fontSize="9"
-          fontWeight="bold"
-          fill="#666"
-        >
-          {type.replace('-', ' a ')}
-        </text>
-      )}
-
-      {/* Indicador especial para tabla intermedia */}
-      {type === 'intermediate-table' && (
-        <text
-          x={(sourcePoint.x + targetPoint.x) / 2}
-          y={(sourcePoint.y + targetPoint.y) / 2 - 10}
-          textAnchor="middle"
-          className="intermediate-table-label"
-          fontSize="9"
-          fontWeight="bold"
-          fill="#FF6B35"
-        >
-          Tabla Intermedia
-        </text>
-      )}
-      
-      {/* Roles */}
-      {(role || properties?.sourceRole) && (
-        <text
-          x={sourcePoint.x + 15}
-          y={sourcePoint.y + 15}
-          textAnchor="start"
-          className="role-label"
-          fontSize="8"
-          fontStyle="italic"
-          fill="#666"
-        >
-          {role || properties?.sourceRole || ''}
-        </text>
-      )}
-      
-      {properties?.targetRole && (
-        <text
-          x={targetPoint.x - 15}
-          y={targetPoint.y + 15}
-          textAnchor="end"
-          className="role-label"
-          fontSize="8"
-          fontStyle="italic"
-          fill="#666"
-        >
-          {properties.targetRole}
+          {filteredLabel}
         </text>
       )}
 
