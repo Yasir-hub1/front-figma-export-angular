@@ -63,15 +63,109 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Función mejorada para copiar enlace con fallbacks
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Método 1: Clipboard API (moderno pero requiere HTTPS)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+
+      // Método 2: Fallback usando selección de texto (funciona en HTTP)
+      const textArea = document.createElement('textarea');
+      textArea.value = shareLink;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Error copiando con execCommand:', err);
+        // Método 3: Fallback final - mostrar el enlace seleccionado para copiado manual
+        showManualCopyDialog();
+      }
+      
+      document.body.removeChild(textArea);
+      
     } catch (error) {
       console.error('Error copiando enlace:', error);
-      alert('Error al copiar enlace');
+      showManualCopyDialog();
     }
+  };
+
+  // Mostrar dialog para copiado manual
+  const showManualCopyDialog = () => {
+    const message = `No se pudo copiar automáticamente. Por favor, copia este enlace manualmente:\n\n${shareLink}`;
+    
+    // Crear un modal simple para mostrar el enlace
+    const modalDiv = document.createElement('div');
+    modalDiv.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    `;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.style.cssText = `
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 90%;
+      max-height: 90%;
+      overflow: auto;
+    `;
+
+    const textArea = document.createElement('textarea');
+    textArea.value = shareLink;
+    textArea.style.cssText = `
+      width: 100%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+    `;
+    textArea.readOnly = true;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Cerrar';
+    closeBtn.style.cssText = `
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    `;
+
+    closeBtn.onclick = () => document.body.removeChild(modalDiv);
+
+    contentDiv.appendChild(document.createTextNode('Copia este enlace:'));
+    contentDiv.appendChild(textArea);
+    contentDiv.appendChild(closeBtn);
+    modalDiv.appendChild(contentDiv);
+    document.body.appendChild(modalDiv);
+
+    // Seleccionar el texto automáticamente
+    textArea.select();
   };
 
   const handleSaveSettings = async () => {
@@ -87,7 +181,6 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
       alert('Error al guardar configuración');
     }
   };
-
 
   if (!isOpen) return null;
 
@@ -141,7 +234,6 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-
           <div className="link-section">
             <h4>Enlace de Compartir</h4>
             
@@ -172,6 +264,7 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
                     readOnly
                     className="share-link-input"
                     placeholder="Enlace de compartir..."
+                    onClick={(e) => e.target.select()} // Seleccionar todo al hacer clic
                   />
                   <button 
                     className="copy-button"
@@ -210,11 +303,18 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
                     Guardar Configuración
                   </button>
                 </div>
+
+                {/* Información adicional sobre el enlace */}
+                <div className="link-info">
+                  <small>
+                    <i className="fas fa-info-circle"></i>
+                    {isPublic ? 'Enlace público' : 'Enlace privado'} • 
+                    {expirationDays === 0 ? 'Sin expiración' : `Expira en ${expirationDays} días`}
+                  </small>
+                </div>
               </div>
             )}
           </div>
-
-       
         </div>
 
         <div className="modal-footer">
