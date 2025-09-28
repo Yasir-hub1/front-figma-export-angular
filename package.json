@@ -53,6 +53,6 @@
     ]
   },
   "devDependencies": {
-    "https-localhost": "^4.7.1"
+    "https-134.209.50.92": "^4.7.1"
   }
 }

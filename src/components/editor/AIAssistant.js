@@ -73,7 +73,7 @@ const AIAssistant = ({
 					typeof window !== "undefined" &&
 					(window.isSecureContext ||
 						window.location.protocol === "https:" ||
-						window.location.hostname === "localhost" ||
+						window.location.hostname === "134.209.50.92" ||
 						window.location.hostname === "127.0.0.1");
 
 				const isSupported =
@@ -92,7 +92,7 @@ const AIAssistant = ({
 
 				if (!isSupported) {
 					if (!isSecureContext) {
-						console.warn("⚠️ Grabación de voz requiere HTTPS o localhost");
+						console.warn("⚠️ Grabación de voz requiere HTTPS o 134.209.50.92");
 					}
 					if (!hasMediaRecorder) {
 						console.warn("⚠️ MediaRecorder no soportado en este navegador");
@@ -334,7 +334,7 @@ const AIAssistant = ({
 				errorMessage = "Configuración de audio no soportada por tu micrófono.";
 			} else if (error.name === "SecurityError") {
 				errorMessage =
-					"Error de seguridad. Asegúrate de estar en HTTPS o localhost.";
+					"Error de seguridad. Asegúrate de estar en HTTPS o 134.209.50.92.";
 			} else if (error.message.includes("getUserMedia")) {
 				errorMessage =
 					"Tu navegador no soporta grabación de audio o necesita permisos.";
