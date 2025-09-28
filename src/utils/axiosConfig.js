@@ -10,6 +10,7 @@ const axiosInstance = axios.create({
   },
 });
 
+
 // Interceptor para añadir el token a las peticiones
 axiosInstance.interceptors.request.use(
   (config) => {
