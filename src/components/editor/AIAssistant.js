@@ -2,7 +2,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useUML } from "../../context/UMLcontext";
 import "./AIAssistant.css";
-import axios from "../../utils/axiosConfig";
+import axios from "../../utils/aiAxiosConfig";
 
 const AIAssistant = ({
 	isOpen,
@@ -54,6 +54,24 @@ const AIAssistant = ({
 
 	// AGREGAR ESTA REFERENCIA después de las referencias existentes
 	const recordingIntervalRef = useRef(null);
+
+	// Función para verificar autenticación sin cerrar sesión automáticamente
+	const checkAuthentication = () => {
+		const token = localStorage.getItem('token');
+		const user = localStorage.getItem('user');
+		
+		if (!token || !user) {
+			return false;
+		}
+		
+		try {
+			const userData = JSON.parse(user);
+			return userData && userData.id;
+		} catch (error) {
+			console.error("Error parsing user data:", error);
+			return false;
+		}
+	};
 
 	// Verificar soporte de voz al montar el componente
 
@@ -539,7 +557,14 @@ const AIAssistant = ({
 
 			let errorMessage = "Error al analizar la imagen";
 
-			if (error.response) {
+			// Manejo específico de errores de autenticación
+			if (error.isAuthError) {
+				errorMessage = "Sesión expirada. Por favor, inicia sesión nuevamente.";
+			} else if (error.isPermissionError) {
+				errorMessage = "No tienes permisos para analizar imágenes.";
+			} else if (error.isNetworkError) {
+				errorMessage = "Error de conexión. Verifica tu internet y vuelve a intentar.";
+			} else if (error.response) {
 				const status = error.response.status;
 				const serverError =
 					error.response.data?.error || error.response.data?.message;
@@ -881,7 +906,14 @@ const AIAssistant = ({
 
 			let errorMessage = "Error al transcribir el audio";
 
-			if (error.response) {
+			// Manejo específico de errores de autenticación
+			if (error.isAuthError) {
+				errorMessage = "Sesión expirada. Por favor, inicia sesión nuevamente.";
+			} else if (error.isPermissionError) {
+				errorMessage = "No tienes permisos para usar la transcripción de voz.";
+			} else if (error.isNetworkError) {
+				errorMessage = "Error de conexión. Verifica tu internet y vuelve a intentar.";
+			} else if (error.response) {
 				const status = error.response.status;
 				const serverError =
 					error.response.data?.error || error.response.data?.message;
@@ -918,9 +950,6 @@ const AIAssistant = ({
 			} else if (error.code === "ECONNABORTED") {
 				errorMessage =
 					"Tiempo de espera agotado. El audio puede ser demasiado largo o la conexión lenta.";
-			} else if (error.code === "NETWORK_ERROR") {
-				errorMessage =
-					"Error de conexión. Verifica tu internet y vuelve a intentar.";
 			} else if (error.message.includes("Network")) {
 				errorMessage = "Problema de conexión. Verifica tu internet.";
 			}
@@ -1017,11 +1046,23 @@ const AIAssistant = ({
 			}
 		} catch (error) {
 			console.error("Error al comunicarse con la IA desde voz:", error);
+			
+			let errorContent = "Lo siento, tuve un problema procesando tu comando de voz.";
+			
+			// Manejo específico de errores de autenticación
+			if (error.isAuthError) {
+				errorContent = "🔐 " + error.message + " Por favor, recarga la página e inicia sesión nuevamente.";
+			} else if (error.isNetworkError) {
+				errorContent = "🌐 " + error.message;
+			} else if (error.isServerError) {
+				errorContent = "⚠️ " + error.message;
+			} else {
+				errorContent += " Error: " + error.message;
+			}
+			
 			const errorMessage = {
 				role: "assistant",
-				content:
-					"Lo siento, tuve un problema procesando tu comando de voz. Error: " +
-					error.message,
+				content: errorContent,
 				timestamp: Date.now(),
 			};
 			setMessages(prev => [...prev, errorMessage]);
@@ -1112,11 +1153,23 @@ const AIAssistant = ({
 			}
 		} catch (error) {
 			console.error("Error al comunicarse con la IA:", error);
+			
+			let errorContent = "Lo siento, tuve un problema procesando tu solicitud.";
+			
+			// Manejo específico de errores de autenticación
+			if (error.isAuthError) {
+				errorContent = "🔐 " + error.message + " Por favor, recarga la página e inicia sesión nuevamente.";
+			} else if (error.isNetworkError) {
+				errorContent = "🌐 " + error.message;
+			} else if (error.isServerError) {
+				errorContent = "⚠️ " + error.message;
+			} else {
+				errorContent += " Error: " + error.message;
+			}
+			
 			const errorMessage = {
 				role: "assistant",
-				content:
-					"Lo siento, tuve un problema procesando tu solicitud. Error: " +
-					error.message,
+				content: errorContent,
 				timestamp: Date.now(),
 			};
 			setMessages(prev => [...prev, errorMessage]);
@@ -1238,6 +1291,11 @@ const AIAssistant = ({
 
 			if (!currentDiagram) {
 				throw new Error("No hay diagrama seleccionado");
+			}
+
+			// Verificar autenticación antes de enviar
+			if (!checkAuthentication()) {
+				throw new Error("Sesión expirada. Por favor, inicia sesión nuevamente.");
 			}
 
 			const validElements = Array.isArray(umlElements)
@@ -1575,14 +1633,40 @@ Analiza el mensaje del usuario y proporciona el JSON completo para crear los ele
 			};
 		} catch (error) {
 			console.error("❌ Error en sendMessageToAI:", error);
+			
+			// Manejo específico de errores de autenticación
+			if (error.response?.status === 401) {
+				console.error("🔐 Error de autenticación detectado");
+				const authError = new Error("Sesión expirada. Por favor, inicia sesión nuevamente.");
+				authError.isAuthError = true;
+				throw authError;
+			}
+			
+			// Manejo de errores de red
+			if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+				const networkError = new Error("Error de conexión. Verifica tu internet y vuelve a intentar.");
+				networkError.isNetworkError = true;
+				throw networkError;
+			}
+			
+			// Manejo de errores del servidor
 			if (error.response) {
 				console.error("Response data:", error.response.data);
 				console.error("Response status:", error.response.status);
+				
+				const serverError = new Error(
+					error.response?.data?.message ||
+					`Error del servidor (${error.response.status})`
+				);
+				serverError.isServerError = true;
+				serverError.status = error.response.status;
+				throw serverError;
 			}
+			
+			// Error genérico
 			throw new Error(
-				error.response?.data?.message ||
-					error.message ||
-					"Error de comunicación con la IA"
+				error.message ||
+				"Error de comunicación con la IA"
 			);
 		}
 	};
@@ -1848,7 +1932,7 @@ Analiza el mensaje del usuario y proporciona el JSON completo para crear los ele
 			<div className="ai-assistant-header">
 				<div className="header-content">
 					<div className="assistant-info">
-						<h3>🤖 Asistente UML IA</h3>
+						<h3>Asistente</h3>
 						<span className="status-indicator">
 							{isAnalyzingImage
 								? "🖼️ Analizando imagen..."
@@ -1860,7 +1944,7 @@ Analiza el mensaje del usuario y proporciona el JSON completo para crear los ele
 								? "✍️ Escribiendo..."
 								: isExecuting
 								? "⚡ Ejecutando..."
-								: "💡 Listo para ayudar"}
+								: ""}
 						</span>
 					</div>
 					<div className="header-actions">
@@ -1915,7 +1999,7 @@ Analiza el mensaje del usuario y proporciona el JSON completo para crear los ele
 			</div>
 
 			<div className="ai-assistant-examples">
-				<div className="examples-label">💡 Ejemplos UML rápidos:</div>
+				<div className="examples-label">Sugerencias:</div>
 				<div className="example-buttons">
 					{[
 						"Crea una tabla producto con relación uno a muchos con categoría",

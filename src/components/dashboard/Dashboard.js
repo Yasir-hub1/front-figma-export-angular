@@ -212,13 +212,19 @@ const Dashboard = () => {
       
       <div className="dashboard-content">
         <header className="dashboard-header">
-          <h1>Mis Proyectos</h1>
-          <button 
-            className="create-button"
-            onClick={() => setShowCreateForm(true)}
-          >
-            Crear Proyecto
-          </button>
+          <div className="header-content">
+            <div className="header-title-section">
+              <h1>🎨 Mis Proyectos UML</h1>
+              <p className="header-subtitle">Gestiona y crea tus diagramas UML</p>
+            </div>
+            <button 
+              className="create-button"
+              onClick={() => setShowCreateForm(true)}
+            >
+              <span className="button-icon">➕</span>
+              <span>Crear Proyecto</span>
+            </button>
+          </div>
         </header>
 
         {/* DEBUG INFO - TEMPORAL
@@ -248,24 +254,34 @@ const Dashboard = () => {
 
         {/* Sección para unirse a un proyecto compartido */}
         <div className="join-project-section">
-          <h2>Unirse a un proyecto compartido</h2>
+          <div className="join-header">
+            <h2>🔗 Unirse a un Proyecto Compartido</h2>
+            <p className="join-description">Ingresa el enlace o token para acceder a un proyecto compartido</p>
+          </div>
           <div className="join-form">
-            <input
-              type="text"
-              placeholder="Pega aquí el enlace compartido o ID del proyecto"
-              value={joinLink}
-              onChange={(e) => setJoinLink(e.target.value)}
-              className="join-input"
-            />
+            <div className="input-group">
+              <label htmlFor="joinLink" className="input-label">
+                Enlace o Token del Proyecto
+              </label>
+              <input
+                type="text"
+                id="joinLink"
+                placeholder="Pega aquí el enlace compartido o ID del proyecto"
+                value={joinLink}
+                onChange={(e) => setJoinLink(e.target.value)}
+                className="join-input"
+              />
+            </div>
             <button 
               className="join-button"
               onClick={handleJoinProject}
               disabled={joiningProject}
             >
-              {joiningProject ? 'Uniéndose...' : 'Unirse'}
+              <span className="button-icon">{joiningProject ? '⏳' : '🚀'}</span>
+              <span>{joiningProject ? 'Uniéndose...' : 'Unirse al Proyecto'}</span>
             </button>
           </div>
-          {joinError && <div className="join-error">{joinError}</div>}
+          {joinError && <div className="join-error">⚠️ {joinError}</div>}
         </div>
         
         {error && <div className="dashboard-error">{error}</div>}
@@ -280,27 +296,41 @@ const Dashboard = () => {
         )}
         
         {loading ? (
-          <div className="loading-spinner">Cargando proyectos...</div>
+          <div className="loading-spinner">
+            <div className="spinner-icon">⏳</div>
+            <p>Cargando tus proyectos...</p>
+          </div>
         ) : (
-          <div className="projects-grid">
+          <div className="projects-section">
             {projects.length > 0 ? (
-              projects.map(project => (
-                <ProjectCard
-                  key={project._id}
-                  project={project}
-                  onEdit={() => {
-                    console.log('📝 DASHBOARD: ProjectCard onEdit called for:', project._id);
-                    handleEditProject(project._id);
-                  }}
-                  onDelete={() => handleDeleteProject(project._id)}
-                  isOwner={currentUser?.id === project.owner?._id || currentUser?.id === project.owner}
-                />
-              ))
+              <>
+                <div className="projects-header">
+                  <h3>📋 Tus Proyectos ({projects.length})</h3>
+                  <p className="projects-subtitle">Haz clic en cualquier proyecto para editarlo</p>
+                </div>
+                <div className="projects-grid">
+                  {projects.map(project => (
+                    <ProjectCard
+                      key={project._id}
+                      project={project}
+                      onEdit={() => {
+                        console.log('📝 DASHBOARD: ProjectCard onEdit called for:', project._id);
+                        handleEditProject(project._id);
+                      }}
+                      onDelete={() => handleDeleteProject(project._id)}
+                      isOwner={currentUser?.id === project.owner?._id || currentUser?.id === project.owner}
+                    />
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="no-projects">
-                <p>No tienes proyectos todavía.</p>
+                <div className="no-projects-icon">🎨</div>
+                <h3>¡Comienza tu primer proyecto UML!</h3>
+                <p>No tienes proyectos todavía. Crea tu primer diagrama UML y comienza a diseñar.</p>
                 <button onClick={() => setShowCreateForm(true)}>
-                  Crear tu primer proyecto
+                  <span className="button-icon">✨</span>
+                  <span>Crear mi Primer Proyecto</span>
                 </button>
               </div>
             )}

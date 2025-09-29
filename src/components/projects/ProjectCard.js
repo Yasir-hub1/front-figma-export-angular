@@ -9,7 +9,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleEdit = () => {
-    console.log("handleEdit ",project)
+    console.log("handleEdit ", project);
     onEdit(project._id);
   };
 
@@ -36,21 +36,49 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
       .substring(0, 2);
   };
 
+  // Mejorar los iconos de tipo de proyecto con mejor mapeo
+  const getProjectTypeIcon = (deviceType) => {
+    const icons = {
+      custom: '🎨',
+      class: '🏗️',
+      sequence: '📊',
+      usecase: '👥',
+      activity: '⚡',
+      state: '🔄',
+      default: '📋'
+    };
+    return icons[deviceType] || icons.default;
+  };
+
   return (
     <div className="project-card">
       <div className="project-card-header">
-        <div className="project-card-canvas" style={{ backgroundColor: project.canvas?.background || '#f0f0f0' }}>
-          {/* Miniatura del proyecto */}
+        <div 
+          className="project-card-canvas" 
+          style={{ 
+            backgroundColor: project.canvas?.background || 'rgba(102, 126, 234, 0.1)' 
+          }}
+        >
+          {/* Miniatura del proyecto mejorada */}
         </div>
       </div>
       
       <div className="project-card-body">
-        <h3>{project.name}</h3>
-        <p className="project-description">{project.description || 'Sin descripción'}</p>
+        <div className="project-title-section">
+          <h3>{project.name}</h3>
+          <div className="project-type-badge">
+            {getProjectTypeIcon(project.deviceType)}
+          </div>
+        </div>
+        
+        <p className="project-description">
+          {project.description || '📝 Sin descripción disponible'}
+        </p>
         
         <div className="project-meta">
           <div className="project-updated">
-            Actualizado {getProjectTimeSince(project.updatedAt)}
+            <span className="meta-icon">🕒</span>
+            <span>Actualizado {getProjectTimeSince(project.updatedAt)}</span>
           </div>
           
           {project.owner && (
@@ -62,6 +90,12 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
             </div>
           )}
         </div>
+        
+        <div className="project-dimensions">
+          <span className="dimension-badge">
+            📐 {project.canvas?.width || 1000} × {project.canvas?.height || 700}px
+          </span>
+        </div>
       </div>
       
       <div className="project-card-footer">
@@ -69,28 +103,33 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
           className="edit-button"
           onClick={handleEdit}
         >
-          ABRIR EDITOR UML
+          <span className="button-icon">🎨</span>
+          <span>Abrir Editor</span>
         </button>
         
         {isOwner && (
           <>
             {showDeleteConfirm ? (
               <div className="delete-confirm">
-                <p>¿Eliminar este proyecto?</p>
+                <p>⚠️ ¿Eliminar este proyecto?</p>
                 <div className="delete-actions">
                   <button 
                     className="confirm-delete"
                     onClick={handleDelete}
                     disabled={isDeleting}
                   >
-                    {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+                    <span className="button-icon">
+                      {isDeleting ? '⏳' : '🗑️'}
+                    </span>
+                    <span>{isDeleting ? 'Eliminando...' : 'Sí, eliminar'}</span>
                   </button>
                   <button 
                     className="cancel-delete"
                     onClick={() => setShowDeleteConfirm(false)}
                     disabled={isDeleting}
                   >
-                    Cancelar
+                    <span className="button-icon">❌</span>
+                    <span>Cancelar</span>
                   </button>
                 </div>
               </div>
@@ -99,7 +138,8 @@ const ProjectCard = ({ project, onEdit, onDelete, isOwner }) => {
                 className="delete-button"
                 onClick={() => setShowDeleteConfirm(true)}
               >
-                Eliminar
+                <span className="button-icon">🗑️</span>
+                <span>Eliminar</span>
               </button>
             )}
           </>

@@ -80,6 +80,51 @@ const ScreenTabs = () => {
 
   return (
     <div className="screen-tabs">
+      <div className="tabs-header">
+        {/* <div className="tabs-brand">
+          <div className="brand-icon">
+            <i className="fas fa-layer-group"></i>
+          </div>
+          <div className="brand-info">
+            <h4 className="brand-title">Diagramas UML</h4>
+            <span className="brand-count">
+              {Array.isArray(diagrams) ? diagrams.length : 0} diagrama{(Array.isArray(diagrams) ? diagrams.length : 0) !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div> */}
+        
+        <div className="tabs-actions">
+          {isCreating ? (
+            <div className="create-input-container">
+              <input
+                type="text"
+                value={newDiagramName}
+                onChange={(e) => setNewDiagramName(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') handleCreateDiagram();
+                  if (e.key === 'Escape') cancelCreating();
+                }}
+                onBlur={handleCreateDiagram}
+                autoFocus
+                className="create-input"
+                placeholder="Nombre del diagrama"
+              />
+              <button className="create-confirm" onClick={handleCreateDiagram}>
+                <i className="fas fa-check"></i>
+              </button>
+              <button className="create-cancel" onClick={cancelCreating}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+          ) : (
+            <button className="add-tab-button" onClick={startCreating}>
+              <i className="fas fa-plus"></i>
+              <span>Nuevo</span>
+            </button>
+          )}
+        </div>
+      </div>
+      
       <div className="tabs-container">
         {Array.isArray(diagrams) && diagrams.map((diagram) => (
           <DiagramTab
@@ -93,45 +138,26 @@ const ScreenTabs = () => {
             elementsCount={currentDiagram?._id === diagram._id ? umlElements.length : 0}
           />
         ))}
-        
-        {isCreating ? (
-          <div className="screen-tab creating">
-            <input
-              type="text"
-              value={newDiagramName}
-              onChange={(e) => setNewDiagramName(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') handleCreateDiagram();
-                if (e.key === 'Escape') cancelCreating();
-              }}
-              onBlur={handleCreateDiagram}
-              autoFocus
-              className="screen-name-input"
-            />
-          </div>
-        ) : (
-          <button className="add-screen-button" onClick={startCreating}>
-            <i className="fa fa-plus"></i>
-            <span>
-              {Array.isArray(diagrams) && diagrams.length > 0 ? 'Nuevo Diagrama' : 'Crear Primer Diagrama'}
-            </span>
-          </button>
-        )}
       </div>
       
-      <div className="screen-info">
-        <span className="screen-count">
-          {Array.isArray(diagrams) ? diagrams.length : 0} diagrama{(Array.isArray(diagrams) ? diagrams.length : 0) !== 1 ? 's' : ''}
-        </span>
-        <span className="device-type">
-          {project?.deviceType || 'UML'}
-        </span>
-        {currentDiagram && (
-          <span className="current-screen-info">
-            Actual: {currentDiagram.name} ({umlElements?.length || 0} elementos)
-          </span>
-        )}
-      </div>
+      {currentDiagram && (
+        <div className="current-diagram-info">
+          <div className="diagram-status">
+            <div className="status-dot"></div>
+            <span className="diagram-name">{currentDiagram.name}</span>
+          </div>
+          <div className="diagram-stats">
+            <span className="elements-count">
+              <i className="fas fa-cube"></i>
+              {umlElements?.length || 0}
+            </span>
+            <span className="diagram-type">
+              <i className="fas fa-diagram-project"></i>
+              {currentDiagram.type || 'class'}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -166,55 +192,78 @@ const DiagramTab = ({ diagram, isActive, onClick, onDelete, onRename, canDelete,
   };
 
   return (
-    <div className={`screen-tab ${isActive ? 'active' : ''}`} onClick={handleTabClick}>
-      {isEditing ? (
-        <input
-          type="text"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          onKeyPress={(e) => {
-            e.stopPropagation();
-            if (e.key === 'Enter') handleSaveEdit();
-            if (e.key === 'Escape') handleCancelEdit();
-          }}
-          onBlur={handleSaveEdit}
-          onClick={(e) => e.stopPropagation()}
-          autoFocus
-          className="screen-name-input"
-        />
-      ) : (
-        <>
-          <span className="screen-name" onDoubleClick={handleStartEdit}>
-            {diagram.name}
-          </span>
-          <div className="screen-actions">
-            <button
-              className="edit-button"
-              onClick={handleStartEdit}
-              title="Renombrar diagrama"
-            >
-              <i className="fa fa-edit"></i>
-            </button>
-            {canDelete && (
-              <button
-                className="delete-button"
-                onClick={onDelete}
-                title="Eliminar diagrama"
-              >
-                <i className="fa fa-times"></i>
+    <div className={`diagram-tab ${isActive ? 'active' : ''}`} onClick={handleTabClick}>
+      <div className="tab-content">
+        {isEditing ? (
+          <div className="edit-container">
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyPress={(e) => {
+                e.stopPropagation();
+                if (e.key === 'Enter') handleSaveEdit();
+                if (e.key === 'Escape') handleCancelEdit();
+              }}
+              onBlur={handleSaveEdit}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+              className="tab-edit-input"
+            />
+            <div className="edit-actions">
+              <button className="edit-save" onClick={handleSaveEdit}>
+                <i className="fas fa-check"></i>
               </button>
-            )}
+              <button className="edit-cancel" onClick={handleCancelEdit}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
           </div>
-        </>
-      )}
-      
-      <div className="screen-preview">
-        <div className="elements-count">
-          {elementsCount || 0} elementos
-        </div>
-        <div className="diagram-type">
-          {diagram.type || 'class'}
-        </div>
+        ) : (
+          <>
+            <div className="tab-header">
+              <div className="tab-icon">
+                <i className="fas fa-diagram-project"></i>
+              </div>
+              <div className="tab-info">
+                <span className="tab-name" onDoubleClick={handleStartEdit}>
+                  {diagram.name}
+                </span>
+                <span className="tab-type">{diagram.type || 'class'}</span>
+              </div>
+              <div className="tab-actions">
+                <button
+                  className="tab-edit"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStartEdit(e);
+                  }}
+                  title="Renombrar"
+                >
+                  <i className="fas fa-edit"></i>
+                </button>
+                {canDelete && (
+                  <button
+                    className="tab-delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(e);
+                    }}
+                    title="Eliminar"
+                  >
+                    <i className="fas fa-trash"></i>
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="tab-footer">
+              <span className="tab-elements">
+                <i className="fas fa-cube"></i>
+                {elementsCount || 0}
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

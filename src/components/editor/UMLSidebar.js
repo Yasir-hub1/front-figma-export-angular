@@ -491,82 +491,124 @@ const UMLSidebar = ({ onClose, connectionMode, setConnectionMode, diagramType })
 
   return (
     <div className="uml-sidebar-container">
-      <div className="uml-sidebar-header">
-        <div className="uml-sidebar-title">
-          <i className="icon fa fa-th-large"></i>
-          Componentes UML
+      {/* <div className="uml-sidebar-header">
+        <div className="sidebar-brand">
+          <div className="brand-icon">
+            <i className="fas fa-magic"></i>
+          </div>
+          <div className="brand-content">
+            <h3 className="brand-title">ELEMENTOS DE UML</h3>
+            <p className="brand-subtitle">Elementos y Relaciones</p>
+          </div>
         </div>
-        <button className="uml-sidebar-toggle" onClick={onClose}>
-          <i className="fa fa-times"></i>
+        <button className="sidebar-close" onClick={onClose}>
+          <i className="fas fa-times"></i>
         </button>
-      </div>
+      </div> */}
 
-      {/* Filters and Search */}
-      <div className="uml-sidebar-filters">
-        <div className="uml-search-box">
+      {/* Search and Navigation */}
+      <div className="sidebar-search-section">
+        <div className="search-container">
+          <div className="search-icon">
+            <i className="fas fa-search"></i>
+          </div>
           <input
             type="text"
-            placeholder="Buscar elementos..."
+            placeholder="Buscar elementos UML..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="uml-search-input"
+            className="search-input"
           />
-          <i className="fa fa-search uml-search-icon"></i>
+          {searchTerm && (
+            <button 
+              className="search-clear"
+              onClick={() => setSearchTerm('')}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          )}
         </div>
 
-        {/* Filter tabs */}
-        <div className="uml-filter-tabs">
+        <div className="navigation-tabs">
           <button
-            className={`uml-filter-tab ${activeTab === 'elements' ? 'active' : ''}`}
+            className={`nav-tab ${activeTab === 'elements' ? 'active' : ''}`}
             onClick={() => setActiveTab('elements')}
           >
-            Elementos
+          
+            <div className="tab-content">
+              <span className="tab-title">Elementos</span>
+              <span className="tab-count">{filteredElements.length}</span>
+            </div>
           </button>
           <button
-            className={`uml-filter-tab ${activeTab === 'relationships' ? 'active' : ''}`}
+            className={`nav-tab ${activeTab === 'relationships' ? 'active' : ''}`}
             onClick={() => setActiveTab('relationships')}
           >
-            Relaciones
+          
+            <div className="tab-content">
+              <span className="tab-title">Relaciones</span>
+              <span className="tab-count">{filteredRelationships.length}</span>
+            </div>
           </button>
         </div>
       </div>
 
-      {/* Indicador de diagrama actual */}
-      <div className="diagram-type-indicator">
-        <span className="diagram-type-label">Diagrama:</span>
-        <span className="diagram-type-name">{diagramType}</span>
-      </div>
+      {/* Diagram Type Indicator */}
+      {/* <div className="diagram-indicator">
+        <div className="indicator-icon">
+          <i className="fas fa-diagram-project"></i>
+        </div>
+        <div className="indicator-content">
+          <span className="indicator-label">Tipo de Diagrama</span>
+          <span className="indicator-value">{diagramType}</span>
+        </div>
+      </div> */}
 
-      {/* Contenido principal */}
-      <div className="uml-sidebar-content">
+      {/* Main Content */}
+      <div className="sidebar-content">
         {activeTab === 'elements' && (
-          <div className="uml-category">
-            <div className="uml-category-header">
-              <i className="uml-category-icon fa fa-th-large"></i>
-              <span>Elementos UML</span>
-              <i className="uml-category-toggle fa fa-chevron-right"></i>
-            </div>
+          <div className="elements-section">
+            {/* <div className="section-header">
+              <div className="section-icon">
+                <i className="fas fa-cube"></i>
+              </div>
+              <div className="section-info">
+                <h4 className="section-title">Elementos UML</h4>
+                <p className="section-description">Arrastra elementos al canvas para crear</p>
+              </div>
+            </div> */}
 
             {filteredElements.length === 0 ? (
-              <div className="uml-empty-list">
-                <div className="uml-empty-icon">🔍</div>
-                <p>No se encontraron elementos</p>
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <i className="fas fa-search"></i>
+                </div>
+                <h5 className="empty-title">No se encontraron elementos</h5>
+                <p className="empty-description">Intenta con otros términos de búsqueda</p>
               </div>
             ) : (
-              <div className="uml-elements-list">
+              <div className="elements-grid">
                 {filteredElements.map((element, index) => (
                   <div
                     key={index}
-                    className="uml-element-item"
+                    className="element-card"
                     onClick={() => handleCreateElement(element.type)}
                     title={element.description}
                   >
-                    <div className={`uml-element-icon ${element.type}`}>
-                      <i className={element.icon}></i>
+                    <div className="card-header">
+                      <div className={`element-icon ${element.type}`}>
+                        <i className={element.icon}></i>
+                      </div>
+                      <div className="element-badge">
+                        <i className="fas fa-plus"></i>
+                      </div>
                     </div>
-                    <div className="uml-element-info">
-                      <div className="uml-element-name">{element.name}</div>
-                      <div className="uml-element-description">{element.description}</div>
+                    <div className="card-content">
+                      <h5 className="element-name">{element.name}</h5>
+                      <p className="element-description">{element.description}</p>
+                    </div>
+                    <div className="card-footer">
+                      <span className="element-type">{element.type}</span>
                     </div>
                   </div>
                 ))}
@@ -576,49 +618,69 @@ const UMLSidebar = ({ onClose, connectionMode, setConnectionMode, diagramType })
         )}
 
         {activeTab === 'relationships' && (
-          <div className="uml-category">
-            <div className="uml-category-header">
-              <i className="uml-category-icon fa fa-link"></i>
-              <span>Relaciones UML</span>
-              <i className="uml-category-toggle fa fa-chevron-right"></i>
+          <div className="relationships-section">
+            <div className="section-header">
+              <div className="section-icon">
+                <i className="fas fa-project-diagram"></i>
+              </div>
+              <div className="section-info">
+                <h4 className="section-title">Relaciones UML</h4>
+                <p className="section-description">Haz clic para activar modo conexión</p>
+              </div>
             </div>
 
             {connectionMode && (
-              <div className="connection-mode-indicator">
-                <div className="connection-mode-content">
-                  <i className="fa fa-link"></i>
-                  <span>Modo activo: {connectionMode}</span>
+              <div className="connection-mode-banner">
+                <div className="banner-content">
+                  <div className="banner-icon">
+                    <i className="fas fa-link"></i>
+                  </div>
+                  <div className="banner-text">
+                    <span className="banner-title">Modo Conexión Activo</span>
+                    <span className="banner-subtitle">{connectionMode}</span>
+                  </div>
                   <button
-                    className="cancel-connection"
+                    className="banner-close"
                     onClick={() => setConnectionMode(null)}
                     title="Cancelar modo conexión"
                   >
-                    <i className="fa fa-times"></i>
+                    <i className="fas fa-times"></i>
                   </button>
                 </div>
               </div>
             )}
 
             {filteredRelationships.length === 0 ? (
-              <div className="uml-empty-list">
-                <div className="uml-empty-icon">🔗</div>
-                <p>No se encontraron relaciones</p>
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <i className="fas fa-link"></i>
+                </div>
+                <h5 className="empty-title">No se encontraron relaciones</h5>
+                <p className="empty-description">Intenta con otros términos de búsqueda</p>
               </div>
             ) : (
-              <div className="uml-elements-list">
+              <div className="relationships-grid">
                 {filteredRelationships.map((relationship, index) => (
                   <div
                     key={index}
-                    className={`uml-element-item ${connectionMode === relationship.type ? 'active' : ''}`}
+                    className={`relationship-card ${connectionMode === relationship.type ? 'active' : ''}`}
                     onClick={() => handleActivateConnectionMode(relationship.type)}
                     title={relationship.description}
                   >
-                    <div className={`uml-element-icon ${relationship.type}`}>
-                      <i className={relationship.icon}></i>
+                    <div className="card-header">
+                      <div className={`relationship-icon ${relationship.type}`}>
+                        <i className={relationship.icon}></i>
+                      </div>
+                      <div className="relationship-badge">
+                        <i className="fas fa-arrow-right"></i>
+                      </div>
                     </div>
-                    <div className="uml-element-info">
-                      <div className="uml-element-name">{relationship.name}</div>
-                      <div className="uml-element-description">{relationship.description}</div>
+                    <div className="card-content">
+                      <h5 className="relationship-name">{relationship.name}</h5>
+                      <p className="relationship-description">{relationship.description}</p>
+                    </div>
+                    <div className="card-footer">
+                      <span className="relationship-type">{relationship.type}</span>
                     </div>
                   </div>
                 ))}

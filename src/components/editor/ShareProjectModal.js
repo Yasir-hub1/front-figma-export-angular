@@ -99,7 +99,7 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
             <i className="fas fa-share-alt"></i>
             Compartir Proyecto
           </h2>
-          <button className="close-button" onClick={onClose}>
+          <button className="close-button" onClick={onClose} title="Cerrar modal">
             <i className="fas fa-times"></i>
           </button>
         </div>
@@ -110,7 +110,7 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
             <p>Diagrama actual: {currentDiagram?.name || 'Ninguno'}</p>
           </div>
 
-          <div className="share-section">
+          {/* <div className="share-section">
             <h4>Configuración de Compartir</h4>
             
             <div className="form-group">
@@ -127,19 +127,19 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
             <div className="form-group">
               <label>
                 Días de expiración:
-                <select 
-                  value={expirationDays} 
-                  onChange={(e) => setExpirationDays(Number(e.target.value))}
-                >
-                  <option value={1}>1 día</option>
-                  <option value={7}>7 días</option>
-                  <option value={30}>30 días</option>
-                  <option value={90}>90 días</option>
-                  <option value={0}>Nunca expira</option>
-                </select>
               </label>
+              <select 
+                value={expirationDays} 
+                onChange={(e) => setExpirationDays(Number(e.target.value))}
+              >
+                <option value={1}>1 día</option>
+                <option value={7}>7 días</option>
+                <option value={30}>30 días</option>
+                <option value={90}>90 días</option>
+                <option value={0}>Nunca expira</option>
+              </select>
             </div>
-          </div>
+          </div> */}
 
 
           <div className="link-section">
@@ -150,6 +150,7 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
                 className="generate-button"
                 onClick={handleGenerateLink}
                 disabled={isGenerating}
+                title="Generar enlace de compartir"
               >
                 {isGenerating ? (
                   <>
@@ -172,11 +173,12 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
                     readOnly
                     className="share-link-input"
                     placeholder="Enlace de compartir..."
+                    title="Enlace de compartir generado"
                   />
                   <button 
                     className="copy-button"
                     onClick={handleCopyLink}
-                    title="Copiar enlace"
+                    title="Copiar enlace al portapapeles"
                   >
                     {copied ? (
                       <>
@@ -197,6 +199,7 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
                     className="regenerate-button"
                     onClick={handleGenerateLink}
                     disabled={isGenerating}
+                    title="Generar nuevo enlace"
                   >
                     <i className="fas fa-refresh"></i>
                     Regenerar
@@ -205,6 +208,7 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
                   <button 
                     className="save-settings-button"
                     onClick={handleSaveSettings}
+                    title="Guardar configuración actual"
                   >
                     <i className="fas fa-save"></i>
                     Guardar Configuración
@@ -218,7 +222,7 @@ const ShareProjectModal = ({ isOpen, onClose }) => {
         </div>
 
         <div className="modal-footer">
-          <button className="cancel-button" onClick={onClose}>
+          <button className="cancel-button" onClick={onClose} title="Cerrar modal">
             Cerrar
           </button>
         </div>

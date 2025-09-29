@@ -132,7 +132,7 @@ const UMLToolbar = ({
         </span>
       </div>
       
-      <div className="toolbar-section view-modes">
+      {/* <div className="toolbar-section view-modes">
         <button 
           className={`mode-button ${viewMode === 'design' ? 'active' : ''}`}
           onClick={() => setViewMode('design')}
@@ -148,7 +148,7 @@ const UMLToolbar = ({
         >
           <i className="fa fa-magic"></i>
         </button>
-      </div>
+      </div> */}
 
       {/* <div className="toolbar-section">
         <select 
@@ -167,7 +167,7 @@ const UMLToolbar = ({
         </select>
       </div> */}
       
-      <div className="toolbar-section">
+      {/* <div className="toolbar-section">
         <button 
           className="toolbar-button"
           onClick={toggleSidebar}
@@ -237,9 +237,9 @@ const UMLToolbar = ({
             </div>
           )}
         </div>
-      </div>
+      </div> */}
       
-      <div className="toolbar-section">
+      {/* <div className="toolbar-section">
         <button 
           className="toolbar-button"
           onClick={handleZoomOut}
@@ -274,7 +274,7 @@ const UMLToolbar = ({
         >
           <i className="fas fa-home"></i>
         </button>
-      </div>
+      </div> */}
 
       {connectionMode && (
         <div className="toolbar-section connection-mode-section">

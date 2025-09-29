@@ -185,7 +185,7 @@ const UMLEditor = () => {
   return (
     <div className="uml-editor-container">
       {/* Navbar superior */}
-      <Navbar project={project} />
+      {/* <Navbar project={project} /> */}
       
       {/* UMLToolbar y tabs */}
       <div className="uml-editor-header">

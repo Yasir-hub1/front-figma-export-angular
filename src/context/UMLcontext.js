@@ -329,7 +329,7 @@ export function UMLProvider({ children, projectId }) {
 
     console.log('Inicializando Socket.IO para proyecto UML:', projectId);
 
-    const newSocket = io('http://134.209.50.92:5002', {
+    const newSocket = io('http://localhost:5002', {
       withCredentials: true,
       transports: ['websocket'],
     });
@@ -610,7 +610,7 @@ export function UMLProvider({ children, projectId }) {
 
   const deleteDiagram = async (diagramId) => {
     try {
-      await diagramService.deleteDiagram(projectId, diagramId);
+      await diagramService.deleteDiagram(diagramId);
 
       dispatch({ type: 'DELETE_DIAGRAM', payload: diagramId });
 

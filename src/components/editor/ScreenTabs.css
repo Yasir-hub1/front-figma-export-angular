@@ -1,294 +1,658 @@
-/* src/components/editor/ScreenTabs.css */
+/* ScreenTabs.css - Diseño Compacto y Moderno */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 .screen-tabs {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e1e5e9;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-tabs::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(102, 126, 234, 0.3) 50%, 
+    transparent 100%);
+}
+
+/* Header */
+.tabs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.tabs-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.brand-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tabs-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.add-tab-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.add-tab-button i {
+  font-size: 12px;
+}
+
+.create-input-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 8px;
+  padding: 4px 8px;
+  backdrop-filter: blur(10px);
+}
+
+.create-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 120px;
+  padding: 4px 8px;
+}
+
+.create-input::placeholder {
+  color: #9ca3af;
+}
+
+.create-confirm,
+.create-cancel {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s ease;
+}
+
+.create-confirm {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.create-confirm:hover {
+  background: rgba(34, 197, 94, 0.2);
+  transform: scale(1.1);
+}
+
+.create-cancel {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.create-cancel:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.1);
+}
+
+/* Tabs Container */
+.tabs-container {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
+}
+
+.tabs-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabs-container::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 2px;
+}
+
+.tabs-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+/* Diagram Tab */
+.diagram-tab {
+  min-width: 200px;
+  max-width: 250px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(102, 126, 234, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.diagram-tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(102, 126, 234, 0.05), 
+    transparent);
+  transition: left 0.5s ease;
+}
+
+.diagram-tab:hover::before {
+  left: 100%;
+}
+
+.diagram-tab:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+}
+
+.diagram-tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.tab-content {
+  padding: 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.tab-icon {
+  width: 24px;
+  height: 24px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.diagram-tab.active .tab-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.tab-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tab-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diagram-tab.active .tab-name {
+  color: white;
+}
+
+.tab-type {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.diagram-tab.active .tab-type {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tab-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.diagram-tab:hover .tab-actions,
+.diagram-tab.active .tab-actions {
+  opacity: 1;
+}
+
+.tab-edit,
+.tab-delete {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s ease;
+}
+
+.tab-edit {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.tab-edit:hover {
+  background: rgba(59, 130, 246, 0.2);
+  transform: scale(1.1);
+}
+
+.tab-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.tab-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.1);
+}
+
+.diagram-tab.active .tab-edit {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.diagram-tab.active .tab-delete {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.tab-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.tab-elements {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #6b7280;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.diagram-tab.active .tab-elements {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-elements i {
+  font-size: 8px;
+}
+
+/* Edit Container */
+.edit-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.tab-edit-input {
+  flex: 1;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  outline: none;
+}
+
+.tab-edit-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-save,
+.edit-cancel {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s ease;
+}
+
+.edit-save {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.edit-save:hover {
+  background: rgba(34, 197, 94, 0.2);
+  transform: scale(1.1);
+}
+
+.edit-cancel {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.edit-cancel:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.1);
+}
+
+/* Current Diagram Info */
+.current-diagram-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  background: rgba(102, 126, 234, 0.05);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.diagram-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.diagram-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.diagram-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.elements-count,
+.diagram-type {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.elements-count i,
+.diagram-type i {
+  font-size: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tabs-header {
     padding: 8px 16px;
-    min-height: 60px;
-    overflow-x: auto;
   }
   
   .tabs-container {
-    display: flex;
+    padding: 8px 16px;
+  }
+  
+  .diagram-tab {
+    min-width: 160px;
+    max-width: 200px;
+  }
+  
+  .tab-content {
+    padding: 8px;
+  }
+  
+  .brand-title {
+    font-size: 14px;
+  }
+  
+  .brand-count {
+    font-size: 10px;
+  }
+  
+  .current-diagram-info {
+    padding: 6px 16px;
+  }
+  
+  .diagram-stats {
     gap: 8px;
-    flex: 1;
-    overflow-x: auto;
-    scrollbar-width: thin;
   }
   
-  .tabs-container::-webkit-scrollbar {
-    height: 4px;
+  .elements-count,
+  .diagram-type {
+    font-size: 10px;
+    padding: 3px 6px;
   }
-  
-  .tabs-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 2px;
-  }
-  
-  .tabs-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 2px;
-  }
-  
-  .screen-tab {
-    display: flex;
+}
+
+@media (max-width: 480px) {
+  .tabs-header {
     flex-direction: column;
-    align-items: center;
-    min-width: 140px;
-    max-width: 180px;
-    padding: 8px 12px;
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 8px 8px 0 0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    user-select: none;
+    gap: 8px;
+    align-items: stretch;
   }
   
-  .screen-tab:hover {
-    border-color: #adb5bd;
-    background: #f1f3f4;
-  }
-  
-  .screen-tab.active {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  }
-  
-  .screen-tab.creating {
-    background: #e3f2fd;
-    border-color: #2196f3;
-    border-style: dashed;
-  }
-  
-  .screen-name {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 4px;
-    text-align: center;
-    word-wrap: break-word;
-    max-width: 100%;
-  }
-  
-  .screen-name-input {
-    background: white;
-    border: 1px solid #2196f3;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    outline: none;
-    width: 120px;
-  }
-  
-  .screen-actions {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    gap: 4px;
-  }
-  
-  .screen-tab:hover .screen-actions {
-    display: flex;
-  }
-  
-  .screen-tab.active .screen-actions {
-    display: flex;
-  }
-  
-  .edit-button,
-  .delete-button {
-    width: 20px;
-    height: 20px;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
+  .tabs-brand {
     justify-content: center;
-    font-size: 10px;
-    transition: all 0.2s ease;
   }
   
-  .edit-button {
-    background: #28a745;
-    color: white;
+  .tabs-actions {
+    justify-content: center;
   }
   
-  .edit-button:hover {
-    background: #218838;
-    transform: scale(1.1);
-  }
-  
-  .delete-button {
-    background: #dc3545;
-    color: white;
-  }
-  
-  .delete-button:hover {
-    background: #c82333;
-    transform: scale(1.1);
-  }
-  
-  .screen-preview {
-    font-size: 11px;
-    opacity: 0.8;
+  .current-diagram-info {
+    flex-direction: column;
+    gap: 6px;
     text-align: center;
   }
   
-  .screen-tab.active .screen-preview {
-    opacity: 0.9;
+  .diagram-stats {
+    justify-content: center;
+  }
+}
+
+/* Animaciones */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.diagram-tab {
+  animation: slideIn 0.3s ease;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .screen-tabs {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(102, 126, 234, 0.2);
   }
   
-  .elements-count {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 10px;
-    font-weight: 500;
+  .tabs-header {
+    background: rgba(42, 42, 42, 0.8);
   }
   
-  .screen-tab.active .elements-count {
-    background: rgba(255, 255, 255, 0.3);
+  .brand-title {
+    color: #e0e0e0;
   }
   
-  .add-screen-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 120px;
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 12px;
-    font-weight: 600;
-    gap: 4px;
+  .brand-count {
+    color: #a0a0a0;
   }
   
-  .add-screen-button:hover {
-    background: linear-gradient(135deg, #218838 0%, #28a745 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  .diagram-tab {
+    background: rgba(42, 42, 42, 0.8);
+    border-color: rgba(102, 126, 234, 0.2);
   }
   
-  .add-screen-button i {
-    font-size: 16px;
-    margin-bottom: 2px;
+  .diagram-tab:hover {
+    background: rgba(42, 42, 42, 0.95);
   }
   
-  .screen-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-    margin-left: 16px;
-    font-size: 12px;
-    color: #666;
-    min-width: 80px;
+  .tab-name {
+    color: #e0e0e0;
   }
   
-  .screen-count {
-    font-weight: 600;
-    color: #495057;
+  .tab-type {
+    color: #a0a0a0;
   }
   
-  .device-type {
-    background: #e9ecef;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #6c757d;
+  .tab-elements {
+    color: #a0a0a0;
+    background: rgba(102, 126, 234, 0.2);
   }
   
-  /* Responsive */
-  @media (max-width: 768px) {
-    .screen-tabs {
-      padding: 6px 12px;
-      min-height: 50px;
-    }
-    
-    .screen-tab {
-      min-width: 100px;
-      max-width: 120px;
-      padding: 6px 8px;
-    }
-    
-    .screen-name {
-      font-size: 12px;
-    }
-    
-    .add-screen-button {
-      min-width: 90px;
-      padding: 6px 8px;
-      font-size: 11px;
-    }
-    
-    .screen-info {
-      display: none;
-    }
+  .current-diagram-info {
+    background: rgba(102, 126, 234, 0.1);
   }
   
-  /* Animaciones */
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
+  .diagram-name {
+    color: #e0e0e0;
   }
   
-  .screen-tab {
-    animation: slideIn 0.3s ease;
+  .elements-count,
+  .diagram-type {
+    color: #a0a0a0;
+    background: rgba(102, 126, 234, 0.2);
   }
-  
-  /* Dark mode */
-  @media (prefers-color-scheme: dark) {
-    .screen-tabs {
-      background: #1a1a1a;
-      border-color: #333;
-    }
-    
-    .screen-tab {
-      background: #2a2a2a;
-      color: #e0e0e0;
-      border-color: #444;
-    }
-    
-    .screen-tab:hover {
-      background: #333;
-      border-color: #555;
-    }
-    
-    .screen-name-input {
-      background: #2a2a2a;
-      color: #e0e0e0;
-      border-color: #2196f3;
-    }
-    
-    .device-type {
-      background: #333;
-      color: #ccc;
-    }
-    
-    .screen-count {
-      color: #ccc;
-    }
-  }
+}

@@ -55,12 +55,13 @@ const Register = () => {
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Nombre de usuario</label>
+            <label htmlFor="username">Nombre de Usuario</label>
             <input
               type="text"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="Ingresa tu nombre de usuario"
               required
             />
           </div>
@@ -72,6 +73,7 @@ const Register = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Ingresa tu email"
               required
             />
           </div>
@@ -83,6 +85,7 @@ const Register = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
               required
             />
           </div>
@@ -94,6 +97,7 @@ const Register = () => {
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Repite tu contraseña"
               required
             />
           </div>

@@ -593,48 +593,65 @@ const UMLProperties = ({ onClose, selectedElement, selectedConnection }) => {
               <div className="attributes-list">
                 {attributes.map((attr, index) => (
                   <div key={index} className="attribute-item">
-                    <select
-                      value={attr.visibility || 'private'}
-                      onChange={(e) => updateAttribute(index, 'visibility', e.target.value)}
-                      onBlur={handleSaveElement}
-                    >
-                      <option value="public">+</option>
-                      <option value="private">-</option>
-                      <option value="protected">#</option>
-                      <option value="package">~</option>
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="nombre"
-                      value={attr.name || ''}
-                      onChange={(e) => updateAttribute(index, 'name', e.target.value)}
-                      onBlur={handleSaveElement}
-                    />
-                    <input
-                      type="text"
-                      placeholder="tipo"
-                      value={attr.type || ''}
-                      onChange={(e) => updateAttribute(index, 'type', e.target.value)}
-                      onBlur={handleSaveElement}
-                    />
-                    <input
-                      type="text"
-                      placeholder="valor por defecto"
-                      value={attr.defaultValue || ''}
-                      onChange={(e) => updateAttribute(index, 'defaultValue', e.target.value)}
-                      onBlur={handleSaveElement}
-                    />
+                    <div className="input-group">
+                      <label className="input-label">Visibilidad</label>
+                      <select
+                        value={attr.visibility || 'private'}
+                        onChange={(e) => updateAttribute(index, 'visibility', e.target.value)}
+                        onBlur={handleSaveElement}
+                        title="Seleccionar visibilidad del atributo"
+                      >
+                        <option value="public">+ Public</option>
+                        <option value="private">- Private</option>
+                        <option value="protected"># Protected</option>
+                        <option value="package">~ Package</option>
+                      </select>
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Nombre</label>
+                      <input
+                        type="text"
+                        placeholder="Ingresa el nombre del atributo"
+                        value={attr.name || ''}
+                        onChange={(e) => updateAttribute(index, 'name', e.target.value)}
+                        onBlur={handleSaveElement}
+                        title="Nombre del atributo"
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Tipo</label>
+                      <input
+                        type="text"
+                        placeholder="String, int, boolean..."
+                        value={attr.type || ''}
+                        onChange={(e) => updateAttribute(index, 'type', e.target.value)}
+                        onBlur={handleSaveElement}
+                        title="Tipo de dato del atributo"
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Valor por defecto</label>
+                      <input
+                        type="text"
+                        placeholder="Valor inicial (opcional)"
+                        value={attr.defaultValue || ''}
+                        onChange={(e) => updateAttribute(index, 'defaultValue', e.target.value)}
+                        onBlur={handleSaveElement}
+                        title="Valor por defecto del atributo"
+                      />
+                    </div>
                     <button 
                       className="remove-attribute"
                       onClick={() => removeAttribute(index)}
                       title="Eliminar atributo"
                     >
-                      ×
+                      <i className="fa fa-trash"></i>
                     </button>
                   </div>
                 ))}
                 <button className="add-attribute-button" onClick={addAttribute}>
-                  + Agregar Atributo
+                  <i className="fa fa-plus"></i>
+                  Agregar Atributo
                 </button>
               </div>
             </div>
@@ -650,54 +667,69 @@ const UMLProperties = ({ onClose, selectedElement, selectedConnection }) => {
               <div className="operations-list">
                 {operations.map((op, index) => (
                   <div key={index} className="operation-item">
-                    <select
-                      value={op.visibility || 'public'}
-                      onChange={(e) => updateOperation(index, 'visibility', e.target.value)}
-                      onBlur={handleSaveElement}
-                    >
-                      <option value="public">+</option>
-                      <option value="private">-</option>
-                      <option value="protected">#</option>
-                      <option value="package">~</option>
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="nombre"
-                      value={op.name || ''}
-                      onChange={(e) => updateOperation(index, 'name', e.target.value)}
-                      onBlur={handleSaveElement}
-                    />
-                    <input
-                      type="text"
-                      placeholder="tipo retorno"
-                      value={op.returnType || ''}
-                      onChange={(e) => updateOperation(index, 'returnType', e.target.value)}
-                      onBlur={handleSaveElement}
-                    />
+                    <div className="input-group">
+                      <label className="input-label">Visibilidad</label>
+                      <select
+                        value={op.visibility || 'public'}
+                        onChange={(e) => updateOperation(index, 'visibility', e.target.value)}
+                        onBlur={handleSaveElement}
+                        title="Seleccionar visibilidad del método"
+                      >
+                        <option value="public">+ Public</option>
+                        <option value="private">- Private</option>
+                        <option value="protected"># Protected</option>
+                        <option value="package">~ Package</option>
+                      </select>
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Nombre</label>
+                      <input
+                        type="text"
+                        placeholder="Ingresa el nombre del método"
+                        value={op.name || ''}
+                        onChange={(e) => updateOperation(index, 'name', e.target.value)}
+                        onBlur={handleSaveElement}
+                        title="Nombre del método"
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Tipo de retorno</label>
+                      <input
+                        type="text"
+                        placeholder="String, int, void..."
+                        value={op.returnType || ''}
+                        onChange={(e) => updateOperation(index, 'returnType', e.target.value)}
+                        onBlur={handleSaveElement}
+                        title="Tipo de dato que retorna el método"
+                      />
+                    </div>
                     {selectedElement.type !== 'interface' && (
-                      <label title="Método abstracto">
-                        <input
-                          type="checkbox"
-                          checked={op.isAbstract || false}
-                          onChange={(e) => {
-                            updateOperation(index, 'isAbstract', e.target.checked);
-                            setTimeout(handleSaveElement, 100);
-                          }}
-                        />
-                        Abs
-                      </label>
+                      <div className="input-group checkbox-group">
+                        <label className="checkbox-label" title="Método abstracto">
+                          <input
+                            type="checkbox"
+                            checked={op.isAbstract || false}
+                            onChange={(e) => {
+                              updateOperation(index, 'isAbstract', e.target.checked);
+                              setTimeout(handleSaveElement, 100);
+                            }}
+                          />
+                          <span>Abstracto</span>
+                        </label>
+                      </div>
                     )}
                     <button 
                       className="remove-operation"
                       onClick={() => removeOperation(index)}
                       title="Eliminar operación"
                     >
-                      ×
+                      <i className="fa fa-trash"></i>
                     </button>
                   </div>
                 ))}
                 <button className="add-operation-button" onClick={addOperation}>
-                  + Agregar {selectedElement.type === 'interface' ? 'Método' : 'Operación'}
+                  <i className="fa fa-plus"></i>
+                  Agregar {selectedElement.type === 'interface' ? 'Método' : 'Operación'}
                 </button>
               </div>
             </div>

@@ -72,36 +72,52 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
 
   return (
     <div className="project-form">
-      <h2>{project ? 'Editar Proyecto UML' : 'Crear Nuevo Proyecto UML'}</h2>
+      <div className="form-header">
+        <h2>{project ? '✏️ Editar Proyecto UML' : '✨ Crear Nuevo Proyecto UML'}</h2>
+        <p className="form-subtitle">
+          {project ? 'Modifica los detalles de tu proyecto' : 'Configura los parámetros iniciales de tu diagrama'}
+        </p>
+      </div>
       
-      {error && <div className="form-error">{error}</div>}
+      {error && <div className="form-error">⚠️ {error}</div>}
       
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="name">Nombre del Proyecto</label>
+          <label htmlFor="name">
+            📝 Nombre del Proyecto
+            <span className="required-indicator">*</span>
+          </label>
           <input
             type="text"
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            placeholder="Mi diagrama UML"
+            placeholder="Ej: Sistema de Gestión de Usuarios"
           />
+          <small className="field-hint">El nombre debe ser descriptivo y único</small>
         </div>
         
         <div className="form-group">
-          <label htmlFor="description">Descripción (opcional)</label>
+          <label htmlFor="description">
+            📄 Descripción del Proyecto
+            <span className="optional-indicator">(opcional)</span>
+          </label>
           <textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe tu proyecto de diagramas UML aquí"
+            placeholder="Describe el propósito y alcance de tu diagrama UML..."
             rows={3}
           />
+          <small className="field-hint">Ayuda a otros a entender el contexto del proyecto</small>
         </div>
         
         <div className="form-group">
-          <label htmlFor="deviceType">Tipo de Diagrama</label>
+          <label htmlFor="deviceType">
+            🎯 Tipo de Diagrama UML
+            <span className="required-indicator">*</span>
+          </label>
           <select
             id="deviceType"
             value={deviceType}
@@ -111,40 +127,61 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
               <option key={diagram.id} value={diagram.id}>{diagram.name}</option>
             ))}
           </select>
+          <small className="field-hint">Selecciona el tipo de diagrama que mejor se adapte a tu proyecto</small>
         </div>
         
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="canvasWidth">Ancho (px)</label>
-            <input
-              type="number"
-              id="canvasWidth"
-              value={canvasWidth}
-              onChange={(e) => setCanvasWidth(e.target.value)}
-              min="600"
-              max="2000"
-              disabled={deviceType !== 'custom'}
-              required
-            />
+        <div className="form-section">
+          <h3 className="section-title">📐 Dimensiones del Canvas</h3>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="canvasWidth">
+                📏 Ancho del Canvas
+                <span className="required-indicator">*</span>
+              </label>
+              <input
+                type="number"
+                id="canvasWidth"
+                value={canvasWidth}
+                onChange={(e) => setCanvasWidth(e.target.value)}
+                min="600"
+                max="2000"
+                disabled={deviceType !== 'custom'}
+                required
+                placeholder="1200"
+              />
+              <small className="field-hint">Mínimo 600px, máximo 2000px</small>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="canvasHeight">
+                📐 Alto del Canvas
+                <span className="required-indicator">*</span>
+              </label>
+              <input
+                type="number"
+                id="canvasHeight"
+                value={canvasHeight}
+                onChange={(e) => setCanvasHeight(e.target.value)}
+                min="400"
+                max="1600"
+                disabled={deviceType !== 'custom'}
+                required
+                placeholder="800"
+              />
+              <small className="field-hint">Mínimo 400px, máximo 1600px</small>
+            </div>
           </div>
-          
-          <div className="form-group">
-            <label htmlFor="canvasHeight">Alto (px)</label>
-            <input
-              type="number"
-              id="canvasHeight"
-              value={canvasHeight}
-              onChange={(e) => setCanvasHeight(e.target.value)}
-              min="400"
-              max="1600"
-              disabled={deviceType !== 'custom'}
-              required
-            />
-          </div>
+          {deviceType !== 'custom' && (
+            <div className="dimension-info">
+              <small>ℹ️ Las dimensiones se ajustan automáticamente según el tipo de diagrama seleccionado</small>
+            </div>
+          )}
         </div>
         
         <div className="form-group">
-          <label htmlFor="canvasBackground">Color de Fondo</label>
+          <label htmlFor="canvasBackground">
+            🎨 Color de Fondo del Canvas
+          </label>
           <div className="color-input-container">
             <input
               type="color"
@@ -159,8 +196,10 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
               onChange={(e) => setCanvasBackground(e.target.value)}
               className="color-text"
               maxLength={7}
+              placeholder="#FFFFFF"
             />
           </div>
+          <small className="field-hint">Elige el color de fondo para tu diagrama</small>
         </div>
         
         <div className="form-actions">
@@ -170,14 +209,16 @@ const ProjectForm = ({ project, onSubmit, onCancel }) => {
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            Cancelar
+            <span className="button-icon">❌</span>
+            <span>Cancelar</span>
           </button>
           <button 
             type="submit" 
             className="submit-button"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Guardando...' : project ? 'Actualizar' : 'Crear'}
+            <span className="button-icon">{isSubmitting ? '⏳' : project ? '💾' : '✨'}</span>
+            <span>{isSubmitting ? 'Guardando...' : project ? 'Actualizar Proyecto' : 'Crear Proyecto'}</span>
           </button>
         </div>
       </form>
